@@ -16,9 +16,9 @@ function SectionLabel({ children, className = "" }: { children: string; classNam
 
 function HeroBlob() {
   return (
-    <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[42rem] lg:block">
-      <div className="absolute right-0 top-1/2 h-[30rem] w-[30rem] -translate-y-1/2 rounded-[55%_45%_60%_40%/50%_55%_45%_50%] bg-[color:var(--accent-soft)] blur-[2px]" />
-      <div className="absolute right-10 top-1/2 h-[24rem] w-[24rem] -translate-y-1/2 rounded-[55%_45%_60%_40%/50%_55%_45%_50%] border border-[color:var(--accent-soft-strong)]" />
+    <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[45rem] lg:block">
+      <div className="absolute right-0 top-[52%] h-[32rem] w-[32rem] -translate-y-1/2 rounded-[55%_45%_60%_40%/50%_55%_45%_50%] bg-[color:var(--accent-soft)] blur-[2px]" />
+      <div className="absolute right-12 top-[51%] h-[25rem] w-[25rem] -translate-y-1/2 rounded-[55%_45%_60%_40%/50%_55%_45%_50%] border border-[color:var(--accent-soft-strong)]" />
     </div>
   );
 }
@@ -27,7 +27,7 @@ function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-bg">
       <HeroBlob />
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col items-center justify-center px-4 pb-20 pt-14 sm:px-6 lg:px-10">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col items-center justify-center px-4 pb-16 pt-10 sm:px-6 lg:px-10">
         <div className="relative z-10 flex w-full max-w-4xl flex-col items-center text-center">
           <SectionLabel className="max-w-[43rem]">
             The decentralized IMEI registry that protects buyers, sellers, and marketplaces.
@@ -44,7 +44,7 @@ function HeroSection() {
             <span className="mt-0.5 block">Built on Base, the Carfax for mobile devices.</span>
           </p>
 
-          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
+          <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row sm:gap-5">
             <Button size="lg" className="min-w-[180px]">
               <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
                 <circle cx="11" cy="11" r="8" />
@@ -99,14 +99,14 @@ function ToolsSection() {
           <span className="block sm:inline"> for Fast <span className="text-accent">Action</span>.</span>
         </h2>
 
-        <div className="mt-14 grid gap-5 lg:grid-cols-3">
+        <div className="mt-14 grid gap-6 lg:grid-cols-3">
           {cards.map((card) => (
             <Card
               key={card.title}
               className={[
-                "relative flex min-h-[19rem] flex-col overflow-hidden border-[color:var(--border-strong)] transition-transform duration-300 hover:-translate-y-1",
+                "relative flex min-h-[20rem] flex-col overflow-hidden border-[color:var(--border-strong)] transition-transform duration-300 hover:-translate-y-1",
                 card.accent
-                  ? "border-transparent bg-accent text-bg lg:-translate-y-4"
+                  ? "border-transparent bg-accent text-bg lg:-translate-y-5"
                   : "bg-bg text-text-primary",
               ].join(" ")}
             >
@@ -129,7 +129,7 @@ function ToolsSection() {
                 {card.desc}
               </p>
 
-              <div className="mt-auto pt-8">
+              <div className="mt-auto pt-10">
                 <Button
                   variant={card.accent ? "outline" : "ghost"}
                   className={[
