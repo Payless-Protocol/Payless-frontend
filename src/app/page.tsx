@@ -5,7 +5,7 @@ function SectionLabel({ children, className = "" }: { children: string; classNam
   return (
     <div
       className={[
-        "inline-flex rounded-full border border-[color:var(--border-subtle)] bg-[color:var(--text-primary)]/[0.08] px-4 py-2 text-xs font-medium text-text-primary/70",
+        "inline-flex rounded-full border border-transparent bg-accent/65 px-4 py-2 text-xs font-medium text-white shadow-[0_12px_24px_rgba(37,99,235,0.16)]",
         className,
       ].join(" ")}
     >
@@ -199,7 +199,7 @@ function BenefitsSection() {
               (benefit) => (
                 <div
                   key={benefit}
-                  className="self-end rounded-[12px] bg-[color:var(--accent)]/65 px-5 py-3 text-right text-sm font-semibold text-text-primary shadow-[0_16px_32px_rgba(0,0,0,0.22)]"
+                  className="self-end rounded-[12px] bg-accent/70 px-5 py-3 text-right text-sm font-semibold text-white shadow-[0_16px_32px_rgba(0,0,0,0.22)]"
                 >
                   {benefit}
                 </div>
@@ -220,7 +220,7 @@ function CTASection() {
           className="relative overflow-hidden rounded-[34px] border border-[color:var(--accent)]/10 px-6 py-20 text-center shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:px-10"
           style={{
             background:
-              "linear-gradient(145deg, color-mix(in srgb, var(--surface-strong) 92%, var(--bg) 8%), color-mix(in srgb, var(--surface-strong) 70%, var(--danger) 30%) 50%, color-mix(in srgb, var(--surface-strong) 85%, var(--bg) 15%))",
+              "linear-gradient(145deg, color-mix(in srgb, var(--surface-strong) 92%, var(--bg) 8%), color-mix(in srgb, var(--surface-strong) 70%, var(--accent) 30%) 50%, color-mix(in srgb, var(--surface-strong) 85%, var(--bg) 15%))",
           }}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05),_transparent_35%)] opacity-60" />

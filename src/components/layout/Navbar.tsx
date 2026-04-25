@@ -31,7 +31,7 @@ export default function Navbar() {
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-10">
         <Link href="/" className="flex items-center gap-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-gradient-to-br from-accent to-accent-strong text-sm font-bold text-white shadow-[0_14px_26px_rgba(107,143,255,0.2)]">
+          <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-accent text-sm font-bold text-white shadow-[0_14px_26px_rgba(37,99,235,0.2)]">
             P
           </span>
           <span className="font-display text-[15px] font-semibold tracking-[0.02em] text-text-primary">
@@ -63,7 +63,7 @@ export default function Navbar() {
           </Link>
           <Link
             href="#"
-            className="inline-flex items-center gap-2 rounded-[10px] bg-[color:var(--accent)] px-4 py-2 text-[13px] font-semibold text-bg shadow-[0_14px_26px_rgba(107,143,255,0.22)] transition hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-[10px] bg-accent px-4 py-2 text-[13px] font-semibold text-white shadow-[0_14px_26px_rgba(37,99,235,0.22)] transition hover:bg-accent-strong"
           >
             Login Now
             <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
