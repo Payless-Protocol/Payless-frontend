@@ -106,7 +106,7 @@ function ToolsSection() {
               className={[
                 "relative flex min-h-[20rem] flex-col overflow-hidden border-[color:var(--border-strong)] transition-transform duration-300 hover:-translate-y-1",
                 card.accent
-                  ? "border-transparent bg-accent text-bg lg:-translate-y-5"
+                  ? "border-transparent bg-accent text-white lg:-translate-y-5"
                   : "bg-bg text-text-primary",
               ].join(" ")}
             >
@@ -123,7 +123,7 @@ function ToolsSection() {
               <p
                 className={[
                   "mt-4 max-w-[18rem] text-[13px] leading-6",
-                  card.accent ? "text-bg/90" : "text-text-primary/70",
+                  card.accent ? "text-white/90" : "text-text-primary/70",
                 ].join(" ")}
               >
                 {card.desc}
