@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 const NAV_LINKS = [
@@ -31,9 +32,14 @@ export default function Navbar() {
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-10">
         <Link href="/" className="flex items-center gap-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-accent text-sm font-bold text-white shadow-[0_14px_26px_rgba(37,99,235,0.2)]">
-            P
-          </span>
+          <Image
+            src="/logo.png"
+            alt="Payless Protocol"
+            width={32}
+            height={32}
+            className="h-8 w-8 rounded-[10px] object-contain"
+            priority
+          />
           <span className="font-display text-[15px] font-semibold tracking-[0.02em] text-text-primary">
             Payless Protocol
           </span>

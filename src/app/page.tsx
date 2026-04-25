@@ -1,5 +1,6 @@
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import Image from "next/image";
 
 function SectionLabel({ children, className = "" }: { children: string; className?: string }) {
   return (
@@ -164,23 +165,14 @@ function BenefitsSection() {
                 "linear-gradient(180deg, color-mix(in srgb, var(--text-primary) 94%, var(--surface) 6%), color-mix(in srgb, var(--text-primary) 80%, var(--surface) 20%))",
             }}
           >
-            <div
-              className="relative h-[15rem] w-[8rem] rounded-[2.2rem] border-[6px] shadow-[0_18px_35px_rgba(0,0,0,0.25)]"
-              style={{
-                borderColor: "color-mix(in srgb, var(--surface-strong) 85%, var(--bg) 15%)",
-                background: "var(--bg)",
-              }}
-            >
-              <div className="absolute inset-x-[32%] top-2 h-2 rounded-full bg-[color:var(--bg)]" />
-              <div
-                className="absolute inset-2 rounded-[1.6rem]"
-                style={{
-                  background:
-                    "linear-gradient(180deg, color-mix(in srgb, var(--text-primary) 92%, var(--surface) 8%) 0%, var(--accent) 45%, color-mix(in srgb, var(--accent) 35%, var(--bg) 65%) 100%)",
-                }}
-              />
-              <div className="absolute bottom-[-20px] right-[-12px] h-20 w-20 rounded-full bg-[color:var(--bg)]/25 blur-2xl" />
-            </div>
+            <Image
+              src="/dk.jpg"
+              alt="Device visual"
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+              priority
+            />
           </div>
         </div>
 
