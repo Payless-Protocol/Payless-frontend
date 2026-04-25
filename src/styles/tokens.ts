@@ -1,11 +1,11 @@
 export const colors = {
-  accent: "var(--accent)",
-  bg: "var(--bg)",
-  surface: "var(--surface)",
-  success: "var(--success)",
-  danger: "var(--danger)",
-  textPrimary: "var(--text-primary)",
-  textSecondary: "var(--text-secondary)",
+  bg: "#0F0F0F",
+  surface: "#1A1A1A",
+  accent: "#00F0FF",
+  success: "#22C55E",
+  danger: "#EF4444",
+  textPrimary: "#E5E5E5",
+  textSecondary: "#808080",
 } as const;
 
 export const radii = {
@@ -13,8 +13,17 @@ export const radii = {
   md: "12px",
   lg: "20px",
   xl: "28px",
+  pill: "9999px",
+} as const;
+
+export const typography = {
+  heading: "32px",
+  subheading: "24px",
+  body: "16px",
+  label: "12px",
 } as const;
 
 export const layout = {
   contentWidth: "1280px",
+  navHeight: "64px",
 } as const;

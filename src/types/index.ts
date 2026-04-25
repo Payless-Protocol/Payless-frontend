@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 export type DeviceStatus = "clean" | "flagged";
 
 export interface DeviceRecord {
@@ -16,6 +14,8 @@ export interface NavLink {
   href: string;
 }
 
-export interface ButtonProps {
-  children: ReactNode;
+export interface ContractConfig {
+  address: string;
+  rpcUrl: string;
+  chainId: number;
 }

@@ -1,9 +1,32 @@
+"use client";
+
+import { type FormEvent, useState } from "react";
+
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { useRegistry } from "@/hooks/useRegistry";
 
 export default function SearchGate() {
+  const [imei, setImei] = useState("");
+  const { record, isLoading, error, search, reset } = useRegistry();
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    try {
+      await search(imei);
+    } catch {
+      // Error state is handled by the hook.
+    }
+  }
+
+  function handleClear() {
+    setImei("");
+    reset();
+  }
+
   return (
     <section className="bg-[#0a0a0e] px-4 py-14 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-7xl">
@@ -15,7 +38,7 @@ export default function SearchGate() {
             Search a Device
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-white/55">
-            Check a device status on-chain before a purchase. No wallet is required for a search.
+            Enter an IMEI to hash it and check the registry without connecting a wallet.
           </p>
         </div>
 
@@ -24,22 +47,34 @@ export default function SearchGate() {
             <div className="space-y-3">
               <h2 className="font-display text-2xl font-bold text-white">IMEI Lookup</h2>
               <p className="text-sm leading-6 text-white/55">
-                Enter the device identifier you want to verify and compare it with the on-chain registry.
+                The input is hashed with keccak256 before the registry call.
               </p>
             </div>
 
-            <Input
-              label="IMEI or hash"
-              placeholder="356938035643809 or 0x..."
-              helperText="Use the IMEI or the already-hashed bytes32 value."
-            />
+            <form className="space-y-5" onSubmit={handleSubmit}>
+              <Input
+                label="IMEI"
+                placeholder="356938035643809"
+                helperText="We hash the IMEI before querying the contract."
+                value={imei}
+                onChange={(event) => setImei(event.target.value)}
+              />
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button className="sm:min-w-[180px]">Search Registry</Button>
-              <Button variant="ghost" className="sm:min-w-[180px]">
-                Clear
-              </Button>
-            </div>
+              {error ? (
+                <div className="rounded-[14px] border border-[#ef4444]/20 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#ffb1b1]">
+                  {error}
+                </div>
+              ) : null}
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button type="submit" className="sm:min-w-[180px]" disabled={isLoading}>
+                  {isLoading ? "Searching..." : "Search Registry"}
+                </Button>
+                <Button type="button" variant="ghost" className="sm:min-w-[180px]" onClick={handleClear}>
+                  Clear
+                </Button>
+              </div>
+            </form>
           </Card>
 
           <Card className="space-y-6 bg-[#10131d]">
@@ -48,30 +83,47 @@ export default function SearchGate() {
                 <p className="text-sm uppercase tracking-[0.2em] text-white/35">Registry Result</p>
                 <h2 className="mt-2 font-display text-2xl font-bold text-white">Device Record</h2>
               </div>
-              <StatusBadge status="clean" />
+              <StatusBadge status={record?.status ?? "clean"} />
             </div>
 
-            <div className="grid gap-4 rounded-[18px] border border-white/10 bg-white/[0.03] p-5">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-white/35">IMEI Hash</p>
-                <p className="mt-2 break-all text-sm text-white/85">0x9f5b...3a21</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-white/35">Reported By</p>
-                <p className="mt-2 text-sm text-white/85">0x0000...cafe</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-white/35">Notes</p>
-                <p className="mt-2 text-sm leading-6 text-white/65">
-                  This is the public preview state for the registry UI. Connect the contract to
-                  populate live records.
-                </p>
-              </div>
-            </div>
+            {record ? (
+              <>
+                <div className="grid gap-4 rounded-[18px] border border-white/10 bg-white/[0.03] p-5">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">IMEI Hash</p>
+                    <p className="mt-2 break-all text-sm text-white/85">{record.imeiHash}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">Reported By</p>
+                    <p className="mt-2 text-sm text-white/85">{record.reporter ?? "Unknown"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">Last Updated</p>
+                    <p className="mt-2 text-sm text-white/85">{record.lastUpdated ?? "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">Notes</p>
+                    <p className="mt-2 text-sm leading-6 text-white/65">{record.notes ?? "No notes recorded."}</p>
+                  </div>
+                </div>
 
-            <div className="rounded-[18px] border border-[#22c55e]/20 bg-[#22c55e]/10 p-4 text-sm text-[#b8f7c7]">
-              The record is currently clean.
-            </div>
+                <div
+                  className={[
+                    "rounded-[18px] border p-4 text-sm",
+                    record.status === "clean"
+                      ? "border-[#22c55e]/20 bg-[#22c55e]/10 text-[#b8f7c7]"
+                      : "border-[#ef4444]/20 bg-[#ef4444]/10 text-[#ffc1c1]",
+                  ].join(" ")}
+                >
+                  {record.status === "clean" ? "The record is currently clean." : "The record is currently flagged."}
+                </div>
+              </>
+            ) : (
+              <div className="grid gap-4 rounded-[18px] border border-white/10 bg-white/[0.03] p-5 text-sm leading-6 text-white/60">
+                <p>Search for an IMEI to see its registry status.</p>
+                <p>Results will show the hash, status, reporter, and any stored notes.</p>
+              </div>
+            )}
           </Card>
         </div>
       </div>

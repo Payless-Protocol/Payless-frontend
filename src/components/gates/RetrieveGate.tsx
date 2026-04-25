@@ -1,8 +1,30 @@
+"use client";
+
+import { type FormEvent, useState } from "react";
+
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
+import { useUnflagDevice } from "@/hooks/useUnflagDevice";
+import { useWallet } from "@/hooks/useWallet";
 
 export default function RetrieveGate() {
+  const [imei, setImei] = useState("");
+  const [secret, setSecret] = useState("");
+  const [reference, setReference] = useState("");
+  const { unflagDevice, isLoading, error, txHash } = useUnflagDevice();
+  const { address, connect, isConnecting } = useWallet();
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    try {
+      await unflagDevice(imei, secret);
+    } catch {
+      // Error state handled by the hook.
+    }
+  }
+
   return (
     <section className="bg-[#0a0a0e] px-4 py-14 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-7xl">
@@ -14,7 +36,7 @@ export default function RetrieveGate() {
             Retrieve a Cleared Device
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-white/55">
-            Use this flow to remove a flag after a successful recovery or dispute resolution.
+            Clear a device after resolution by hashing the IMEI and secret before the write.
           </p>
         </div>
 
@@ -22,20 +44,47 @@ export default function RetrieveGate() {
           <Card className="space-y-5">
             <h2 className="font-display text-2xl font-bold text-white">Recovery Check</h2>
             <div className="grid gap-4 md:grid-cols-2">
-              <Input label="IMEI or hash" placeholder="356938035643809" />
-              <Input label="Recovery secret" placeholder="Secret phrase" />
+              <Input label="IMEI" placeholder="356938035643809" value={imei} onChange={(event) => setImei(event.target.value)} />
+              <Input
+                label="Secret"
+                placeholder="Recovery secret"
+                value={secret}
+                onChange={(event) => setSecret(event.target.value)}
+              />
             </div>
             <Input
               label="Resolution reference"
               placeholder="Case or ticket number"
+              value={reference}
+              onChange={(event) => setReference(event.target.value)}
               helperText="Optional proof that the report has been resolved."
             />
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button className="sm:min-w-[200px]">Unflag Device</Button>
-              <Button variant="ghost" className="sm:min-w-[200px]">
-                Connect Wallet
-              </Button>
-            </div>
+            {error ? (
+              <div className="rounded-[14px] border border-[#ef4444]/20 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#ffb1b1]">
+                {error}
+              </div>
+            ) : null}
+            {txHash ? (
+              <div className="rounded-[14px] border border-[#22c55e]/20 bg-[#22c55e]/10 px-4 py-3 text-sm text-[#b8f7c7]">
+                Transaction submitted: {txHash}
+              </div>
+            ) : null}
+            <form className="space-y-5" onSubmit={handleSubmit}>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button type="submit" className="sm:min-w-[200px]" disabled={isLoading}>
+                  {isLoading ? "Submitting..." : "Unflag Device"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="sm:min-w-[200px]"
+                  disabled={isConnecting}
+                  onClick={() => connect().catch(() => undefined)}
+                >
+                  {address ? "Wallet Connected" : isConnecting ? "Connecting..." : "Connect Wallet"}
+                </Button>
+              </div>
+            </form>
           </Card>
 
           <Card className="space-y-5 bg-[#10131d]">
@@ -46,7 +95,7 @@ export default function RetrieveGate() {
 
             <div className="space-y-3 rounded-[18px] border border-white/10 bg-white/[0.03] p-5 text-sm text-white/65">
               <p>Only authorized recovery requests should reach this step.</p>
-              <p>The current UI is prepared for a future unflag transaction.</p>
+              <p>The UI is prepared for the on-chain unflag transaction.</p>
               <p>Keep wallet authorization and evidence attached when integrating backend logic.</p>
             </div>
 
