@@ -1,11 +1,11 @@
 export const colors = {
-  bg: "#161616",
-  surface: "#1A1A1A",
-  accent: "#2563EB",
+  bg: "#050505",
+  surface: "#0D0D0D",
+  accent: "#82AAFF",
   success: "#22C55E",
   danger: "#EF4444",
   textPrimary: "#FFFFFF",
-  textSecondary: "#B5B5B5",
+  textSecondary: "#BFBFBF",
 } as const;
 
 export const radii = {

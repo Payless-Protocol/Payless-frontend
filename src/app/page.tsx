@@ -6,7 +6,7 @@ function SectionLabel({ children, className = "" }: { children: string; classNam
   return (
     <div
       className={[
-        "inline-flex rounded-full border border-transparent bg-accent/65 px-4 py-2 text-xs font-medium text-white shadow-[0_12px_24px_rgba(37,99,235,0.16)]",
+        "inline-flex rounded-full border border-transparent bg-accent/65 px-4 py-2 text-xs font-medium text-white shadow-[0_12px_24px_rgba(130,170,255,0.16)]",
         className,
       ].join(" ")}
     >
@@ -26,39 +26,56 @@ function HeroBlob() {
 
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-bg">
-      <HeroBlob />
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col items-center justify-center px-4 pb-16 pt-10 sm:px-6 lg:px-10">
-        <div className="relative z-10 flex w-full max-w-4xl flex-col items-center text-center">
-          <SectionLabel className="max-w-[43rem]">
+    <section className="relative overflow-hidden bg-bg px-4 pt-10 sm:px-6 lg:px-10">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(130,170,255,0.15),transparent_28%),radial-gradient(circle_at_10%_20%,rgba(255,255,255,0.04),transparent_18%)]" />
+      <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-10 py-8 lg:grid-cols-[1.04fr_0.96fr] lg:py-12">
+        <div className="relative">
+          <div className="absolute -left-10 bottom-[-2rem] h-56 w-56 rounded-[55%_45%_60%_40%/50%_55%_45%_50%] bg-accent/18 blur-[1px]" />
+          <div className="overflow-hidden rounded-[32px] border border-white/10 bg-surface shadow-[0_24px_60px_rgba(0,0,0,0.34)]">
+            <div className="relative aspect-[4/3] min-h-[26rem] w-full">
+              <Image
+                src="/dk.jpg"
+                alt="Device visual"
+                fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-cover"
+                priority
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="relative z-10 flex flex-col items-start text-left lg:items-end lg:text-right">
+          <div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-accent/10 blur-3xl" />
+          <SectionLabel className="mb-7 max-w-[32rem]">
             The decentralized IMEI registry that protects buyers, sellers, and marketplaces.
           </SectionLabel>
 
-          <h1 className="mt-8 font-display text-[clamp(3.2rem,8vw,5.8rem)] font-extrabold leading-[0.95] tracking-[-0.05em] text-text-primary">
+          <h1 className="font-display text-[clamp(3rem,6.8vw,5.6rem)] font-extrabold leading-[0.94] tracking-[-0.05em] text-text-primary">
             <span className="block">Make Stolen Devices</span>
             <span className="block text-accent">Worthless.</span>
           </h1>
 
-          <p className="mx-auto mt-7 max-w-2xl text-center text-sm leading-7 text-text-secondary sm:text-[15px]">
+          <p className="mt-7 max-w-[36rem] text-sm leading-7 text-text-secondary sm:text-[15px] lg:ml-auto">
             Payless Protocol makes stolen devices risky to buy or sell. Instantly flag an IMEI
             on-chain and create a trusted record anyone can verify in seconds.
             <span className="mt-0.5 block">Built on Base, the Carfax for mobile devices.</span>
           </p>
 
-          <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row sm:gap-5">
-            <Button size="lg" className="min-w-[180px]">
+          <div className="mt-9 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-5 lg:ml-auto">
+            <Button size="lg" className="min-w-[178px]">
               <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.35-4.35" />
               </svg>
               Search IMEI
             </Button>
-            <Button variant="ghost" size="lg" className="min-w-[180px]">
-              Report Lost Device
+            <Button variant="ghost" size="lg" className="min-w-[178px] bg-white/[0.03]">
+              Join Our Waitlist
             </Button>
           </div>
 
-          <p className="mt-7 text-sm text-text-secondary/70">
+          <p className="mt-7 text-sm text-text-secondary/80 lg:ml-auto">
             Built On <span className="font-semibold text-accent">Base</span>
           </p>
         </div>
@@ -153,26 +170,25 @@ function ToolsSection() {
 
 function BenefitsSection() {
   return (
-    <section className="overflow-hidden bg-bg px-4 pb-24 sm:px-6 lg:px-10">
-      <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.03fr_0.97fr]">
+    <section className="relative overflow-hidden px-4 pb-24 sm:px-6 lg:px-10">
+      <div className="absolute inset-0">
+        <Image src="/red.jpg" alt="" fill sizes="100vw" className="object-cover opacity-20" aria-hidden="true" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,5,5,0.84),rgba(5,5,5,0.72))]" />
+      </div>
+      <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.03fr_0.97fr]">
         <div className="relative overflow-hidden rounded-[32px] bg-[color:var(--surface)] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.25)]">
           <div className="absolute -left-12 bottom-[-64px] h-56 w-56 rounded-[55%_45%_60%_40%/50%_55%_45%_50%] bg-[color:var(--accent-soft)] blur-[1px]" />
           <div className="absolute -bottom-10 -left-8 h-48 w-48 rounded-[55%_45%_60%_40%/50%_55%_45%_50%] border border-[color:var(--accent-soft-strong)]" />
-          <div
-            className="relative flex h-[20rem] items-center justify-center overflow-hidden rounded-[28px]"
-            style={{
-              background:
-                "linear-gradient(180deg, color-mix(in srgb, var(--text-primary) 94%, var(--surface) 6%), color-mix(in srgb, var(--text-primary) 80%, var(--surface) 20%))",
-            }}
-          >
-            <Image
-              src="/dk.jpg"
-              alt="Device visual"
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              className="object-cover"
-              priority
-            />
+          <div className="relative overflow-hidden rounded-[28px]">
+            <div className="relative aspect-[4/3] min-h-[20rem]">
+              <Image
+                src="/dk.jpg"
+                alt="Benefits visual"
+                fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-cover"
+              />
+            </div>
           </div>
         </div>
 
@@ -191,7 +207,7 @@ function BenefitsSection() {
               (benefit) => (
                 <div
                   key={benefit}
-                  className="self-end rounded-[12px] bg-accent/70 px-5 py-3 text-right text-sm font-semibold text-white shadow-[0_16px_32px_rgba(0,0,0,0.22)]"
+                  className="self-end rounded-[12px] border border-white/10 bg-[color:var(--surface-muted)] px-5 py-3 text-right text-sm font-semibold text-white shadow-[0_16px_32px_rgba(0,0,0,0.22)]"
                 >
                   {benefit}
                 </div>
@@ -208,13 +224,11 @@ function CTASection() {
   return (
     <section className="bg-bg px-4 pb-24 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-7xl">
-        <div
-          className="relative overflow-hidden rounded-[34px] border border-[color:var(--accent)]/10 px-6 py-20 text-center shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:px-10"
-          style={{
-            background:
-              "linear-gradient(145deg, color-mix(in srgb, var(--surface-strong) 92%, var(--bg) 8%), color-mix(in srgb, var(--surface-strong) 70%, var(--accent) 30%) 50%, color-mix(in srgb, var(--surface-strong) 85%, var(--bg) 15%))",
-          }}
-        >
+        <div className="relative overflow-hidden rounded-[34px] border border-white/10 px-6 py-20 text-center shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:px-10">
+          <div className="absolute inset-0">
+            <Image src="/red.jpg" alt="" fill sizes="100vw" className="object-cover opacity-22" aria-hidden="true" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,5,5,0.62),rgba(5,5,5,0.84))]" />
+          </div>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05),_transparent_35%)] opacity-60" />
           <div className="relative z-10">
             <SectionLabel>Take action in seconds with fast and trusted device verification.</SectionLabel>

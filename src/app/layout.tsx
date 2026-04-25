@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { DM_Sans, Syne } from "next/font/google";
+import { Inter, Montserrat } from "next/font/google";
 
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
 import "@/styles/globals.css";
 
-const displayFont = Syne({
+const displayFont = Montserrat({
   subsets: ["latin"],
   variable: "--font-display",
 });
 
-const sansFont = DM_Sans({
+const sansFont = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -31,7 +31,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-bg font-sans text-text-primary antialiased">
         <div className="flex min-h-screen flex-col">
           <Navbar />
-          <main className="flex-1 pt-16">{children}</main>
+          <main className="flex-1 pb-28">{children}</main>
           <Footer />
         </div>
       </body>

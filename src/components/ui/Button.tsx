@@ -11,7 +11,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   accent:
-    "border-transparent bg-accent text-text-primary shadow-[0_14px_34px_rgba(37,99,235,0.28)] hover:bg-accent-strong",
+    "border-transparent bg-accent text-text-primary shadow-[0_14px_34px_rgba(130,170,255,0.28)] hover:bg-accent-strong",
   ghost:
     "border border-text-primary/85 bg-transparent text-text-primary hover:border-text-primary hover:bg-text-primary/5",
   outline:
