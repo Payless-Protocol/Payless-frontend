@@ -11,12 +11,17 @@ const config: Config = {
       },
       colors: {
         accent: "var(--accent)",
+        "accent-strong": "var(--accent-strong)",
         bg: "var(--bg)",
         surface: "var(--surface)",
+        "surface-strong": "var(--surface-strong)",
+        "surface-muted": "var(--surface-muted)",
         success: "var(--success)",
         danger: "var(--danger)",
         "text-primary": "var(--text-primary)",
         "text-secondary": "var(--text-secondary)",
+        "border-subtle": "var(--border-subtle)",
+        "border-strong": "var(--border-strong)",
       },
       boxShadow: {
         glow: "0 0 0 1px rgba(107, 143, 255, 0.12), 0 20px 60px rgba(0, 0, 0, 0.35)",

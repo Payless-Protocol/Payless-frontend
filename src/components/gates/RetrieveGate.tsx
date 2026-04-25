@@ -26,16 +26,16 @@ export default function RetrieveGate() {
   }
 
   return (
-    <section className="bg-[#0a0a0e] px-4 py-14 sm:px-6 lg:px-10">
+    <section className="bg-bg px-4 py-14 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <div className="inline-flex rounded-full border border-white/10 bg-white/[0.08] px-4 py-2 text-xs font-medium text-white/70">
+          <div className="inline-flex rounded-full border border-border-subtle bg-text-primary/[0.08] px-4 py-2 text-xs font-medium text-text-primary/70">
             Gate 3 - Write unflagDevice()
           </div>
-          <h1 className="mt-5 font-display text-[clamp(2.3rem,4vw,3.5rem)] font-extrabold tracking-[-0.04em] text-white">
+          <h1 className="mt-5 font-display text-[clamp(2.3rem,4vw,3.5rem)] font-extrabold tracking-[-0.04em] text-text-primary">
             Retrieve a Cleared Device
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-white/55">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-text-secondary">
             Clear a device after resolution by hashing the IMEI and secret before the write.
           </p>
         </div>
@@ -43,7 +43,7 @@ export default function RetrieveGate() {
         <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
           <Card className="space-y-5">
             <form className="space-y-5" onSubmit={handleSubmit}>
-              <h2 className="font-display text-2xl font-bold text-white">Recovery Check</h2>
+              <h2 className="font-display text-2xl font-bold text-text-primary">Recovery Check</h2>
               <div className="grid gap-4 md:grid-cols-2">
                 <Input label="IMEI" placeholder="356938035643809" value={imei} onChange={(event) => setImei(event.target.value)} />
                 <Input
@@ -61,12 +61,12 @@ export default function RetrieveGate() {
                 helperText="Optional proof that the report has been resolved."
               />
               {error ? (
-                <div className="rounded-[14px] border border-[#ef4444]/20 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#ffb1b1]">
+                <div className="rounded-[14px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
                   {error}
                 </div>
               ) : null}
               {txHash ? (
-                <div className="rounded-[14px] border border-[#22c55e]/20 bg-[#22c55e]/10 px-4 py-3 text-sm text-[#b8f7c7]">
+                <div className="rounded-[14px] border border-success/20 bg-success/10 px-4 py-3 text-sm text-success">
                   Transaction submitted: {txHash}
                 </div>
               ) : null}
@@ -87,19 +87,19 @@ export default function RetrieveGate() {
             </form>
           </Card>
 
-          <Card className="space-y-5 bg-[#10131d]">
+          <Card className="space-y-5 bg-surface-strong">
             <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-white/35">Recovery Status</p>
-              <h2 className="mt-2 font-display text-2xl font-bold text-white">Ready for Review</h2>
+              <p className="text-sm uppercase tracking-[0.2em] text-text-secondary/45">Recovery Status</p>
+              <h2 className="mt-2 font-display text-2xl font-bold text-text-primary">Ready for Review</h2>
             </div>
 
-            <div className="space-y-3 rounded-[18px] border border-white/10 bg-white/[0.03] p-5 text-sm text-white/65">
+            <div className="space-y-3 rounded-[18px] border border-border-subtle bg-text-primary/[0.03] p-5 text-sm text-text-secondary">
               <p>Only authorized recovery requests should reach this step.</p>
               <p>The UI is prepared for the on-chain unflag transaction.</p>
               <p>Keep wallet authorization and evidence attached when integrating backend logic.</p>
             </div>
 
-            <div className="rounded-[18px] border border-[#6b8fff]/20 bg-[#6b8fff]/10 p-4 text-sm text-[#d6e2ff]">
+            <div className="rounded-[18px] border border-accent/20 bg-accent/10 p-4 text-sm text-text-primary">
               Once connected, the approved wallet can clear the device record on-chain.
             </div>
           </Card>

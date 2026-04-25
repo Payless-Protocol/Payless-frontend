@@ -29,14 +29,14 @@ export default function Input({
       <input
         id={inputId}
         className={[
-          "h-12 w-full rounded-[12px] border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-[#6b8fff]/50 focus:bg-white/[0.08]",
-          error ? "border-[#ef4444]/60 focus:border-[#ef4444]/70" : "",
+          "h-12 w-full rounded-[12px] border border-border-subtle bg-text-primary/5 px-4 text-sm text-text-primary placeholder:text-text-primary/30 outline-none transition focus:border-accent/50 focus:bg-text-primary/[0.08]",
+          error ? "border-danger/60 focus:border-danger/70" : "",
           className,
         ].join(" ")}
         {...props}
       />
       {helperText ? <p className="text-xs text-white/45">{helperText}</p> : null}
-      {error ? <p className="text-xs text-[#ef4444]">{error}</p> : null}
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
     </label>
   );
 }

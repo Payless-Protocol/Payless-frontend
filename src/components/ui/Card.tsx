@@ -7,7 +7,7 @@ export default function Card({
   return (
     <div
       className={[
-        "rounded-[24px] border border-white/10 bg-white/[0.04] p-6 shadow-glow backdrop-blur-md",
+        "rounded-[24px] border border-border-subtle bg-surface p-6 shadow-glow backdrop-blur-md",
         className,
       ].join(" ")}
       {...props}

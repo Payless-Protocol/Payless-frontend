@@ -6,8 +6,8 @@ interface StatusBadgeProps {
 }
 
 const statusStyles: Record<DeviceStatus, string> = {
-  clean: "bg-[#22c55e]/15 text-[#7df0a2] ring-[#22c55e]/20",
-  flagged: "bg-[#ef4444]/15 text-[#ff8a8a] ring-[#ef4444]/20",
+  clean: "bg-success/15 text-success ring-success/20",
+  flagged: "bg-danger/15 text-danger ring-danger/20",
 };
 
 export default function StatusBadge({

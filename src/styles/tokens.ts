@@ -1,7 +1,7 @@
 export const colors = {
   bg: "#0F0F0F",
   surface: "#1A1A1A",
-  accent: "#00F0FF",
+  accent: "#6B8FFF",
   success: "#22C55E",
   danger: "#EF4444",
   textPrimary: "#E5E5E5",
