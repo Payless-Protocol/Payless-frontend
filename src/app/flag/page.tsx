@@ -1,1 +1,5 @@
-// Gate 2 - mounts <FlagGate />
+import FlagGate from "@/components/gates/FlagGate";
+
+export default function FlagPage() {
+  return <FlagGate />;
+}

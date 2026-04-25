@@ -1,6 +1,8 @@
 # Payless Registry
 
-Frontend scaffold for the Payless Registry, a decentralized stolen device registry built on Base.
+Payless Registry is a frontend for a decentralized stolen-device registry built on Base.
+The current UI uses a dark, glassy visual system with a blue accent, a marketing-style
+landing page, and three dedicated gate routes for search, flagging, and retrieval.
 
 ## Tech Stack
 
@@ -26,7 +28,7 @@ Frontend scaffold for the Payless Registry, a decentralized stolen device regist
    npm install
    ```
 
-2. Copy environment values into `.env.local`:
+2. Add local environment values to `.env.local`:
 
    ```bash
    CONTRACT_ADDRESS=
@@ -34,14 +36,14 @@ Frontend scaffold for the Payless Registry, a decentralized stolen device regist
    CHAIN_ID=
    ```
 
-3. Run the app:
+3. Start the development server:
 
    ```bash
    npm run dev
    ```
 
-## Notes
+## UI Notes
 
-- `.env.example` is committed as a safe template.
-- `.env.local` stays local and is ignored by Git.
-- This branch contains the initial scaffold only.
+- The landing page mirrors the provided reference with hero, tools, benefits, and CTA sections.
+- `Navbar` and `Footer` are shared across routes to keep the experience consistent.
+- Gate pages are styled as polished UI shells and are ready for contract wiring later.

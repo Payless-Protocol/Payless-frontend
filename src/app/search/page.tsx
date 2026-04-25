@@ -1,1 +1,5 @@
-// Gate 1 - mounts <SearchGate />
+import SearchGate from "@/components/gates/SearchGate";
+
+export default function SearchPage() {
+  return <SearchGate />;
+}
