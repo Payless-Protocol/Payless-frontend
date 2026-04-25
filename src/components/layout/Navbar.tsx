@@ -30,10 +30,10 @@ export default function Navbar() {
   return (
     <header
       className={[
-        "fixed inset-x-0 top-0 z-50 border-b transition-all duration-300",
+        "fixed inset-x-0 top-0 z-50 border-b border-white/8 transition-all duration-300",
         scrolled
-          ? "border-border-subtle bg-[color:var(--bg)]/95 backdrop-blur-xl"
-          : "border-transparent bg-[color:var(--bg)]/82 backdrop-blur-xl",
+          ? "bg-[rgba(5,5,5,0.72)] backdrop-blur-[12px]"
+          : "bg-[rgba(5,5,5,0.58)] backdrop-blur-[12px]",
       ].join(" ")}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-10">
@@ -69,13 +69,13 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <Link
             href="#"
-            className="hidden rounded-[10px] border border-text-primary/85 px-4 py-2 text-[13px] font-semibold text-text-primary transition hover:border-text-primary hover:bg-text-primary/[0.04] sm:inline-flex"
+            className="hidden rounded-[10px] border border-white/12 bg-white/[0.04] px-4 py-2 text-[13px] font-semibold text-text-primary transition hover:scale-[1.02] hover:border-white/20 hover:bg-white/[0.06] sm:inline-flex"
           >
             Sign Up
           </Link>
           <Link
             href="#"
-            className="inline-flex items-center gap-2 rounded-[10px] bg-accent px-4 py-2 text-[13px] font-semibold text-white shadow-[0_14px_26px_rgba(130,170,255,0.22)] transition hover:bg-accent-strong"
+            className="inline-flex items-center gap-2 rounded-[10px] bg-accent px-4 py-2 text-[13px] font-semibold text-white shadow-[0_14px_26px_rgba(37,99,235,0.22)] transition hover:scale-[1.02] hover:bg-accent-strong"
           >
             Login Now
             <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

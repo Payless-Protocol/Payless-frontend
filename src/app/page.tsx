@@ -172,11 +172,12 @@ function BenefitsSection() {
   return (
     <section className="relative overflow-hidden px-4 pb-24 sm:px-6 lg:px-10">
       <div className="absolute inset-0">
-        <Image src="/red.jpg" alt="" fill sizes="100vw" className="object-cover opacity-20" aria-hidden="true" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,5,5,0.84),rgba(5,5,5,0.72))]" />
+        <Image src="/red.jpg" alt="" fill sizes="100vw" className="object-cover opacity-70" aria-hidden="true" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.6),rgba(0,0,0,0.85))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_35%,rgba(37,99,235,0.14),transparent_30%),radial-gradient(circle_at_85%_25%,rgba(255,255,255,0.06),transparent_24%)]" />
       </div>
       <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.03fr_0.97fr]">
-        <div className="relative overflow-hidden rounded-[32px] bg-[color:var(--surface)] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.25)]">
+        <div className="relative overflow-hidden rounded-[32px] border border-white/8 bg-[rgba(255,255,255,0.05)] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.25)] backdrop-blur-[12px]">
           <div className="absolute -left-12 bottom-[-64px] h-56 w-56 rounded-[55%_45%_60%_40%/50%_55%_45%_50%] bg-[color:var(--accent-soft)] blur-[1px]" />
           <div className="absolute -bottom-10 -left-8 h-48 w-48 rounded-[55%_45%_60%_40%/50%_55%_45%_50%] border border-[color:var(--accent-soft-strong)]" />
           <div className="relative overflow-hidden rounded-[28px]">
@@ -207,7 +208,7 @@ function BenefitsSection() {
               (benefit) => (
                 <div
                   key={benefit}
-                  className="self-end rounded-[12px] border border-white/10 bg-[color:var(--surface-muted)] px-5 py-3 text-right text-sm font-semibold text-white shadow-[0_16px_32px_rgba(0,0,0,0.22)]"
+                  className="self-end rounded-[12px] border border-white/8 bg-[rgba(255,255,255,0.05)] px-5 py-3 text-right text-sm font-semibold text-white shadow-[0_16px_32px_rgba(0,0,0,0.22)] backdrop-blur-[12px]"
                 >
                   {benefit}
                 </div>
@@ -224,14 +225,12 @@ function CTASection() {
   return (
     <section className="bg-bg px-4 pb-24 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-7xl">
-        <div className="relative overflow-hidden rounded-[34px] border border-white/10 px-6 py-20 text-center shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:px-10">
-          <div className="absolute inset-0">
-            <Image src="/red.jpg" alt="" fill sizes="100vw" className="object-cover opacity-22" aria-hidden="true" />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,5,5,0.62),rgba(5,5,5,0.84))]" />
-          </div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05),_transparent_35%)] opacity-60" />
+        <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,#000000,#050505)] px-6 py-20 text-center shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:px-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(37,99,235,0.12),transparent_35%)] opacity-80" />
           <div className="relative z-10">
-            <SectionLabel>Take action in seconds with fast and trusted device verification.</SectionLabel>
+            <SectionLabel className="bg-[rgba(255,255,255,0.08)] text-white shadow-[0_12px_24px_rgba(0,0,0,0.12)]">
+              Take action in seconds with fast and trusted device verification.
+            </SectionLabel>
             <h2 className="mt-8 font-display text-[clamp(2.5rem,5vw,4.35rem)] font-extrabold leading-[1.06] tracking-[-0.045em] text-text-primary">
               Protect Your <span className="text-accent">Device</span>. Protect
               <span className="block">Your Next <span className="text-accent">Purchase</span>.</span>
@@ -241,14 +240,14 @@ function CTASection() {
               Payless helps buyers stay safe and makes stolen devices harder to trade.
             </p>
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button size="lg">
+              <Button size="lg" className="transition-transform duration-200 hover:scale-[1.02] hover:shadow-[0_18px_40px_rgba(37,99,235,0.34)]">
                 <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.35-4.35" />
                 </svg>
                 Search IMEI
               </Button>
-              <Button variant="ghost" size="lg">
+              <Button variant="ghost" size="lg" className="bg-transparent transition-transform duration-200 hover:scale-[1.02] hover:shadow-[0_18px_40px_rgba(255,255,255,0.08)]">
                 Join Our Waitlist
               </Button>
             </div>
