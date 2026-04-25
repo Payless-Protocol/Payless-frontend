@@ -42,34 +42,34 @@ export default function RetrieveGate() {
 
         <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
           <Card className="space-y-5">
-            <h2 className="font-display text-2xl font-bold text-white">Recovery Check</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Input label="IMEI" placeholder="356938035643809" value={imei} onChange={(event) => setImei(event.target.value)} />
-              <Input
-                label="Secret"
-                placeholder="Recovery secret"
-                value={secret}
-                onChange={(event) => setSecret(event.target.value)}
-              />
-            </div>
-            <Input
-              label="Resolution reference"
-              placeholder="Case or ticket number"
-              value={reference}
-              onChange={(event) => setReference(event.target.value)}
-              helperText="Optional proof that the report has been resolved."
-            />
-            {error ? (
-              <div className="rounded-[14px] border border-[#ef4444]/20 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#ffb1b1]">
-                {error}
-              </div>
-            ) : null}
-            {txHash ? (
-              <div className="rounded-[14px] border border-[#22c55e]/20 bg-[#22c55e]/10 px-4 py-3 text-sm text-[#b8f7c7]">
-                Transaction submitted: {txHash}
-              </div>
-            ) : null}
             <form className="space-y-5" onSubmit={handleSubmit}>
+              <h2 className="font-display text-2xl font-bold text-white">Recovery Check</h2>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Input label="IMEI" placeholder="356938035643809" value={imei} onChange={(event) => setImei(event.target.value)} />
+                <Input
+                  label="Secret"
+                  placeholder="Recovery secret"
+                  value={secret}
+                  onChange={(event) => setSecret(event.target.value)}
+                />
+              </div>
+              <Input
+                label="Resolution reference"
+                placeholder="Case or ticket number"
+                value={reference}
+                onChange={(event) => setReference(event.target.value)}
+                helperText="Optional proof that the report has been resolved."
+              />
+              {error ? (
+                <div className="rounded-[14px] border border-[#ef4444]/20 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#ffb1b1]">
+                  {error}
+                </div>
+              ) : null}
+              {txHash ? (
+                <div className="rounded-[14px] border border-[#22c55e]/20 bg-[#22c55e]/10 px-4 py-3 text-sm text-[#b8f7c7]">
+                  Transaction submitted: {txHash}
+                </div>
+              ) : null}
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button type="submit" className="sm:min-w-[200px]" disabled={isLoading}>
                   {isLoading ? "Submitting..." : "Unflag Device"}

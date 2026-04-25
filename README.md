@@ -31,9 +31,9 @@ landing page, and three dedicated gate routes for search, flagging, and retrieva
 2. Add local environment values to `.env.local`:
 
    ```bash
-   CONTRACT_ADDRESS=
-   RPC_URL=
-   CHAIN_ID=
+   NEXT_PUBLIC_CONTRACT_ADDRESS=
+   NEXT_PUBLIC_RPC_URL=
+   NEXT_PUBLIC_CHAIN_ID=
    ```
 
 3. Start the development server:
@@ -46,4 +46,5 @@ landing page, and three dedicated gate routes for search, flagging, and retrieva
 
 - The landing page mirrors the provided reference with hero, tools, benefits, and CTA sections.
 - `Navbar` and `Footer` are shared across routes to keep the experience consistent.
-- Gate pages are styled as polished UI shells and are ready for contract wiring later.
+- `next.config.mjs` is used because this Next.js version does not load `next.config.ts`.
+- Gate pages are wired for live contract integration and the Search gate is connected to `registry()`.

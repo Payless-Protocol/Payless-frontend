@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { useWallet } from "@/hooks/useWallet";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -14,6 +16,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { address, shortAddress, connect, disconnect, isConnecting } = useWallet();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -65,16 +68,24 @@ export default function Navbar() {
           >
             Report Device
           </Link>
-          <Link
-            href="/search"
+          <button
+            type="button"
+            onClick={() => {
+              if (address) {
+                disconnect();
+                return;
+              }
+
+              connect().catch(() => undefined);
+            }}
             className="inline-flex items-center gap-2 rounded-[10px] bg-gradient-to-r from-[#6b8fff] to-[#89a6ff] px-4 py-2 text-[13px] font-medium text-white shadow-[0_12px_28px_rgba(107,143,255,0.24)] transition hover:opacity-90"
           >
-            Connect Wallet
+            {isConnecting ? "Connecting..." : address ? shortAddress ?? address : "Connect Wallet"}
             <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-          </Link>
+          </button>
         </div>
       </nav>
     </header>

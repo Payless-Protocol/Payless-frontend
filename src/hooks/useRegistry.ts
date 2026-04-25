@@ -73,7 +73,7 @@ export function useRegistry() {
     setError(null);
 
     try {
-      const imeiHash = hashIMEI(normalized);
+      const imeiHash = hashIMEI(normalized) as `0x${string}`;
       const contract = getReadContract();
       const result = await contract.registry(imeiHash);
       const nextRecord = normalizeRecord(imeiHash, result);

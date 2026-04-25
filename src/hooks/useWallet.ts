@@ -34,7 +34,8 @@ export function useWallet() {
     const ethereum = typeof window === "undefined" ? null : (window as Window & { ethereum?: WalletEthereum }).ethereum;
 
     if (ethereum?.on) {
-      const handler = (accounts: string[]) => {
+      const handler = (...args: unknown[]) => {
+        const accounts = (args[0] as string[] | undefined) ?? [];
         setAddress(accounts[0] ?? null);
       };
       ethereum.on("accountsChanged", handler);

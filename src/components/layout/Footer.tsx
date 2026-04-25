@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const footerLinks = [
   { label: "Home", href: "/" },
   { label: "Search", href: "/search" },
@@ -38,7 +40,12 @@ export default function Footer() {
             <span className="h-2.5 w-2.5 rounded-full bg-[#22c55e]" />
             Base network online
           </span>
-          <a href="https://basescan.org" target="_blank" rel="noreferrer" className="text-[#89a6ff] transition hover:text-white">
+          <a
+            href="https://basescan.org"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[#89a6ff] transition hover:text-white"
+          >
             BaseScan
           </a>
         </div>

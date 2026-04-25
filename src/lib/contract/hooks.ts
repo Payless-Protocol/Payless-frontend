@@ -4,7 +4,6 @@ import {
   JsonRpcProvider,
   getAddress,
   isAddress,
-  type ContractRunner,
 } from "ethers";
 
 import { PAYLESS_ABI } from "@/lib/contract/abi";

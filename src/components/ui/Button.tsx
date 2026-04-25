@@ -36,7 +36,7 @@ export default function Button({
     <button
       type={type}
       className={[
-        "inline-flex items-center justify-center gap-2 rounded-[10px] font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#6b8fff]/40 focus:ring-offset-0",
+        "inline-flex items-center justify-center gap-2 rounded-[10px] font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#6b8fff]/40 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60",
         variantStyles[variant],
         sizeStyles[size],
         className,
