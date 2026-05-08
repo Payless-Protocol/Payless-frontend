@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import SharedNavbar from "./Navbar";
+import WaitlistModal from "./WaitlistModal";
 
 const COLORS = {
   bg: "#0a0a0e",
@@ -22,7 +25,7 @@ const COLORS = {
 
 const PAGE_WIDTH = 1280;
 
-const pageStyle = {
+const pageStyle: any = {
   minHeight: "100vh",
   background: COLORS.bg,
   color: COLORS.white,
@@ -66,7 +69,7 @@ const buttonBase = {
   transform: "translateY(0) scale(1)",
 };
 
-function SearchIcon({ size = 16 }) {
+function SearchIcon({ size = 16 }: any) {
   return (
     <svg
       width={size}
@@ -84,7 +87,7 @@ function SearchIcon({ size = 16 }) {
   );
 }
 
-function UserIcon({ size = 14 }) {
+function UserIcon({ size = 14 }: any) {
   return (
     <svg
       width={size}
@@ -101,7 +104,7 @@ function UserIcon({ size = 14 }) {
   );
 }
 
-function LogoMark({ size = 32 }) {
+function LogoMark({ size = 32 }: any) {
   return (
     <div
       style={{
@@ -142,9 +145,10 @@ function HoverButton({
   hoverStyle = {},
   alignSelf,
   onClick,
+  href = null,
   type = "button",
   title,
-}) {
+}: any) {
   const [hovered, setHovered] = useState(false);
 
   const sizeStyle =
@@ -185,6 +189,33 @@ function HoverButton({
           boxShadow: hovered ? "0 12px 24px rgba(255,255,255,0.06)" : "none",
         };
 
+  const sharedStyle = {
+    ...buttonBase,
+    ...sizeStyle,
+    ...variantStyle,
+    ...style,
+    ...(hovered ? hoverStyle : {}),
+    alignSelf,
+    transform: hovered ? "translateY(-1px) scale(1.02)" : "translateY(0) scale(1)",
+  };
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        title={title}
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={sharedStyle}
+      >
+        {leftIcon}
+        <span>{children}</span>
+        {rightIcon}
+      </Link>
+    );
+  }
+
   return (
     <button
       type={type}
@@ -192,15 +223,7 @@ function HoverButton({
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        ...buttonBase,
-        ...sizeStyle,
-        ...variantStyle,
-        ...style,
-        ...(hovered ? hoverStyle : {}),
-        alignSelf,
-        transform: hovered ? "translateY(-1px) scale(1.02)" : "translateY(0) scale(1)",
-      }}
+      style={sharedStyle}
     >
       {leftIcon}
       <span>{children}</span>
@@ -209,11 +232,11 @@ function HoverButton({
   );
 }
 
-function NavLink({ label, active = false, href = "#" }) {
+function NavLink({ label, active = false, href = "#", style = {} }: any) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <a
+    <Link
       href={href}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -224,10 +247,11 @@ function NavLink({ label, active = false, href = "#" }) {
         fontWeight: active ? 600 : 400,
         textDecoration: "none",
         transition: "all 0.2s ease",
+        ...style,
       }}
     >
       {label}
-    </a>
+    </Link>
   );
 }
 
@@ -271,7 +295,19 @@ function Navbar() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>
-          <LogoMark size={32} />
+          <img
+            src="/logo.png"
+            alt="Payless Protocol"
+            width={32}
+            height={32}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              display: "block",
+              objectFit: "cover",
+            }}
+          />
           <span
             style={{
               color: COLORS.white,
@@ -337,7 +373,7 @@ function Navbar() {
   );
 }
 
-function SectionBadge({ children, style = {} }) {
+function SectionBadge({ children, style = {} }: any) {
   return <div style={{ ...pillStyle, ...style }}>{children}</div>;
 }
 
@@ -381,6 +417,15 @@ function HeroBlob() {
 }
 
 function HeroSection() {
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   return (
     <section
       style={{
@@ -388,7 +433,7 @@ function HeroSection() {
         minHeight: "100vh",
         background: COLORS.bg,
         overflow: "hidden",
-        padding: "80px 40px 60px",
+        padding: isMobile ? "24px" : "80px 40px 60px",
       }}
     >
       <HeroBlob />
@@ -410,7 +455,7 @@ function HeroSection() {
           style={{
             fontFamily: "'Syne', sans-serif",
             fontWeight: 800,
-            fontSize: "clamp(48px, 7vw, 78px)",
+            fontSize: isMobile ? "clamp(38px, 8vw, 82px)" : "clamp(48px, 7vw, 78px)",
             lineHeight: 1,
             letterSpacing: "-0.03em",
             color: COLORS.white,
@@ -424,7 +469,7 @@ function HeroSection() {
           style={{
             fontFamily: "'Syne', sans-serif",
             fontWeight: 800,
-            fontSize: "clamp(48px, 7vw, 78px)",
+            fontSize: isMobile ? "clamp(38px, 8vw, 82px)" : "clamp(48px, 7vw, 78px)",
             lineHeight: 1,
             letterSpacing: "-0.03em",
             margin: "0 0 28px",
@@ -444,7 +489,9 @@ function HeroSection() {
             lineHeight: 1.7,
           }}
         >
-          Payless Protocol makes stolen devices risky to buy or sell. Instantly flag an IMEI on-chain and create a trusted record anyone can verify in seconds. Built on Base — the Carfax for mobile devices.
+          Payless Protocol makes stolen devices risky to buy or sell. Instantly flag an
+          IMEI on-chain and create a trusted record anyone can verify in seconds.
+          Built on Base — the Carfax for mobile devices.
         </p>
 
         <div
@@ -462,6 +509,7 @@ function HeroSection() {
             leftIcon={<SearchIcon size={16} />}
             style={{ borderRadius: 10, paddingLeft: 20, paddingRight: 20 }}
             hoverStyle={{ opacity: 0.88 }}
+            href="/search"
           >
             Search IMEI
           </HoverButton>
@@ -470,6 +518,7 @@ function HeroSection() {
             size="lg"
             style={{ borderRadius: 10, paddingLeft: 26, paddingRight: 26 }}
             hoverStyle={{ borderColor: "rgba(255,255,255,0.7)" }}
+            href="/report"
           >
             Report Lost Device
           </HoverButton>
@@ -489,7 +538,7 @@ function HeroSection() {
   );
 }
 
-function ToolCard({ title, desc, cta, accent = false }) {
+function ToolCard({ title, desc, cta, accent = false, isMobile = false }: any) {
   return (
     <div
       style={{
@@ -503,7 +552,7 @@ function ToolCard({ title, desc, cta, accent = false }) {
         background: accent
           ? COLORS.heroCardBlue
           : "rgba(255,255,255,0.04)",
-        transform: accent ? "translateY(-14px)" : "translateY(0)",
+        transform: accent && !isMobile ? "translateY(-14px)" : "translateY(0)",
         boxShadow: accent ? "0 24px 50px rgba(74,124,247,0.12)" : "none",
       }}
     >
@@ -557,6 +606,7 @@ function ToolCard({ title, desc, cta, accent = false }) {
           hoverStyle={{
             opacity: 0.9,
           }}
+          href={cta === "Retrieve Now" ? "/retrieve" : cta === "Start Searching" ? "/search" : cta === "Report Lost Device" ? "/report" : undefined}
         >
           {cta}
         </HoverButton>
@@ -566,6 +616,15 @@ function ToolCard({ title, desc, cta, accent = false }) {
 }
 
 function ToolsSection() {
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   return (
     <section
       style={{
@@ -610,12 +669,12 @@ function ToolsSection() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))",
             gap: 20,
             alignItems: "start",
           }}
         >
-          <ToolCard
+          <ToolCard isMobile={isMobile}
             title={
               <>
                 Retrieve <span style={{ color: COLORS.accent }}>IMEI</span>
@@ -624,13 +683,13 @@ function ToolsSection() {
             desc="Find your IMEI when it's unknown. Let's guide you through simple steps to retrieve it quickly and continue the process."
             cta="Retrieve Now"
           />
-          <ToolCard
+          <ToolCard isMobile={isMobile}
             title="Report Lost Or Stole Phone"
             desc="Flags a device as lost or stolen, triggering an alert that helps prevent misuse and boost recovery chances."
             cta="Report Lost Device"
             accent
           />
-          <ToolCard
+          <ToolCard isMobile={isMobile}
             title={
               <>
                 Search <span style={{ color: COLORS.accent }}>IMEI</span> Status
@@ -646,6 +705,15 @@ function ToolsSection() {
 }
 
 function BenefitsSection() {
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   return (
     <section
       style={{
@@ -658,7 +726,7 @@ function BenefitsSection() {
           maxWidth: PAGE_WIDTH,
           margin: "0 auto",
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
           gap: 80,
           alignItems: "center",
         }}
@@ -668,7 +736,7 @@ function BenefitsSection() {
             position: "relative",
             borderRadius: 20,
             overflow: "hidden",
-            height: 380,
+            height: isMobile ? 280 : 380,
             background: "linear-gradient(160deg, #d8d8d8 0%, #f0f0f0 40%, #b0b0b0 100%)",
           }}
         >
@@ -747,9 +815,18 @@ function BenefitsSection() {
   );
 }
 
-function CTASection() {
+function CTASection({ onOpenWaitlist }: any) {
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   return (
-    <section style={{ background: COLORS.bg, padding: "0 60px 100px" }}>
+    <section style={{ background: COLORS.bg, padding: isMobile ? "0 20px 60px" : "0 60px 100px" }}>
       <div style={{ maxWidth: PAGE_WIDTH, margin: "0 auto" }}>
         <div
           style={{
@@ -759,7 +836,10 @@ function CTASection() {
             padding: "72px 40px",
             textAlign: "center",
             border: "1px solid rgba(180,60,40,0.1)",
-            background: COLORS.ctaBg,
+            backgroundColor: "#1c0a08",
+            backgroundImage: 'url("/red.png")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
         >
           <div
@@ -789,7 +869,7 @@ function CTASection() {
               style={{
                 fontFamily: "'Syne', sans-serif",
                 fontWeight: 800,
-                fontSize: "clamp(32px, 5vw, 64px)",
+                fontSize: isMobile ? "clamp(28px, 7vw, 64px)" : "clamp(32px, 5vw, 64px)",
                 lineHeight: 1.06,
                 letterSpacing: "-0.02em",
                 color: COLORS.white,
@@ -828,6 +908,7 @@ function CTASection() {
                 size="lg"
                 leftIcon={<SearchIcon size={16} />}
                 hoverStyle={{ opacity: 0.88 }}
+                href="/search"
               >
                 Search IMEI
               </HoverButton>
@@ -835,6 +916,7 @@ function CTASection() {
                 variant="outline"
                 size="lg"
                 hoverStyle={{ borderColor: "rgba(255,255,255,0.7)" }}
+                onClick={onOpenWaitlist}
               >
                 Join Our Waitlist
               </HoverButton>
@@ -895,23 +977,24 @@ function Footer() {
         </div>
 
         <nav style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
-          <a
-            href="#"
+          <NavLink
+            label="Home"
+            active
+            href="/"
             style={{
               padding: "4px 12px",
               borderRadius: 6,
               background: "rgba(255,255,255,0.08)",
               color: "rgba(255,255,255,0.9)",
-              textDecoration: "none",
-              fontFamily: "'DM Sans', sans-serif",
               fontSize: 13,
-              fontWeight: 500,
             }}
-          >
-            Home
-          </a>
-          {["search", "Report", "Retrieve"].map((label) => (
-            <NavLink key={label} label={label} />
+          />
+          {[
+            { label: "search", href: "/search" },
+            { label: "Report", href: "/report" },
+            { label: "Retrieve", href: "/retrieve" },
+          ].map((link) => (
+            <NavLink key={link.href} label={link.label} href={link.href} />
           ))}
         </nav>
       </div>
@@ -920,6 +1003,8 @@ function Footer() {
 }
 
 export default function PaylessLanding() {
+  const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
+
   return (
     <>
       <style>{`
@@ -933,14 +1018,15 @@ export default function PaylessLanding() {
         ::-webkit-scrollbar-thumb:hover { background: rgba(107, 155, 255, 0.55); }
       `}</style>
       <div style={pageStyle}>
-        <Navbar />
+      <SharedNavbar />
         <main>
           <HeroSection />
           <ToolsSection />
           <BenefitsSection />
-          <CTASection />
+          <CTASection onOpenWaitlist={() => setIsWaitlistOpen(true)} />
         </main>
         <Footer />
+        <WaitlistModal isOpen={isWaitlistOpen} onClose={() => setIsWaitlistOpen(false)} />
       </div>
     </>
   );
