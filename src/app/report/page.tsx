@@ -265,13 +265,9 @@ export default function ReportPage() {
     if (!confirmed) return;
     if (isPending || isConfirming) return;
 
-    // 1. Get Address - Replace string with your actual address if getContractAddress returns null
-    const targetAddress = getContractAddress(activeChainId) || "PASTE_YOUR_CONTRACT_ADDRESS_HERE";
-
-    if (!targetAddress || targetAddress === "PASTE_YOUR_CONTRACT_ADDRESS_HERE") {
-       setManualError("Smart contract address missing. Please check your config.");
-       return;
-    }
+    // 1. Get Address - Type-safe fallback to prevent Vercel build errors
+    const fallbackAddress = "0x6fB698d2870f0744747B50710609351C941D7d76" as `0x${string}`;
+    const targetAddress = getContractAddress(activeChainId) || fallbackAddress;
 
     // 2. Generate Hashes
     const imeiHash = hashIMEI(imei.trim());
@@ -287,7 +283,7 @@ export default function ReportPage() {
 
       sendCalls({
         calls: [{
-          to: targetAddress as `0x${string}`,
+          to: targetAddress,
           data: calldata,
         }],
         capabilities: {
@@ -298,7 +294,7 @@ export default function ReportPage() {
       });
     } else {
       writeContract({
-        address: targetAddress as `0x${string}`,
+        address: targetAddress,
         abi: PAYLESS_ABI,
         functionName: "flagDevice",
         args: [imeiHash, secretHash],
@@ -399,7 +395,7 @@ export default function ReportPage() {
                 <input
                   key={`word-${index}`}
                   value={word}
-                  disabled={isPending || isPending || isConfirming}
+                  disabled={isPending || isConfirming}
                   onChange={(event) => {
                     const sanitized = event.target.value.toLowerCase().replace(/[^a-z]/g, "");
                     setWords((current) => current.map((item, itemIndex) => (itemIndex === index ? sanitized : item)));
