@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { useAccount, useConnect } from "wagmi";
 import { TOKENS } from "@/styles/tokens";
 
 type ConnectType = "coinbase" | "metamask" | "walletconnect";
@@ -218,7 +218,6 @@ function OptionCard({
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { address, isConnected } = useAccount();
   const { connectAsync, connectors, isPending } = useConnect();
-  const { disconnect } = useDisconnect();
   const [connecting, setConnecting] = useState<ConnectType | null>(null);
   const [rendered, setRendered] = useState(false);
   const [shown, setShown] = useState(false);

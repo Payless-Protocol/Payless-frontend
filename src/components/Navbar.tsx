@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount } from "wagmi";
 import AuthModal from "@/components/AuthModal";
 import { TOKENS } from "@/styles/tokens";
 
@@ -115,7 +115,6 @@ export default function Navbar() {
     return () => window.removeEventListener("resize", check);
   }, []);
   const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
