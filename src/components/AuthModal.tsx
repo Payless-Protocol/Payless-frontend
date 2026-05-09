@@ -144,12 +144,14 @@ function OptionCard({
   icon,
   loading,
   onClick,
+  isMobile,
 }: {
   title: string;
   subtitle?: ReactNode;
   icon: ReactNode;
   loading: boolean;
   onClick: () => void;
+  isMobile: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
 
@@ -165,7 +167,7 @@ function OptionCard({
         alignItems: "center",
         justifyContent: "center",
         gap: 12,
-        padding: "14px 20px",
+        padding: isMobile ? "18px 16px" : "14px 20px",
         background: hovered ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.06)",
         border: `1px solid ${hovered ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"}`,
         borderRadius: 12,
@@ -193,7 +195,13 @@ function OptionCard({
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-        <span style={{ color: TOKENS.heading, fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, lineHeight: 1.3 }}>
+        <span style={{ 
+          color: TOKENS.heading, 
+          fontFamily: "'DM Sans', sans-serif", 
+          fontSize: isMobile ? 16 : 15, 
+          fontWeight: 600, 
+          lineHeight: 1.3 
+        }}>
           {title}
         </span>
         {subtitle && (
@@ -224,6 +232,53 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  const [detectedWallets, setDetectedWallets] = useState<
+    Array<{ name: string; icon: string; rdns: string }>
+  >([]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const providers: Array<{
+      name: string;
+      icon: string;
+      rdns: string;
+    }> = [];
+
+    // Listen for EIP-6963 wallet announcements
+    const handleAnnounce = (event: Event) => {
+      const ev = event as CustomEvent<{
+        info: { name: string; icon: string; rdns: string };
+      }>;
+      if (!ev.detail?.info) return;
+      const { name, icon, rdns } = ev.detail.info;
+      // Avoid duplicates
+      if (!providers.find((p) => p.rdns === rdns)) {
+        providers.push({ name, icon, rdns });
+        setDetectedWallets([...providers]);
+      }
+    };
+
+    window.addEventListener("eip6963:announceProvider", handleAnnounce);
+
+    // Request all providers to announce themselves
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+
+    // Also check window.ethereum as fallback
+    if (typeof window.ethereum !== "undefined" && providers.length === 0) {
+      providers.push({
+        name: window.ethereum.isMetaMask ? "MetaMask" : "Browser Wallet",
+        icon: "",
+        rdns: "io.metamask.fallback",
+      });
+      setDetectedWallets([...providers]);
+    }
+
+    return () => {
+      window.removeEventListener("eip6963:announceProvider", handleAnnounce);
+    };
+  }, []);
+
 
   const truncatedAddress = useMemo(() => {
     if (!address) return "";
@@ -231,18 +286,28 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   }, [address]);
 
   const connectorMap = useMemo(() => {
+    console.log("Available connectors:", connectors.map(c => ({
+      id: c.id,
+      name: c.name,
+      type: c.type,
+    })));
+
     const coinbase = connectors.find(
-      (connector) => connector.id === "coinbaseWalletSDK" || connector.name.toLowerCase().includes("coinbase")
+      (c) => 
+        c.id === "coinbaseWalletSDK" || 
+        c.id === "coinbaseWallet" ||
+        c.type === "coinbaseWallet"
     );
     const metamask = connectors.find(
-      (connector) =>
-        connector.id === "metaMask" ||
-        connector.id === "injected" ||
-        connector.name.toLowerCase().includes("metamask") ||
-        connector.name.toLowerCase().includes("injected")
+      (c) => 
+        c.id === "metaMask" || 
+        c.id === "injected" ||
+        c.type === "injected"
     );
     const walletconnect = connectors.find(
-      (connector) => connector.id === "walletConnect" || connector.name.toLowerCase().includes("walletconnect")
+      (c) => 
+        c.id === "walletConnect" ||
+        c.type === "walletConnect"
     );
 
     return {
@@ -345,20 +410,20 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           background: "#0f0f18",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           borderRadius: "20px 20px 0 0",
-          padding: "32px 24px 40px",
+          padding: "28px 24px 40px",
           maxHeight: "90vh",
           overflowY: "auto",
           boxShadow: "0 -8px 40px rgba(0,0,0,0.45)",
           transform: shown ? "translateY(0)" : "translateY(100%)",
-          opacity: shown ? 1 : 0,
-          transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)",
         } : {
+          position: "relative",
           width: "100%",
           maxWidth: 440,
           background: "#0f0f18",
           border: "1px solid rgba(255,255,255,0.08)",
           borderRadius: 24,
-          padding: "32px 36px",
+          padding: "36px",
           boxShadow: "0 36px 80px rgba(0,0,0,0.45)",
           transform: shown ? "translateY(0)" : "translateY(16px)",
           opacity: shown ? 1 : 0,
@@ -485,10 +550,54 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+              {detectedWallets.length > 0 && (
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  background: "rgba(34,197,94,0.08)",
+                  border: "1px solid rgba(34,197,94,0.2)",
+                  borderRadius: "12px",
+                  padding: "10px 14px",
+                  marginBottom: "16px",
+                }}>
+                  {/* Green pulse dot */}
+                  <div style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: "#22C55E",
+                    flexShrink: 0,
+                    boxShadow: "0 0 6px rgba(34,197,94,0.6)",
+                    animation: "pulse 2s infinite",
+                  }}/>
+                  <div style={{ flex: 1 }}>
+                    <div style={{
+                      color: "#22C55E",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 13,
+                      fontWeight: 600,
+                    }}>
+                      {detectedWallets.length === 1
+                        ? `${detectedWallets[0].name} detected`
+                        : `${detectedWallets.length} wallets detected`}
+                    </div>
+                    <div style={{
+                      color: "rgba(255,255,255,0.4)",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 11,
+                      marginTop: 2,
+                    }}>
+                      {detectedWallets.map(w => w.name).join(", ")}
+                    </div>
+                  </div>
+                </div>
+              )}
               <OptionCard
                 title="Continue with Coinbase Wallet"
                 loading={connecting === "coinbase" || busy}
                 onClick={() => void handleConnect("coinbase")}
+                isMobile={isMobile}
                 icon={
                   <WalletLogo
                     src="https://cdn.cdnlogo.com/logos/c/19/coinbase.svg"
@@ -504,6 +613,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 title="Continue with MetaMask"
                 loading={connecting === "metamask" || busy}
                 onClick={() => void handleConnect("metamask")}
+                isMobile={isMobile}
                 icon={
                   <WalletLogo
                     src="https://cdn.cdnlogo.com/logos/m/78/metamask.svg"
@@ -517,9 +627,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
               <OptionCard
                 title="Continue with Google"
-                subtitle="Via Coinbase Smart Wallet — select Google inside"
+                subtitle="Via Coinbase Smart Wallet — choose Google inside the popup"
                 loading={connecting === "coinbase" || busy}
                 onClick={() => void handleConnect("coinbase")}
+                isMobile={isMobile}
                 icon={
                   <WalletLogo
                     src="https://cdn.cdnlogo.com/logos/g/35/google-icon.svg"
@@ -535,6 +646,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 subtitle="Rainbow, Trust, Ledger, and 300+ more."
                 loading={connecting === "walletconnect" || busy}
                 onClick={() => void handleConnect("walletconnect")}
+                isMobile={isMobile}
                 icon={
                   <div
                     style={{
