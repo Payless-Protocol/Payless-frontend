@@ -8,11 +8,9 @@ import {
   CodeBlock,
   ConnectWalletCard,
   GateShell,
-  MiniStepCard,
   Panel,
   Pill,
   Spinner,
-  StatusCard,
   TextInput,
 } from "@/components/gates/GateKit";
 import { useAccount, useChainId, useConnect, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
@@ -22,10 +20,8 @@ import { hashIMEI, hashSecret } from "@/lib/hash";
 import { PAYLESS_ABI, getContractAddress } from "@/lib/contract";
 import { getTxUrl } from "@/lib/basescan";
 import { TOKENS } from "@/styles/tokens";
-import { paymasterConfig } from "@/lib/paymaster";
 
 const isValidIMEI = (value: string) => /^\d{15}$/.test(value.trim());
-const trimTxMessage = (message: string) => (message.length > 120 ? `${message.slice(0, 120)}...` : message);
 
 const getReportErrorMessage = (error: Error): string => {
   const msg = error.message.toLowerCase();
@@ -185,7 +181,6 @@ export default function ReportPage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-
   const activeChainId = chainId || 84532;
   const imeiError = useMemo(() => {
     if (!touched || imei.length === 0) return null;
@@ -200,7 +195,6 @@ export default function ReportPage() {
       setHashPreview(`${preview.slice(0, 20)}...`);
       return;
     }
-
     setHashPreview("");
   }, [secretReady, words]);
 
@@ -226,7 +220,7 @@ export default function ReportPage() {
   const secretError = submitAttempted && !secretReady ? "Enter all 3 secret words." : null;
   const confirmationError = submitAttempted && !confirmed ? "Please confirm this is your device before submitting." : null;
   const transactionError = manualError ? new Error(manualError) : (writeError ?? waitError ?? sendCallsError ?? (callsStatus?.status === "failure" ? new Error("Transaction failed") : null));
-  
+
   const currentTxHash = txHash || callsStatus?.receipts?.[0]?.transactionHash;
   const txUrl = currentTxHash ? getTxUrl(currentTxHash as `0x${string}`, activeChainId) : "";
 
@@ -260,7 +254,7 @@ export default function ReportPage() {
     setSubmitAttempted(true);
     setManualError(null);
 
-    if (!/^\d{15}$/.test(imei.trim())) {
+    if (!isValidIMEI(imei)) {
       setManualError("IMEI must be exactly 15 digits.");
       return;
     }
@@ -268,18 +262,16 @@ export default function ReportPage() {
       setManualError("Each secret word must be at least 2 characters.");
       return;
     }
-    if (!confirmed) return;
-    if (isPending || isConfirming) return;
+    if (!confirmed || isPending || isConfirming) return;
 
-    const imeiHash = hashIMEI(imei);
+    // 1. MANUALLY SET THE VERIFIED ADDRESS
+    const contractAddr = "0x90afC5fDaD522Bd0a71CE62Cf3b28cA024DCb392" as `0x${string}`;
+
+    // 2. Generate Hashes
+    const imeiHash = hashIMEI(imei.trim());
     const secretHash = hashSecret(words);
 
-    const ZERO_HASH = "0x" + "0".repeat(64);
-    if (imeiHash === ZERO_HASH || secretHash === ZERO_HASH) {
-      setManualError("Hashing failed. Please refresh and try again.");
-      return;
-    }
-
+    // 3. Execute Transaction
     if (capabilities?.[activeChainId]?.paymasterService?.supported) {
       const calldata = encodeFunctionData({
         abi: PAYLESS_ABI,
@@ -289,7 +281,7 @@ export default function ReportPage() {
 
       sendCalls({
         calls: [{
-          to: getContractAddress(activeChainId),
+          to: contractAddr,
           data: calldata,
         }],
         capabilities: {
@@ -300,7 +292,7 @@ export default function ReportPage() {
       });
     } else {
       writeContract({
-        address: getContractAddress(activeChainId),
+        address: contractAddr,
         abi: PAYLESS_ABI,
         functionName: "flagDevice",
         args: [imeiHash, secretHash],
@@ -381,7 +373,7 @@ export default function ReportPage() {
                 setTouched(true);
               }}
               placeholder="Enter 15-digit IMEI (e.g. 352099001761481)"
-              helper="Your IMEI is never sent to any server. It is hashed locally in your browser before the query."
+              helper="Your IMEI is never sent to any server. It is hashed locally in your browser."
               error={imeiError}
               maxLength={15}
               inputMode="numeric"
@@ -394,8 +386,7 @@ export default function ReportPage() {
               Secret Recovery Phrase (3 words)
             </div>
             <div style={{ color: TOKENS.muted, fontSize: 11, lineHeight: 1.5, marginBottom: 10 }}>
-              Choose 3 unique words you will remember. This is your recovery key to unflag the device later. Store it
-              safely.
+              Choose 3 unique words. This is your recovery key to unflag the device later.
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flexDirection: isMobile ? "column" : "row" }}>
               {words.map((word, index) => (
@@ -426,9 +417,6 @@ export default function ReportPage() {
               ))}
             </div>
             {secretError ? <div style={{ marginTop: 8, color: TOKENS.danger, fontSize: 12 }}>{secretError}</div> : null}
-            <div style={{ marginTop: 6, color: TOKENS.muted, fontSize: 11, lineHeight: 1.5 }}>
-              Your actual words are never stored or transmitted.
-            </div>
             {hashPreview ? (
               <div style={{ marginTop: 14 }}>
                 <div style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: 500 }}>
@@ -501,7 +489,7 @@ export default function ReportPage() {
             tone="green"
             icon={<GreenCheckIcon />}
             title="Device Flagged Successfully ✓"
-            body="Your IMEI has been registered on the Base blockchain. Anyone searching this IMEI will now see it is flagged as stolen."
+            body="Your IMEI has been registered on the Base blockchain."
             link={txUrl}
             linkLabel={`Transaction: ${currentTxHash.slice(0, 8)}...${currentTxHash.slice(-6)}`}
             action={

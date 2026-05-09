@@ -1,10 +1,12 @@
-import { keccak256, toUtf8Bytes } from "ethers";
+import { keccak256, encodePacked } from 'viem';
 
-export function hashIMEI(imei: string): `0x${string}` {
-  return keccak256(toUtf8Bytes(imei.trim())) as `0x${string}`;
-}
+export const hashIMEI = (imei: string) => {
+  return keccak256(encodePacked(['string'], [imei]));
+};
 
-export function hashSecret(words: string[]): `0x${string}` {
-  const joined = words.map((word) => word.trim().toLowerCase()).join("-");
-  return keccak256(toUtf8Bytes(joined)) as `0x${string}`;
-}
+export const hashSecret = (words: string[]) => {
+  const combined = words.map(w => w.toLowerCase().trim()).join("");
+  return keccak256(encodePacked(['string'], [combined]));
+};
+
+
