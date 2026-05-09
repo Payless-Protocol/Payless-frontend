@@ -265,7 +265,7 @@ export default function ReportPage() {
     if (!confirmed) return;
     if (isPending || isConfirming) return;
 
-    // 1. Get Address - Type-safe fallback to prevent Vercel build errors
+    // 1. Get Address - Updated with your correct contract address
     const fallbackAddress = "0x90afC5fDaD522Bd0a71CE62Cf3b28cA024DCb392" as `0x${string}`;
     const targetAddress = getContractAddress(activeChainId) || fallbackAddress;
 
@@ -283,7 +283,7 @@ export default function ReportPage() {
 
       sendCalls({
         calls: [{
-          to: targetAddress,
+          to: targetAddress, // Explicitly set to address for smart wallet
           data: calldata,
         }],
         capabilities: {
