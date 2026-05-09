@@ -220,7 +220,7 @@ export default function ReportPage() {
   const secretError = submitAttempted && !secretReady ? "Enter all 3 secret words." : null;
   const confirmationError = submitAttempted && !confirmed ? "Please confirm this is your device before submitting." : null;
   const transactionError = manualError ? new Error(manualError) : (writeError ?? waitError ?? sendCallsError ?? (callsStatus?.status === "failure" ? new Error("Transaction failed") : null));
-  
+
   const currentTxHash = txHash || callsStatus?.receipts?.[0]?.transactionHash;
   const txUrl = currentTxHash ? getTxUrl(currentTxHash as `0x${string}`, activeChainId) : "";
 
@@ -265,10 +265,19 @@ export default function ReportPage() {
     if (!confirmed) return;
     if (isPending || isConfirming) return;
 
-    // HASHING LOGIC: Matching the contract's expected bytes32
+    // 1. Get Address - Replace string with your actual address if getContractAddress returns null
+    const targetAddress = getContractAddress(activeChainId) || "PASTE_YOUR_CONTRACT_ADDRESS_HERE";
+
+    if (!targetAddress || targetAddress === "PASTE_YOUR_CONTRACT_ADDRESS_HERE") {
+       setManualError("Smart contract address missing. Please check your config.");
+       return;
+    }
+
+    // 2. Generate Hashes
     const imeiHash = hashIMEI(imei.trim());
     const secretHash = hashSecret(words);
 
+    // 3. Execute Transaction
     if (capabilities?.[activeChainId]?.paymasterService?.supported) {
       const calldata = encodeFunctionData({
         abi: PAYLESS_ABI,
@@ -278,7 +287,7 @@ export default function ReportPage() {
 
       sendCalls({
         calls: [{
-          to: getContractAddress(activeChainId),
+          to: targetAddress as `0x${string}`,
           data: calldata,
         }],
         capabilities: {
@@ -289,7 +298,7 @@ export default function ReportPage() {
       });
     } else {
       writeContract({
-        address: getContractAddress(activeChainId),
+        address: targetAddress as `0x${string}`,
         abi: PAYLESS_ABI,
         functionName: "flagDevice",
         args: [imeiHash, secretHash],
@@ -390,7 +399,7 @@ export default function ReportPage() {
                 <input
                   key={`word-${index}`}
                   value={word}
-                  disabled={isPending || isConfirming}
+                  disabled={isPending || isPending || isConfirming}
                   onChange={(event) => {
                     const sanitized = event.target.value.toLowerCase().replace(/[^a-z]/g, "");
                     setWords((current) => current.map((item, itemIndex) => (itemIndex === index ? sanitized : item)));
