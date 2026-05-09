@@ -9,3 +9,4 @@ export const hashSecret = (words: string[]) => {
   return keccak256(encodePacked(['string'], [combined]));
 };
 
+
