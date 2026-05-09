@@ -266,7 +266,7 @@ export default function ReportPage() {
     if (isPending || isConfirming) return;
 
     // 1. Get Address - Type-safe fallback to prevent Vercel build errors
-    const fallbackAddress = "0x6fB698d2870f0744747B50710609351C941D7d76" as `0x${string}`;
+    const fallbackAddress = "0x90afC5fDaD522Bd0a71CE62Cf3b28cA024DCb392" as `0x${string}`;
     const targetAddress = getContractAddress(activeChainId) || fallbackAddress;
 
     // 2. Generate Hashes
