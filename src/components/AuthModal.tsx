@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useAccount, useConnect } from "wagmi";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { TOKENS } from "@/styles/tokens";
 
 type ConnectType = "coinbase" | "metamask" | "walletconnect";
@@ -167,15 +167,14 @@ function OptionCard({
         justifyContent: "center",
         gap: 12,
         padding: isMobile ? "18px 16px" : "14px 20px",
-        minHeight: isMobile ? 56 : 52,
-        background: hovered ? "rgba(74,124,247,0.08)" : "rgba(255,255,255,0.06)",
-        border: `1px solid ${hovered ? "rgba(74,124,247,0.35)" : "rgba(255,255,255,0.1)"}`,
+        background: hovered ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.06)",
+        border: `1px solid ${hovered ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"}`,
         borderRadius: 12,
         cursor: loading ? "not-allowed" : "pointer",
         opacity: loading ? 0.82 : 1,
-        transition: "all 0.18s ease",
-        transform: hovered && !loading ? "translateX(2px)" : "translateX(0)",
-        textAlign: "left",
+        transition: "all 0.2s ease",
+        transform: hovered && !loading ? "translateY(-1px)" : "translateY(0)",
+        textAlign: "center",
       }}
     >
       <div
@@ -198,7 +197,7 @@ function OptionCard({
         <span style={{ 
           color: TOKENS.heading, 
           fontFamily: "'DM Sans', sans-serif", 
-          fontSize: isMobile ? 15 : 15, 
+          fontSize: isMobile ? 16 : 15, 
           fontWeight: 600, 
           lineHeight: 1.3 
         }}>
@@ -218,6 +217,7 @@ function OptionCard({
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { address, isConnected } = useAccount();
   const { connectAsync, connectors, isPending } = useConnect();
+  const { disconnect } = useDisconnect();
   const [connecting, setConnecting] = useState<ConnectType | null>(null);
   const [rendered, setRendered] = useState(false);
   const [shown, setShown] = useState(false);
@@ -285,6 +285,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   }, [address]);
 
   const connectorMap = useMemo(() => {
+    console.log("Available connectors:", connectors.map(c => ({
+      id: c.id,
+      name: c.name,
+      type: c.type,
+    })));
 
     const coinbase = connectors.find(
       (c) => 
@@ -404,7 +409,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           background: "#0f0f18",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           borderRadius: "20px 20px 0 0",
-          padding: "28px 24px calc(24px + env(safe-area-inset-bottom))",
+          padding: "28px 24px 40px",
           maxHeight: "90vh",
           overflowY: "auto",
           boxShadow: "0 -8px 40px rgba(0,0,0,0.45)",
