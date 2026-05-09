@@ -37,7 +37,11 @@ function NavLink({
         fontSize: 14,
         fontWeight: active ? 600 : 400,
         textDecoration: "none",
-        transition: "all 0.2s ease",
+        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+        display: "inline-flex",
+        alignItems: "center",
+        transform: hovered ? "translateY(-1px)" : "translateY(0)",
+        opacity: hovered ? 1 : 0.85,
       }}
     >
       {label}
@@ -135,7 +139,7 @@ export default function Navbar() {
           right: 0,
           zIndex: 100,
           height: 64,
-          padding: "0 40px",
+          padding: isMobile ? "0 16px" : "0 40px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -178,6 +182,9 @@ export default function Navbar() {
                 fontSize: 15,
                 letterSpacing: "0.02em",
                 whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: isMobile ? "100px" : "auto",
               }}
             >
               Payless Protocol
@@ -251,7 +258,12 @@ export default function Navbar() {
                     fontSize: 13,
                     fontWeight: 500,
                     cursor: "pointer",
+                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
+                  onMouseEnter={(e) => { if (!isMobile) e.currentTarget.style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={(e) => { if (!isMobile) e.currentTarget.style.transform = "translateY(0)"; }}
+                  onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.97)"}
+                  onMouseUp={(e) => e.currentTarget.style.transform = isMobile ? "scale(1)" : "translateY(-1px)"}
                 >
                   {isMobile ? <PersonPlusIcon size={14} /> : "Sign Up"}
                 </button>
@@ -272,7 +284,12 @@ export default function Navbar() {
                     fontSize: 13,
                     fontWeight: 500,
                     cursor: "pointer",
+                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
+                  onMouseEnter={(e) => { if (!isMobile) e.currentTarget.style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={(e) => { if (!isMobile) e.currentTarget.style.transform = "translateY(0)"; }}
+                  onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.97)"}
+                  onMouseUp={(e) => e.currentTarget.style.transform = isMobile ? "scale(1)" : "translateY(-1px)"}
                 >
                   {isMobile ? <UserIcon size={14} /> : "Login Now"}
                 </button>
@@ -295,7 +312,12 @@ export default function Navbar() {
                   fontSize: 13,
                   fontWeight: 500,
                   cursor: "pointer",
+                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
+                onMouseEnter={(e) => { if (!isMobile) e.currentTarget.style.transform = "translateY(-1px)"; }}
+                onMouseLeave={(e) => { if (!isMobile) e.currentTarget.style.transform = "translateY(0)"; }}
+                onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.97)"}
+                onMouseUp={(e) => e.currentTarget.style.transform = isMobile ? "scale(1)" : "translateY(-1px)"}
               >
                 <span>Sign Out</span>
                 <svg width="14" height="14" viewBox="0 0 24 24"
@@ -305,6 +327,30 @@ export default function Navbar() {
                   <polyline points="16 17 21 12 16 7"/>
                   <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
+              </button>
+            )}
+
+            {isMobile && (
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(true)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 44,
+                  height: 44,
+                  background: "transparent",
+                  border: "none",
+                  color: TOKENS.heading,
+                  cursor: "pointer",
+                  borderRadius: 8,
+                  transition: "all 0.2s ease",
+                }}
+                onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.92)"}
+                onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+              >
+                <HamburgerIcon />
               </button>
             )}
           </div>

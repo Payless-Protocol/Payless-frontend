@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 export const metadata = {
   title: "Payless Protocol — Stolen Device Registry on Base",
   description: "The decentralized IMEI registry that protects buyers, sellers, and marketplaces. Built on Base.",
+  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
   openGraph: {
     title: "Payless Protocol",
     description: "Make stolen devices worthless.",

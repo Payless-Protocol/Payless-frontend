@@ -265,7 +265,7 @@ export default function ReportPage() {
     if (!confirmed || isPending || isConfirming) return;
 
     // 1. MANUALLY SET THE VERIFIED ADDRESS
-    const contractAddr = "0x90afC5fDaD522Bd0a71CE62Cf3b28cA024DCb392" as `0x${string}`;
+    const contractAddr = getContractAddress(activeChainId);
 
     // 2. Generate Hashes
     const imeiHash = hashIMEI(imei.trim());
@@ -406,6 +406,7 @@ export default function ReportPage() {
                     border: `1px solid ${TOKENS.inputBorder}`,
                     borderRadius: TOKENS.buttonRadius,
                     padding: "13px 14px",
+                    minHeight: 48,
                     color: TOKENS.heading,
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: 14,

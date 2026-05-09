@@ -75,12 +75,11 @@ function AppLogoBlock() {
       <img
         src="/logo.png"
         alt="Payless Protocol"
+        width={48}
+        height={48}
         style={{
-          width: 36,
-          height: 36,
           objectFit: "contain",
-          borderRadius: 8,
-          display: "block",
+          borderRadius: 10,
         }}
       />
     </div>
@@ -168,14 +167,15 @@ function OptionCard({
         justifyContent: "center",
         gap: 12,
         padding: isMobile ? "18px 16px" : "14px 20px",
-        background: hovered ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.06)",
-        border: `1px solid ${hovered ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"}`,
+        minHeight: isMobile ? 56 : 52,
+        background: hovered ? "rgba(74,124,247,0.08)" : "rgba(255,255,255,0.06)",
+        border: `1px solid ${hovered ? "rgba(74,124,247,0.35)" : "rgba(255,255,255,0.1)"}`,
         borderRadius: 12,
         cursor: loading ? "not-allowed" : "pointer",
         opacity: loading ? 0.82 : 1,
-        transition: "all 0.2s ease",
-        transform: hovered && !loading ? "translateY(-1px)" : "translateY(0)",
-        textAlign: "center",
+        transition: "all 0.18s ease",
+        transform: hovered && !loading ? "translateX(2px)" : "translateX(0)",
+        textAlign: "left",
       }}
     >
       <div
@@ -198,7 +198,7 @@ function OptionCard({
         <span style={{ 
           color: TOKENS.heading, 
           fontFamily: "'DM Sans', sans-serif", 
-          fontSize: isMobile ? 16 : 15, 
+          fontSize: isMobile ? 15 : 15, 
           fontWeight: 600, 
           lineHeight: 1.3 
         }}>
@@ -286,11 +286,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   }, [address]);
 
   const connectorMap = useMemo(() => {
-    console.log("Available connectors:", connectors.map(c => ({
-      id: c.id,
-      name: c.name,
-      type: c.type,
-    })));
 
     const coinbase = connectors.find(
       (c) => 
@@ -410,7 +405,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           background: "#0f0f18",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           borderRadius: "20px 20px 0 0",
-          padding: "28px 24px 40px",
+          padding: "28px 24px calc(24px + env(safe-area-inset-bottom))",
           maxHeight: "90vh",
           overflowY: "auto",
           boxShadow: "0 -8px 40px rgba(0,0,0,0.45)",
@@ -595,16 +590,21 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               )}
               <OptionCard
                 title="Continue with Coinbase Wallet"
+                subtitle="Passkey, Google, or email — no seed phrase needed"
                 loading={connecting === "coinbase" || busy}
                 onClick={() => void handleConnect("coinbase")}
                 isMobile={isMobile}
                 icon={
-                  <WalletLogo
-                    src="https://cdn.cdnlogo.com/logos/c/19/coinbase.svg"
+                  <img
+                    src="https://altcoinsbox.com/wp-content/uploads/2023/01/coinbase-logo.webp"
                     alt="Coinbase"
-                    width={22}
-                    height={22}
-                    fallback={<span style={{ color: TOKENS.heading, fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 12 }}>C</span>}
+                    width={26}
+                    height={26}
+                    style={{ objectFit: "contain", borderRadius: 4 }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 
+                        "https://cdn.cdnlogo.com/logos/c/19/coinbase.svg";
+                    }}
                   />
                 }
               />
@@ -615,19 +615,23 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 onClick={() => void handleConnect("metamask")}
                 isMobile={isMobile}
                 icon={
-                  <WalletLogo
-                    src="https://cdn.cdnlogo.com/logos/m/78/metamask.svg"
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
                     alt="MetaMask"
-                    width={22}
-                    height={22}
-                    fallback={<MetaMaskMark />}
+                    width={28}
+                    height={28}
+                    style={{ objectFit: "contain" }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "https://cdn.cdnlogo.com/logos/m/78/metamask.svg";
+                    }}
                   />
                 }
               />
 
               <OptionCard
                 title="Continue with Google"
-                subtitle="Via Coinbase Smart Wallet — choose Google inside the popup"
+                subtitle="Sign in with Google via Coinbase Smart Wallet"
                 loading={connecting === "coinbase" || busy}
                 onClick={() => void handleConnect("coinbase")}
                 isMobile={isMobile}
@@ -641,6 +645,16 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   />
                 }
               />
+              <div style={{ 
+                fontFamily: "'DM Sans', sans-serif", 
+                fontSize: 11, 
+                color: "rgba(255,255,255,0.25)", 
+                marginTop: 4, 
+                marginLeft: 60,
+                textAlign: "left"
+              }}>
+                Google login opens inside the Coinbase Smart Wallet popup
+              </div>
               <OptionCard
                 title="Other Wallets"
                 subtitle="Rainbow, Trust, Ledger, and 300+ more."
@@ -659,7 +673,17 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       borderRadius: "inherit",
                     }}
                   >
-                    <WalletConnectMark />
+                    <img
+                      src="https://avatars.githubusercontent.com/u/37784886"
+                      alt="WalletConnect"
+                      width={26}
+                      height={26}
+                      style={{ objectFit: "contain", borderRadius: 6 }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src =
+                          "https://cdn.cdnlogo.com/logos/w/35/walletconnect.svg";
+                      }}
+                    />
                   </div>
                 }
               />

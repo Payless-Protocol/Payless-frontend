@@ -22,7 +22,6 @@ import { hashIMEI, hashSecret } from "@/lib/hash";
 import { PAYLESS_ABI, getContractAddress } from "@/lib/contract";
 import { getTxUrl } from "@/lib/basescan";
 import { TOKENS } from "@/styles/tokens";
-import { paymasterConfig } from "@/lib/paymaster";
 
 const isValidIMEI = (value: string) => /^\d{15}$/.test(value.trim());
 const trimTxMessage = (message: string) => (message.length > 120 ? `${message.slice(0, 120)}...` : message);
@@ -406,6 +405,7 @@ export default function RetrievePage() {
                     border: `1px solid ${TOKENS.inputBorder}`,
                     borderRadius: TOKENS.buttonRadius,
                     padding: "13px 14px",
+                    minHeight: 48,
                     color: TOKENS.heading,
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: 14,

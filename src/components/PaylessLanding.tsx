@@ -379,7 +379,8 @@ function SectionBadge({ children, style = {} }: any) {
   return <div style={{ ...pillStyle, ...style }}>{children}</div>;
 }
 
-function HeroBlob() {
+function HeroBlob({ isMobile }: { isMobile: boolean }) {
+  if (isMobile) return null;
   return (
     <svg
       viewBox="0 0 400 420"
@@ -427,10 +428,11 @@ function HeroSection() {
         position: "relative",
         background: "#0a0a0e",
         overflow: "hidden",
-        padding: isMobile ? "24px" : "100px 60px 80px",
+        padding: isMobile ? "100px 24px 60px" : "160px 60px 80px",
+        animation: "fadeSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both",
       }}
     >
-      <HeroBlob />
+      <HeroBlob isMobile={isMobile} />
 
       <div
         style={{
@@ -491,9 +493,10 @@ function HeroSection() {
         <div
           style={{
             display: "flex",
+            flexDirection: isMobile ? "column" : "row",
             justifyContent: "center",
+            alignItems: "center",
             gap: 14,
-            flexWrap: "wrap",
             marginBottom: 28,
           }}
         >
@@ -501,7 +504,12 @@ function HeroSection() {
             variant="primary"
             size="lg"
             leftIcon={<SearchIcon size={16} />}
-            style={{ borderRadius: 10, paddingLeft: 20, paddingRight: 20 }}
+            style={{ 
+              borderRadius: 10, 
+              paddingLeft: 20, 
+              paddingRight: 20,
+              width: isMobile ? "100%" : "auto"
+            }}
             hoverStyle={{ opacity: 0.88 }}
             href="/search"
           >
@@ -510,7 +518,12 @@ function HeroSection() {
           <HoverButton
             variant="outline"
             size="lg"
-            style={{ borderRadius: 10, paddingLeft: 26, paddingRight: 26 }}
+            style={{ 
+              borderRadius: 10, 
+              paddingLeft: 26, 
+              paddingRight: 26,
+              width: isMobile ? "100%" : "auto"
+            }}
             hoverStyle={{ borderColor: "rgba(255,255,255,0.7)" }}
             href="/report"
           >
@@ -626,7 +639,7 @@ function ToolsSection() {
       style={{
         position: "relative",
         background: "#0a0a0e",
-        padding: "80px 60px",
+        padding: isMobile ? "60px 24px" : "80px 60px",
       }}
     >
       <div
@@ -717,7 +730,7 @@ function BenefitsSection() {
     <section
       style={{
         background: "#0a0a0e",
-        padding: "80px 60px",
+        padding: isMobile ? "60px 24px" : "80px 60px",
       }}
     >
       <div
@@ -735,7 +748,7 @@ function BenefitsSection() {
             position: "relative",
             borderRadius: 20,
             overflow: "hidden",
-            height: isMobile ? 280 : 380,
+            height: isMobile ? 260 : 380,
             background: "linear-gradient(160deg, #e8e8ec 0%, #f4f4f6 45%, #d0d0d8 100%)",
             display: "flex",
             alignItems: "center",
@@ -762,8 +775,8 @@ function BenefitsSection() {
           </svg>
         </div>
 
-        <div style={{ textAlign: "right" }}>
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <div style={{ textAlign: isMobile ? "left" : "right" }}>
+          <div style={{ display: "flex", justifyContent: isMobile ? "flex-start" : "flex-end" }}>
             <SectionBadge style={{ marginBottom: 24 }}>Benefits.</SectionBadge>
           </div>
 
@@ -781,7 +794,7 @@ function BenefitsSection() {
             Why <span style={{ color: COLORS.accent }}>Payless</span> Changes Everything.
           </h2>
 
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 14 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: isMobile ? "flex-start" : "flex-end", gap: 14 }}>
             {["1. Buy With Confidence", "2. Reduced Resale Value for Thieves", "3. Instant Theft Reporting"].map(
               (benefit) => (
                 <div
@@ -796,7 +809,7 @@ function BenefitsSection() {
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: 14,
                     fontWeight: 500,
-                    textAlign: "right",
+                    textAlign: isMobile ? "left" : "right",
                   }}
                 >
                   {benefit}
@@ -892,9 +905,10 @@ function CTASection({ onOpenWaitlist }: any) {
             <div
               style={{
                 display: "flex",
+                flexDirection: isMobile ? "column" : "row",
                 justifyContent: "center",
+                alignItems: "center",
                 gap: 14,
-                flexWrap: "wrap",
                 marginBottom: 24,
               }}
             >
@@ -902,6 +916,7 @@ function CTASection({ onOpenWaitlist }: any) {
                 variant="primary"
                 size="lg"
                 leftIcon={<SearchIcon size={16} />}
+                style={{ width: isMobile ? "100%" : "auto" }}
                 hoverStyle={{ opacity: 0.88 }}
                 href="/search"
               >
@@ -910,6 +925,7 @@ function CTASection({ onOpenWaitlist }: any) {
               <HoverButton
                 variant="outline"
                 size="lg"
+                style={{ width: isMobile ? "100%" : "auto" }}
                 hoverStyle={{ borderColor: "rgba(255,255,255,0.7)" }}
                 onClick={onOpenWaitlist}
               >
@@ -928,13 +944,12 @@ function CTASection({ onOpenWaitlist }: any) {
 }
 
 function Footer() {
-  const [scrolled, setScrolled] = useState(false);
-
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   return (
@@ -942,7 +957,7 @@ function Footer() {
       style={{
         background: "#0a0a0e",
         borderTop: "1px solid rgba(255,255,255,0.06)",
-        padding: "18px 60px",
+        padding: isMobile ? "40px 24px" : "18px 60px",
       }}
     >
       <div
@@ -950,13 +965,13 @@ function Footer() {
           maxWidth: PAGE_WIDTH,
           margin: "0 auto",
           display: "flex",
+          flexDirection: isMobile ? "column" : "row",
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: 24,
-          flexWrap: "wrap",
+          justifyContent: isMobile ? "center" : "space-between",
+          gap: isMobile ? 32 : 24,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center" }}>
           <LogoMark size={28} />
           <span
             style={{
@@ -971,7 +986,13 @@ function Footer() {
           </span>
         </div>
 
-        <nav style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
+        <nav style={{ 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          gap: isMobile ? 16 : 24, 
+          flexWrap: "wrap" 
+        }}>
           <NavLink
             label="Home"
             active
@@ -1019,233 +1040,6 @@ export default function PaylessLanding() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  if (isMobile) {
-    return (
-      <div style={{ ...pageStyle, paddingTop: "64px" }}>
-        <SharedNavbar />
-        <main>
-          {/* MOBILE SECTION 1 — TOP BAR */}
-          <div style={{ padding: "20px 20px 0px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
-              <div style={{
-                width: 38,
-                height: 38,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #4a7cf7, #6b9bff)",
-                border: "2px solid rgba(74,124,247,0.4)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24"
-                     fill="none" stroke="white" strokeWidth="2"
-                     strokeLinecap="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-              </div>
-              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: "#fff" }}>
-                {address ? `${address.slice(0, 2)}${address.slice(2, 6)}...` : "Connect Wallet"}
-              </div>
-            </div>
-          </div>
-
-          {/* MOBILE SECTION 2 — HERO HEADING */}
-          <div style={{ padding: "0 20px", marginBottom: "24px" }}>
-            <h1 style={{
-              fontFamily: "'Syne', sans-serif",
-              fontSize: "32px",
-              fontWeight: 800,
-              color: "#fff",
-              lineHeight: 1.15,
-              letterSpacing: "-0.02em",
-              margin: 0
-            }}>
-              Get to know your<br />
-              device <span style={{ color: "#4a7cf7" }}>status</span>
-            </h1>
-          </div>
-
-          {/* MOBILE SECTION 3 — SEARCH BAR */}
-          <div style={{ padding: "0 20px", marginBottom: "28px" }}>
-            <div 
-              onClick={() => router.push("/search")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: "100px",
-                padding: "12px 18px",
-                cursor: "pointer"
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24"
-                   fill="none" stroke="currentColor" strokeWidth="2"
-                   strokeLinecap="round" style={{ color: "rgba(255,255,255,0.5)" }}>
-                <rect x="3" y="3" width="7" height="7" rx="1"/>
-                <rect x="14" y="3" width="7" height="7" rx="1"/>
-                <rect x="3" y="14" width="7" height="7" rx="1"/>
-                <rect x="14" y="14" width="7" height="7" rx="1"/>
-              </svg>
-              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.35)", flex: 1 }}>
-                Instant device status lookup
-              </div>
-            </div>
-          </div>
-
-          {/* MOBILE SECTION 4 — REPORT CARD */}
-          <div style={{ padding: "0 20px", marginBottom: "16px" }}>
-            <div style={{
-              background: "linear-gradient(145deg, #5b7fe8, #7399f5)",
-              borderRadius: "20px",
-              padding: "24px",
-              position: "relative",
-              overflow: "hidden"
-            }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "48px" }}>
-                <div>
-                  <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, color: "#fff", marginBottom: "4px", margin: 0 }}>
-                    Report.
-                  </h2>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.75)", margin: 0 }}>
-                    Get to flag your lost devices
-                  </p>
-                </div>
-                <button 
-                  onClick={() => router.push("/report")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    background: "#0a0a0e",
-                    border: "none",
-                    borderRadius: "100px",
-                    padding: "10px 18px",
-                    color: "#fff",
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    cursor: "pointer"
-                  }}
-                >
-                  Flag Now!
-                  <svg width="14" height="14" viewBox="0 0 24 24"
-                       fill="none" stroke="white" strokeWidth="2.5"
-                       strokeLinecap="round">
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                    <polyline points="12 5 19 12 12 19"/>
-                  </svg>
-                </button>
-              </div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: 0 }}>
-                Flags a device as lost or stolen, triggering an alert that helps prevent misuse and boost recovery chances.
-              </p>
-              {/* DECORATIVE CIRCLES */}
-              <div style={{
-                position: "absolute",
-                bottom: -20,
-                right: -20,
-                width: 100,
-                height: 100,
-                borderRadius: "50%",
-                border: "2px solid rgba(255,255,255,0.2)",
-                background: "transparent",
-                pointerEvents: "none"
-              }} />
-              <div style={{
-                position: "absolute",
-                bottom: 5,
-                right: 5,
-                width: 65,
-                height: 65,
-                borderRadius: "50%",
-                border: "2px solid rgba(255,255,255,0.15)",
-                background: "transparent",
-                pointerEvents: "none"
-              }} />
-            </div>
-          </div>
-
-          {/* MOBILE SECTION 5 — RETRIEVE CARD */}
-          <div style={{ padding: "0 20px", marginBottom: "32px" }}>
-            <div style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: "20px",
-              padding: "24px",
-              position: "relative",
-              overflow: "hidden"
-            }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div>
-                  <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, color: "#fff", marginBottom: "4px", margin: 0 }}>
-                    Retrieve
-                  </h2>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.5)", margin: 0 }}>
-                    Don't know your IMEI?
-                  </p>
-                </div>
-                <button 
-                  onClick={() => router.push("/retrieve")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    background: "#fff",
-                    border: "none",
-                    borderRadius: "100px",
-                    padding: "10px 18px",
-                    color: "#0a0a0e",
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    cursor: "pointer"
-                  }}
-                >
-                  Let's go!
-                  <svg width="14" height="14" viewBox="0 0 24 24"
-                       fill="none" stroke="#0a0a0e" strokeWidth="2.5"
-                       strokeLinecap="round">
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                    <polyline points="12 5 19 12 12 19"/>
-                  </svg>
-                </button>
-              </div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.5)", lineHeight: 1.6, marginTop: "48px", margin: 0 }}>
-                Find your IMEI when it's unknown. Let's guide you through simple steps to retrieve it quickly and continue the process.
-              </p>
-              {/* DECORATIVE CIRCLES */}
-              <div style={{
-                position: "absolute",
-                bottom: -20,
-                right: -20,
-                width: 100,
-                height: 100,
-                borderRadius: "50%",
-                border: "2px solid rgba(255,255,255,0.1)",
-                background: "transparent",
-                pointerEvents: "none"
-              }} />
-              <div style={{
-                position: "absolute",
-                bottom: 5,
-                right: 5,
-                width: 65,
-                height: 65,
-                borderRadius: "50%",
-                border: "2px solid rgba(255,255,255,0.07)",
-                background: "transparent",
-                pointerEvents: "none"
-              }} />
-            </div>
-          </div>
-        </main>
-        <WaitlistModal isOpen={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
-      </div>
-    );
-  }
 
   return (
     <>
