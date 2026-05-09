@@ -262,12 +262,10 @@ export default function ReportPage() {
       setManualError("Each secret word must be at least 2 characters.");
       return;
     }
-    if (!confirmed) return;
-    if (isPending || isConfirming) return;
+    if (!confirmed || isPending || isConfirming) return;
 
-    // 1. Get Address - Updated with your correct contract address
-    const fallbackAddress = "0x90afC5fDaD522Bd0a71CE62Cf3b28cA024DCb392" as `0x${string}`;
-    const targetAddress = getContractAddress(activeChainId) || fallbackAddress;
+    // 1. MANUALLY SET THE VERIFIED ADDRESS
+    const contractAddr = "0x90afC5fDaD522Bd0a71CE62Cf3b28cA024DCb392" as `0x${string}`;
 
     // 2. Generate Hashes
     const imeiHash = hashIMEI(imei.trim());
@@ -283,7 +281,7 @@ export default function ReportPage() {
 
       sendCalls({
         calls: [{
-          to: targetAddress, // Explicitly set to address for smart wallet
+          to: contractAddr,
           data: calldata,
         }],
         capabilities: {
@@ -294,7 +292,7 @@ export default function ReportPage() {
       });
     } else {
       writeContract({
-        address: targetAddress,
+        address: contractAddr,
         abi: PAYLESS_ABI,
         functionName: "flagDevice",
         args: [imeiHash, secretHash],
