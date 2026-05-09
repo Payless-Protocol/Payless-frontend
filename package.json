@@ -14,7 +14,6 @@
     "@tanstack/react-query": "^5.100.9",
     "ethereum-cryptography": "^2.2.1",
     "ethers": "^6.13.4",
-    // SECURITY REVIEW NEEDED: next package has HIGH/MODERATE vulnerabilities (GHSA-ggv3-7p47-pfv8, GHSA-3x4c-7xq6-9pq8, GHSA-q4gf-8mx6-v5v3)
     "next": "^14.2.32",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -26,7 +25,6 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "autoprefixer": "^10.4.21",
-    // SECURITY REVIEW NEEDED: postcss has MODERATE vulnerability (GHSA-qx2v-qp2m-jg93)
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3"
