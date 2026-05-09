@@ -530,6 +530,27 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   />
                 }
               />
+              <OptionCard
+                title="Other Wallets"
+                subtitle="Rainbow, Trust, Ledger, and 300+ more."
+                loading={connecting === "walletconnect" || busy}
+                onClick={() => void handleConnect("walletconnect")}
+                icon={
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      background: "linear-gradient(135deg, #3b99fc, #7b46f6)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "inherit",
+                    }}
+                  >
+                    <WalletConnectMark />
+                  </div>
+                }
+              />
               <div style={{ textAlign: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.25)", marginTop: 8, marginBottom: 4 }}>
                 Google login is available inside the Coinbase Smart Wallet flow
               </div>

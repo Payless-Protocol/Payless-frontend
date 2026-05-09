@@ -3,7 +3,7 @@ import { PAYLESS_ABI } from "./abi";
 
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
 export const SEPOLIA_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS as `0x${string}`;
-export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "";
+export const RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL ?? "";
 export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? "8453");
 export { PAYLESS_ABI };
 
@@ -14,11 +14,15 @@ export function getContractAddress(chainId: number): `0x${string}` {
 }
 
 export function getReadProvider() {
-  if (!RPC_URL) {
-    throw new Error("RPC URL is not configured.");
+  const rpcUrl = process.env.NEXT_PUBLIC_BASE_RPC_URL;
+  if (!rpcUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_BASE_RPC_URL is not set. " +
+      "Add it to .env.local and restart the dev server."
+    );
   }
 
-  return new JsonRpcProvider(RPC_URL, CHAIN_ID);
+  return new JsonRpcProvider(rpcUrl, CHAIN_ID);
 }
 
 export function getReadContract(chainId = CHAIN_ID) {

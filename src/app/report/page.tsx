@@ -35,7 +35,10 @@ const getReportErrorMessage = (error: Error): string => {
   if (msg.includes("invalidsecret")) {
     return "The secret phrase was rejected. Ensure all 3 words are filled in.";
   }
-  return error.message;
+  if (msg.includes("user rejected") || msg.includes("rejected the request")) {
+    return "Transaction was cancelled in your wallet.";
+  }
+  return "Transaction failed. Please try again.";
 };
 
 function GreenCheckIcon() {
@@ -172,6 +175,7 @@ export default function ReportPage() {
   const [touched, setTouched] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [hashPreview, setHashPreview] = useState("");
+  const [manualError, setManualError] = useState<string | null>(null);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -221,7 +225,7 @@ export default function ReportPage() {
 
   const secretError = submitAttempted && !secretReady ? "Enter all 3 secret words." : null;
   const confirmationError = submitAttempted && !confirmed ? "Please confirm this is your device before submitting." : null;
-  const transactionError = writeError ?? waitError ?? sendCallsError ?? (callsStatus?.status === "failure" ? new Error("Transaction failed") : null);
+  const transactionError = manualError ? new Error(manualError) : (writeError ?? waitError ?? sendCallsError ?? (callsStatus?.status === "failure" ? new Error("Transaction failed") : null));
   
   const currentTxHash = txHash || callsStatus?.receipts?.[0]?.transactionHash;
   const txUrl = currentTxHash ? getTxUrl(currentTxHash as `0x${string}`, activeChainId) : "";
@@ -234,6 +238,7 @@ export default function ReportPage() {
     setSubmitAttempted(false);
     setHashPreview("");
     setSubmittedHash(undefined);
+    setManualError(null);
     resetWrite();
     resetSendCalls();
   };
@@ -242,6 +247,7 @@ export default function ReportPage() {
     resetWrite();
     resetSendCalls();
     setSubmittedHash(undefined);
+    setManualError(null);
   };
 
   const handleConnect = async () => {
@@ -252,10 +258,27 @@ export default function ReportPage() {
 
   const handleFlag = () => {
     setSubmitAttempted(true);
-    if (!isValidIMEI(imei) || !secretReady || !confirmed || isPending || isConfirming) return;
+    setManualError(null);
+
+    if (!/^\d{15}$/.test(imei.trim())) {
+      setManualError("IMEI must be exactly 15 digits.");
+      return;
+    }
+    if (words.some(w => !w.trim() || w.trim().length < 2)) {
+      setManualError("Each secret word must be at least 2 characters.");
+      return;
+    }
+    if (!confirmed) return;
+    if (isPending || isConfirming) return;
 
     const imeiHash = hashIMEI(imei);
     const secretHash = hashSecret(words);
+
+    const ZERO_HASH = "0x" + "0".repeat(64);
+    if (imeiHash === ZERO_HASH || secretHash === ZERO_HASH) {
+      setManualError("Hashing failed. Please refresh and try again.");
+      return;
+    }
 
     if (capabilities?.[activeChainId]?.paymasterService?.supported) {
       const calldata = encodeFunctionData({

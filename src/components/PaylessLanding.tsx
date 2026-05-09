@@ -378,41 +378,34 @@ function SectionBadge({ children, style = {} }: any) {
 }
 
 function HeroBlob() {
-  const path =
-    "M 60,20 C 120,-10 220,10 270,70 C 330,140 310,240 260,290 C 200,350 100,340 50,280 C -10,210 -20,100 60,20 Z";
-
   return (
-    <div
-      aria-hidden="true"
+    <svg
+      viewBox="0 0 400 420"
+      xmlns="http://www.w3.org/2000/svg"
       style={{
         position: "absolute",
-        right: -30,
+        right: -40,
         top: "50%",
         transform: "translateY(-52%)",
-        width: 380,
-        height: 400,
+        width: 400,
+        height: 420,
         pointerEvents: "none",
-        zIndex: 1,
+        zIndex: 0,
       }}
     >
-      <svg viewBox="0 0 340 360" width="100%" height="100%" style={{ overflow: "visible" }}>
-        <path d={path} fill="rgba(50,70,160,0.55)" />
-      </svg>
-      <svg
-        viewBox="0 0 340 360"
-        width="100%"
-        height="100%"
-        style={{
-          position: "absolute",
-          inset: 0,
-          overflow: "visible",
-          transform: "scale(1.08)",
-          transformOrigin: "center",
-        }}
-      >
-        <path d={path} fill="none" stroke="rgba(74,124,247,0.22)" strokeWidth="1.5" />
-      </svg>
-    </div>
+      <path
+        d="M 80,40 C 160,-20 280,20 340,100 C 410,190 390,310 310,370 
+           C 220,440 90,420 40,330 C -20,230 -10,110 80,40 Z"
+        fill="none"
+        stroke="rgba(74,124,247,0.18)"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M 90,55 C 165,-10 275,28 330,108 C 395,198 372,305 295,358 
+           C 210,418 88,398 42,312 C -12,218 8,122 90,55 Z"
+        fill="rgba(45,65,150,0.45)"
+      />
+    </svg>
   );
 }
 
@@ -430,10 +423,9 @@ function HeroSection() {
     <section
       style={{
         position: "relative",
-        minHeight: "100vh",
-        background: COLORS.bg,
+        background: "#0a0a0e",
         overflow: "hidden",
-        padding: isMobile ? "24px" : "80px 40px 60px",
+        padding: isMobile ? "24px" : "100px 60px 80px",
       }}
     >
       <HeroBlob />
@@ -538,19 +530,19 @@ function HeroSection() {
   );
 }
 
-function ToolCard({ title, desc, cta, accent = false, isMobile = false }: any) {
+function ToolCard({ title, desc, cta, accent = false, isMobile = false, alignButton = "flex-start" }: any) {
   return (
     <div
       style={{
         position: "relative",
         display: "flex",
         flexDirection: "column",
-        minHeight: 320,
+        minHeight: accent ? 310 : 280,
         padding: 28,
         borderRadius: 20,
         border: accent ? "none" : "1px solid rgba(255,255,255,0.1)",
         background: accent
-          ? COLORS.heroCardBlue
+          ? "linear-gradient(145deg, #5b7fe8, #7399f5)"
           : "rgba(255,255,255,0.04)",
         transform: accent && !isMobile ? "translateY(-14px)" : "translateY(0)",
         boxShadow: accent ? "0 24px 50px rgba(74,124,247,0.12)" : "none",
@@ -562,7 +554,7 @@ function ToolCard({ title, desc, cta, accent = false, isMobile = false }: any) {
           height: 44,
           borderRadius: "50%",
           background: accent ? "rgba(0,0,0,0.28)" : "rgba(255,255,255,0.9)",
-          marginBottom: 52,
+          marginBottom: 48,
           flex: "0 0 auto",
         }}
       />
@@ -585,23 +577,25 @@ function ToolCard({ title, desc, cta, accent = false, isMobile = false }: any) {
           fontSize: 13,
           lineHeight: 1.65,
           margin: "0 0 36px",
-          color: accent ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.45)",
+          color: accent ? "rgba(255,255,255,0.82)" : "rgba(255,255,255,0.45)",
           maxWidth: 290,
+          flex: 1,
         }}
       >
         {desc}
       </p>
-      <div style={{ marginTop: "auto", display: "flex", justifyContent: accent ? "flex-end" : "flex-start" }}>
+      <div style={{ marginTop: "auto", display: "flex", justifyContent: alignButton }}>
         <HoverButton
           variant={accent ? "dark" : "outline"}
           size="sm"
           style={{
             borderRadius: 8,
-            paddingLeft: 22,
-            paddingRight: 22,
+            padding: "10px 22px",
             background: accent ? "#0a0a0e" : "transparent",
             border: accent ? "none" : "1px solid rgba(255,255,255,0.25)",
             color: COLORS.white,
+            fontSize: 13,
+            fontWeight: 600,
           }}
           hoverStyle={{
             opacity: 0.9,
@@ -629,7 +623,7 @@ function ToolsSection() {
     <section
       style={{
         position: "relative",
-        background: COLORS.bg,
+        background: "#0a0a0e",
         padding: "80px 60px",
       }}
     >
@@ -669,7 +663,7 @@ function ToolsSection() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1.1fr 1fr",
             gap: 20,
             alignItems: "start",
           }}
@@ -677,26 +671,29 @@ function ToolsSection() {
           <ToolCard isMobile={isMobile}
             title={
               <>
-                Retrieve <span style={{ color: COLORS.accent }}>IMEI</span>
+                Retrieve <span style={{ color: "#4a7cf7" }}>IMEI</span>
               </>
             }
             desc="Find your IMEI when it's unknown. Let's guide you through simple steps to retrieve it quickly and continue the process."
             cta="Retrieve Now"
+            alignButton="flex-start"
           />
           <ToolCard isMobile={isMobile}
             title="Report Lost Or Stole Phone"
             desc="Flags a device as lost or stolen, triggering an alert that helps prevent misuse and boost recovery chances."
             cta="Report Lost Device"
             accent
+            alignButton="flex-end"
           />
           <ToolCard isMobile={isMobile}
             title={
               <>
-                Search <span style={{ color: COLORS.accent }}>IMEI</span> Status
+                Search <span style={{ color: "#4a7cf7" }}>IMEI</span> Status
               </>
             }
             desc="Know the status of a device before buying, helping you avoid stolen hardware and buy with confidence."
             cta="Start Searching"
+            alignButton="flex-end"
           />
         </div>
       </div>
@@ -717,7 +714,7 @@ function BenefitsSection() {
   return (
     <section
       style={{
-        background: COLORS.bg,
+        background: "#0a0a0e",
         padding: "80px 60px",
       }}
     >
@@ -737,34 +734,30 @@ function BenefitsSection() {
             borderRadius: 20,
             overflow: "hidden",
             height: isMobile ? 280 : 380,
-            background: "linear-gradient(160deg, #d8d8d8 0%, #f0f0f0 40%, #b0b0b0 100%)",
+            background: "linear-gradient(160deg, #e8e8ec 0%, #f4f4f6 45%, #d0d0d8 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              left: -30,
-              bottom: -26,
-              width: 220,
-              height: 220,
-              background: "rgba(74,124,247,0.2)",
-              borderRadius: "60% 40% 50% 50% / 50% 50% 60% 40%",
-            }}
-          />
-          <img
-            src="/dk.jpg"
-            alt="Benefits visual"
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              transform: "rotate(-3deg) scale(1.02)",
-              transformOrigin: "center",
-            }}
-          />
+          <svg width="170" height="320" viewBox="0 0 170 320"
+            fill="none" style={{ transform: "rotate(-4deg)" }}>
+            <rect x="8" y="0" width="154" height="320" rx="24"
+              fill="#1a1a22" stroke="rgba(255,255,255,0.12)"
+              strokeWidth="1.5"/>
+            <rect x="18" y="12" width="134" height="296" rx="18"
+              fill="url(#phoneScreen)"/>
+            <rect x="62" y="5" width="46" height="9" rx="4.5"
+              fill="#0a0a12"/>
+            <defs>
+              <linearGradient id="phoneScreen" x1="18" y1="12"
+                x2="152" y2="308" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#2a7a8a" stopOpacity="0.9"/>
+                <stop offset="55%" stopColor="#1a3a6a" stopOpacity="0.95"/>
+                <stop offset="100%" stopColor="#060818" stopOpacity="1"/>
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
 
         <div style={{ textAlign: "right" }}>
@@ -826,7 +819,7 @@ function CTASection({ onOpenWaitlist }: any) {
   }, []);
 
   return (
-    <section style={{ background: COLORS.bg, padding: isMobile ? "0 20px 60px" : "0 60px 100px" }}>
+    <section style={{ background: "#0a0a0e", padding: isMobile ? "0 20px 60px" : "0 60px 100px" }}>
       <div style={{ maxWidth: PAGE_WIDTH, margin: "0 auto" }}>
         <div
           style={{
@@ -945,7 +938,7 @@ function Footer() {
   return (
     <footer
       style={{
-        background: COLORS.bg,
+        background: "#0a0a0e",
         borderTop: "1px solid rgba(255,255,255,0.06)",
         padding: "18px 60px",
       }}
@@ -994,7 +987,16 @@ function Footer() {
             { label: "Report", href: "/report" },
             { label: "Retrieve", href: "/retrieve" },
           ].map((link) => (
-            <NavLink key={link.href} label={link.label} href={link.href} />
+            <NavLink 
+              key={link.href} 
+              label={link.label} 
+              href={link.href} 
+              style={{
+                background: "transparent",
+                color: "rgba(255,255,255,0.4)",
+                padding: "0"
+              }}
+            />
           ))}
         </nav>
       </div>
@@ -1003,30 +1005,20 @@ function Footer() {
 }
 
 export default function PaylessLanding() {
-  const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body { background: #0a0a0e; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0e; }
-        ::-webkit-scrollbar-thumb { background: rgba(107, 155, 255, 0.4); border-radius: 999px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(107, 155, 255, 0.55); }
-      `}</style>
       <div style={pageStyle}>
       <SharedNavbar />
         <main>
           <HeroSection />
           <ToolsSection />
           <BenefitsSection />
-          <CTASection onOpenWaitlist={() => setIsWaitlistOpen(true)} />
+          <CTASection onOpenWaitlist={() => setWaitlistOpen(true)} />
         </main>
         <Footer />
-        <WaitlistModal isOpen={isWaitlistOpen} onClose={() => setIsWaitlistOpen(false)} />
+        <WaitlistModal isOpen={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
       </div>
     </>
   );

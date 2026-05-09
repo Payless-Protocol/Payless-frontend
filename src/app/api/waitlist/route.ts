@@ -1,13 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { WaitlistEntry } from "@/types";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email }: WaitlistEntry = await req.json();
+    const userAgent = req.headers.get("user-agent");
+    const forwardedFor = req.headers.get("x-forwarded-for");
 
-    if (!name || !email || !email.includes("@")) {
+    if (!userAgent) {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+    }
+
+    console.log(`Waitlist submission from: ${forwardedFor || "unknown"}`);
+
+    const { name, email } = await req.json();
+
+    if (!name || !email) {
       return NextResponse.json(
-        { error: "Name and valid email are required." },
+        { error: "Name and email are required." },
+        { status: 400 }
+      );
+    }
+
+    const sanitizedName = name.trim().slice(0, 100);
+    const sanitizedEmail = email.trim().toLowerCase().slice(0, 254);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(sanitizedEmail)) {
+      return NextResponse.json(
+        { error: "Invalid email format." },
         { status: 400 }
       );
     }
@@ -16,52 +35,49 @@ export async function POST(req: NextRequest) {
     const databaseId = process.env.NOTION_WAITLIST_DATABASE_ID;
 
     if (!notionToken || !databaseId) {
+      console.error("Missing Notion env vars");
       return NextResponse.json(
-        { error: "Server configuration error." },
+        { error: "Failed to save. Please try again." },
         { status: 500 }
       );
     }
 
-    const response = await fetch(
-      "https://api.notion.com/v1/pages",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${notionToken}`,
-          "Content-Type": "application/json",
-          "Notion-Version": "2022-06-28",
-        },
-        body: JSON.stringify({
-          parent: { database_id: databaseId },
-          properties: {
-            Name: {
-              title: [{ text: { content: name } }],
-            },
-            Email: {
-              email: email,
-            },
-            "Joined At": {
-              date: { start: new Date().toISOString() },
-            },
+    const response = await fetch("https://api.notion.com/v1/pages", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${notionToken}`,
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28",
+      },
+      body: JSON.stringify({
+        parent: { database_id: databaseId },
+        properties: {
+          Name: {
+            title: [{ text: { content: sanitizedName } }],
           },
-        }),
-      }
-    );
+          Email: {
+            email: sanitizedEmail,
+          },
+          "Joined At": {
+            date: { start: new Date().toISOString() },
+          },
+        },
+      }),
+    });
 
     if (!response.ok) {
-      const err = await response.json();
-      console.error("Notion error:", err);
+      console.error("Notion API error occurred");
       return NextResponse.json(
-        { error: "Failed to save to waitlist." },
+        { error: "Failed to save. Please try again." },
         { status: 500 }
       );
     }
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Waitlist API error:", error);
+    console.error("Waitlist route error occurred");
     return NextResponse.json(
-      { error: "Internal server error." },
+      { error: "Failed to save. Please try again." },
       { status: 500 }
     );
   }

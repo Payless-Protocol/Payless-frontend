@@ -201,47 +201,14 @@ export default function Navbar() {
           )}
 
           <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 auto", marginLeft: isMobile ? "auto" : undefined }}>
-            {!isConnected && (
-              <button
-                type="button"
-                onClick={() => setAuthOpen(true)}
-                onMouseEnter={(event) => {
-                  event.currentTarget.style.borderColor = "rgba(255,255,255,0.6)";
-                  event.currentTarget.style.background = "rgba(255,255,255,0.02)";
-                }}
-                onMouseLeave={(event) => {
-                  event.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
-                  event.currentTarget.style.background = "transparent";
-                }}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  padding: isMobile ? "8px" : "8px 20px",
-                  background: "transparent",
-                  border: "1px solid rgba(255,255,255,0.25)",
-                  borderRadius: 8,
-                  color: TOKENS.heading,
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {isMobile ? <PersonPlusIcon size={14} /> : "Sign Up"}
-              </button>
-            )}
-
-            {isConnected && (
+            {isConnected && !isMobile && (
               <div
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 8,
-                  padding: isMobile ? "8px" : "8px 18px",
+                  padding: "8px 18px",
                   background: "rgba(34,197,94,0.12)",
                   border: "1px solid rgba(34,197,94,0.22)",
                   borderRadius: 8,
@@ -251,68 +218,69 @@ export default function Navbar() {
                   fontWeight: 500,
                 }}
               >
-                {isMobile ? <UserIcon size={14} /> : (
-                  <>
-                    <span
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: 999,
-                        background: TOKENS.success,
-                        boxShadow: "0 0 0 4px rgba(34,197,94,0.12)",
-                        flex: "0 0 auto",
-                      }}
-                    />
-                    <span>{connectedLabel}</span>
-                  </>
-                )}
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 999,
+                    background: TOKENS.success,
+                    boxShadow: "0 0 0 4px rgba(34,197,94,0.12)",
+                    flex: "0 0 auto",
+                  }}
+                />
+                <span>{connectedLabel}</span>
               </div>
             )}
 
-            {isConnected ? (
-              <button
-                type="button"
-                onClick={() => disconnect()}
-                onMouseEnter={(event) => {
-                  event.currentTarget.style.opacity = "0.9";
-                  event.currentTarget.style.transform = "translateY(-1px)";
-                }}
-                onMouseLeave={(event) => {
-                  event.currentTarget.style.opacity = "1";
-                  event.currentTarget.style.transform = "translateY(0)";
-                }}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  padding: isMobile ? "8px" : "8px 20px",
-                  background: "linear-gradient(135deg, #4a7cf7, #6b9bff)",
-                  border: "none",
-                  borderRadius: 8,
-                  color: TOKENS.heading,
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {isMobile ? <SignOutIcon size={14} /> : <span>Sign Out</span>}
-                {!isMobile && <SignOutIcon size={14} />}
-              </button>
+            {!isConnected ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setAuthOpen(true)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    padding: isMobile ? "8px" : "8px 20px",
+                    background: "transparent",
+                    border: "1px solid rgba(255,255,255,0.25)",
+                    borderRadius: 8,
+                    color: TOKENS.heading,
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                >
+                  {isMobile ? <PersonPlusIcon size={14} /> : "Sign Up"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAuthOpen(true)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    padding: isMobile ? "8px" : "8px 20px",
+                    background: "linear-gradient(135deg, #4a7cf7, #6b9bff)",
+                    border: "none",
+                    borderRadius: 8,
+                    color: TOKENS.heading,
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                >
+                  {isMobile ? <UserIcon size={14} /> : "Login Now"}
+                </button>
+              </>
             ) : (
               <button
                 type="button"
-                onClick={() => setAuthOpen(true)}
-                onMouseEnter={(event) => {
-                  event.currentTarget.style.opacity = "0.9";
-                  event.currentTarget.style.transform = "translateY(-1px)";
-                }}
-                onMouseLeave={(event) => {
-                  event.currentTarget.style.opacity = "1";
-                  event.currentTarget.style.transform = "translateY(0)";
-                }}
+                onClick={() => disconnect()}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -327,11 +295,16 @@ export default function Navbar() {
                   fontSize: 13,
                   fontWeight: 500,
                   cursor: "pointer",
-                  transition: "all 0.2s ease",
                 }}
               >
-                {isMobile ? <UserIcon size={14} /> : <span>Login Now</span>}
-                {!isMobile && <UserIcon size={14} />}
+                <span>Sign Out</span>
+                <svg width="14" height="14" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" strokeWidth="2"
+                     strokeLinecap="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
               </button>
             )}
           </div>

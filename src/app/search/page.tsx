@@ -45,6 +45,17 @@ function ErrorIcon() {
   );
 }
 
+const getSearchErrorMessage = (error: Error): string => {
+  const msg = error.message.toLowerCase();
+  if (msg.includes("network") || msg.includes("fetch")) {
+    return "Network error. Check your connection and try again.";
+  }
+  if (msg.includes("rpc") || msg.includes("provider")) {
+    return "Blockchain connection error. Please try again shortly.";
+  }
+  return "Query failed. Please try again.";
+};
+
 export default function SearchPage() {
   const chainId = useChainId();
   const [imei, setImei] = useState("");
@@ -106,8 +117,7 @@ export default function SearchPage() {
         formattedDate: formatTimestamp(record[1] as bigint),
       });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Unknown error";
-      setError(`Query failed: ${msg}`);
+      setError(getSearchErrorMessage(err as Error));
     } finally {
       setLoading(false);
     }
