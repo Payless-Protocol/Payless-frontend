@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
+import { useRouter } from "next/navigation";
 import SharedNavbar from "./Navbar";
 import WaitlistModal from "./WaitlistModal";
 
@@ -1006,6 +1008,244 @@ function Footer() {
 
 export default function PaylessLanding() {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const { address } = useAccount();
+  const router = useRouter();
+  
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  if (isMobile) {
+    return (
+      <div style={{ ...pageStyle, paddingTop: "64px" }}>
+        <SharedNavbar />
+        <main>
+          {/* MOBILE SECTION 1 — TOP BAR */}
+          <div style={{ padding: "20px 20px 0px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
+              <div style={{
+                width: 38,
+                height: 38,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #4a7cf7, #6b9bff)",
+                border: "2px solid rgba(74,124,247,0.4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24"
+                     fill="none" stroke="white" strokeWidth="2"
+                     strokeLinecap="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: "#fff" }}>
+                {address ? `${address.slice(0, 2)}${address.slice(2, 6)}...` : "Connect Wallet"}
+              </div>
+            </div>
+          </div>
+
+          {/* MOBILE SECTION 2 — HERO HEADING */}
+          <div style={{ padding: "0 20px", marginBottom: "24px" }}>
+            <h1 style={{
+              fontFamily: "'Syne', sans-serif",
+              fontSize: "32px",
+              fontWeight: 800,
+              color: "#fff",
+              lineHeight: 1.15,
+              letterSpacing: "-0.02em",
+              margin: 0
+            }}>
+              Get to know your<br />
+              device <span style={{ color: "#4a7cf7" }}>status</span>
+            </h1>
+          </div>
+
+          {/* MOBILE SECTION 3 — SEARCH BAR */}
+          <div style={{ padding: "0 20px", marginBottom: "28px" }}>
+            <div 
+              onClick={() => router.push("/search")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: "100px",
+                padding: "12px 18px",
+                cursor: "pointer"
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" strokeWidth="2"
+                   strokeLinecap="round" style={{ color: "rgba(255,255,255,0.5)" }}>
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.35)", flex: 1 }}>
+                Instant device status lookup
+              </div>
+            </div>
+          </div>
+
+          {/* MOBILE SECTION 4 — REPORT CARD */}
+          <div style={{ padding: "0 20px", marginBottom: "16px" }}>
+            <div style={{
+              background: "linear-gradient(145deg, #5b7fe8, #7399f5)",
+              borderRadius: "20px",
+              padding: "24px",
+              position: "relative",
+              overflow: "hidden"
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "48px" }}>
+                <div>
+                  <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, color: "#fff", marginBottom: "4px", margin: 0 }}>
+                    Report.
+                  </h2>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.75)", margin: 0 }}>
+                    Get to flag your lost devices
+                  </p>
+                </div>
+                <button 
+                  onClick={() => router.push("/report")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    background: "#0a0a0e",
+                    border: "none",
+                    borderRadius: "100px",
+                    padding: "10px 18px",
+                    color: "#fff",
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    cursor: "pointer"
+                  }}
+                >
+                  Flag Now!
+                  <svg width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="white" strokeWidth="2.5"
+                       strokeLinecap="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </button>
+              </div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: 0 }}>
+                Flags a device as lost or stolen, triggering an alert that helps prevent misuse and boost recovery chances.
+              </p>
+              {/* DECORATIVE CIRCLES */}
+              <div style={{
+                position: "absolute",
+                bottom: -20,
+                right: -20,
+                width: 100,
+                height: 100,
+                borderRadius: "50%",
+                border: "2px solid rgba(255,255,255,0.2)",
+                background: "transparent",
+                pointerEvents: "none"
+              }} />
+              <div style={{
+                position: "absolute",
+                bottom: 5,
+                right: 5,
+                width: 65,
+                height: 65,
+                borderRadius: "50%",
+                border: "2px solid rgba(255,255,255,0.15)",
+                background: "transparent",
+                pointerEvents: "none"
+              }} />
+            </div>
+          </div>
+
+          {/* MOBILE SECTION 5 — RETRIEVE CARD */}
+          <div style={{ padding: "0 20px", marginBottom: "32px" }}>
+            <div style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "20px",
+              padding: "24px",
+              position: "relative",
+              overflow: "hidden"
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, color: "#fff", marginBottom: "4px", margin: 0 }}>
+                    Retrieve
+                  </h2>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.5)", margin: 0 }}>
+                    Don't know your IMEI?
+                  </p>
+                </div>
+                <button 
+                  onClick={() => router.push("/retrieve")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    background: "#fff",
+                    border: "none",
+                    borderRadius: "100px",
+                    padding: "10px 18px",
+                    color: "#0a0a0e",
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    cursor: "pointer"
+                  }}
+                >
+                  Let's go!
+                  <svg width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="#0a0a0e" strokeWidth="2.5"
+                       strokeLinecap="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </button>
+              </div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.5)", lineHeight: 1.6, marginTop: "48px", margin: 0 }}>
+                Find your IMEI when it's unknown. Let's guide you through simple steps to retrieve it quickly and continue the process.
+              </p>
+              {/* DECORATIVE CIRCLES */}
+              <div style={{
+                position: "absolute",
+                bottom: -20,
+                right: -20,
+                width: 100,
+                height: 100,
+                borderRadius: "50%",
+                border: "2px solid rgba(255,255,255,0.1)",
+                background: "transparent",
+                pointerEvents: "none"
+              }} />
+              <div style={{
+                position: "absolute",
+                bottom: 5,
+                right: 5,
+                width: 65,
+                height: 65,
+                borderRadius: "50%",
+                border: "2px solid rgba(255,255,255,0.07)",
+                background: "transparent",
+                pointerEvents: "none"
+              }} />
+            </div>
+          </div>
+        </main>
+        <WaitlistModal isOpen={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
+      </div>
+    );
+  }
 
   return (
     <>
