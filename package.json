@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "^4.3.7",
-    "@rainbow-me/rainbowkit": "^2.2.11",
+    "@privy-io/react-auth": "^3.23.1",
+    "@privy-io/wagmi": "^4.0.6",
     "@tanstack/react-query": "^5.100.9",
     "ethereum-cryptography": "^2.2.1",
     "ethers": "^6.13.4",

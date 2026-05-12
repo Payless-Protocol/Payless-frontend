@@ -11,9 +11,8 @@ const shellStyle: CSSProperties = {
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  padding: "64px 20px 80px",
+  padding: "64px 24px 80px",
   fontFamily: "'DM Sans', sans-serif",
-  animation: "fadeSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) both",
 };
 
 const contentStyle: CSSProperties = {
@@ -35,40 +34,6 @@ export function GateShell({
     <main style={shellStyle}>
       <div style={{ ...contentStyle, maxWidth }}>{children}</div>
     </main>
-  );
-}
-
-export function Pill({
-  children,
-  tone = "blue",
-}: {
-  children: ReactNode;
-  tone?: "blue" | "red" | "green";
-}) {
-  const tones = {
-    blue: { background: "rgba(74,124,247,0.12)", border: "rgba(74,124,247,0.3)", color: TOKENS.accent },
-    red: { background: "rgba(239,68,68,0.1)", border: "rgba(239,68,68,0.3)", color: TOKENS.danger },
-    green: { background: "rgba(34,197,94,0.1)", border: "rgba(34,197,94,0.3)", color: TOKENS.success },
-  } as const;
-
-  const theme = tones[tone];
-
-  return (
-    <div
-      style={{
-        display: "inline-block",
-        padding: "5px 14px",
-        borderRadius: 999,
-        background: theme.background,
-        border: `1px solid ${theme.border}`,
-        color: theme.color,
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: 12,
-        fontWeight: 500,
-      }}
-    >
-      {children}
-    </div>
   );
 }
 
@@ -95,8 +60,8 @@ export function Panel({
         background: TOKENS.surface,
         border: `1px solid ${TOKENS.borderSubtle}`,
         borderRadius: TOKENS.cardRadius,
-        padding: isMobile ? 20 : 40,
-        boxShadow: "0 24px 60px rgba(0,0,0,0.28)",
+        padding: isMobile ? 24 : 40,
+        boxShadow: "0 14px 32px rgba(0,0,0,0.18)",
         backdropFilter: "blur(10px)",
         ...style,
         ...(isMobile ? { maxWidth: "100%" } : {}),
@@ -160,7 +125,6 @@ export function TextInput({
           border: `1px solid ${error ? TOKENS.danger : TOKENS.inputBorder}`,
           borderRadius: TOKENS.buttonRadius,
           padding: "13px 16px",
-          minHeight: 48,
           color: TOKENS.heading,
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 14,
@@ -255,13 +219,12 @@ export function Button({
         gap: 8,
         borderRadius: TOKENS.buttonRadius,
         padding: "13px 22px",
-        minHeight: 52,
         fontFamily: "'Syne', sans-serif",
         fontSize: 15,
         fontWeight: 700,
         cursor: disabled || loading ? "not-allowed" : "pointer",
         opacity: disabled || loading ? 0.45 : 1,
-        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+        transition: "all 0.2s ease",
         transform: "translateY(0) scale(1)",
         ...variants[variant],
         ...style,
@@ -369,14 +332,12 @@ export function StatusCard({
   icon,
   title,
   children,
-  footer,
   action,
 }: {
   tone: "success" | "danger" | "neutral";
   icon: ReactNode;
   title: ReactNode;
   children: ReactNode;
-  footer?: ReactNode;
   action?: ReactNode;
 }) {
   const tones = {
@@ -404,6 +365,7 @@ export function StatusCard({
         borderRadius: 16,
         background: theme.background,
         border: `1px solid ${theme.border}`,
+        boxShadow: "0 14px 32px rgba(0,0,0,0.14)",
       }}
     >
       <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
@@ -422,7 +384,6 @@ export function StatusCard({
             {title}
           </div>
           <div style={{ color: TOKENS.body, fontSize: 14, lineHeight: 1.7 }}>{children}</div>
-          {footer ? <div style={{ marginTop: 14, color: TOKENS.muted, fontSize: 12 }}>{footer}</div> : null}
           {action ? <div style={{ marginTop: 18 }}>{action}</div> : null}
         </div>
       </div>
@@ -446,50 +407,6 @@ export function CodeBlock({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-    </div>
-  );
-}
-
-export function MiniStepCard({
-  number,
-  title,
-  body,
-}: {
-  number: string;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div
-      style={{
-        flex: "1 1 160px",
-        maxWidth: 160,
-        background: TOKENS.surface,
-        border: `1px solid ${TOKENS.borderSubtle}`,
-        borderRadius: 12,
-        padding: "16px 20px",
-        textAlign: "center",
-      }}
-    >
-      <div
-        style={{
-          width: 32,
-          height: 32,
-          borderRadius: 999,
-          background: "linear-gradient(135deg, #4a7cf7, #6b9bff)",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: TOKENS.heading,
-          fontFamily: "'Syne', sans-serif",
-          fontSize: 14,
-          fontWeight: 700,
-        }}
-      >
-        {number}
-      </div>
-      <div style={{ marginTop: 10, color: TOKENS.heading, fontSize: 13, fontWeight: 600 }}>{title}</div>
-      <div style={{ marginTop: 6, color: "rgba(255,255,255,0.45)", fontSize: 11, lineHeight: 1.5 }}>{body}</div>
     </div>
   );
 }

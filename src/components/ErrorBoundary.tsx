@@ -27,7 +27,6 @@ export class ErrorBoundary extends Component<Props, State> {
           padding: 24,
           textAlign: "center",
         }}>
-          <div style={{ fontSize: 48 }}>⚠️</div>
           <h2 style={{
             fontFamily: "'Syne', sans-serif",
             fontSize: 24,
@@ -37,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
             Something went wrong
           </h2>
           <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, maxWidth: 400 }}>
-            {this.state.error?.message || "An unexpected error occurred."}
+            Reload the page to continue.
           </p>
           <button
             onClick={() => window.location.reload()}

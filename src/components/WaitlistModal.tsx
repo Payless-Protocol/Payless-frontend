@@ -247,11 +247,11 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
             </div>
 
             <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 22, fontWeight: 800, color: "#fff", textAlign: "center", marginBottom: 10 }}>
-              You're on the list! 🎉
+              You're on the list
             </h2>
 
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.5)", textAlign: "center", maxWidth: 300, margin: "0 auto", marginBottom: 28 }}>
-              We'll reach out to {name} when Payless Protocol launches.
+              We'll email {name} when the waitlist opens.
             </p>
 
             <button
@@ -301,7 +301,7 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
             </h2>
 
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)", textAlign: "center", marginBottom: 24 }}>
-              {errorMsg}
+              {errorMsg ? `${errorMsg.split(".")[0].trim()}.` : "Please try again in a moment."}
             </p>
 
             <button

@@ -7,10 +7,10 @@ export const RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL ?? "";
 export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? "8453");
 export { PAYLESS_ABI };
 
-export function getContractAddress(chainId: number): `0x${string}` {
-  if (chainId === 84532) return SEPOLIA_CONTRACT_ADDRESS;
-  if (chainId === 8453) return CONTRACT_ADDRESS;
-  throw new Error(`Unsupported chain: ${chainId}`);
+export function getContractAddress(chainId?: number): `0x${string}` {
+  const addr = (chainId === 8453) ? CONTRACT_ADDRESS : SEPOLIA_CONTRACT_ADDRESS;
+  console.log(`[getContractAddress] chainId: ${chainId}, returning: ${addr}`);
+  return addr;
 }
 
 export function getReadProvider() {

@@ -1,17 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
-import { Button, GateShell, Panel, Pill, StatusCard, TextInput } from "@/components/gates/GateKit";
-import { PAYLESS_ABI } from "@/lib/contract";
+import { Button, GateShell, Panel, StatusCard, TextInput } from "@/components/gates/GateKit";
+import { PAYLESS_ABI, getContractAddress } from "@/lib/contract";
 import { hashIMEI } from "@/lib/hash";
 import { config } from "@/lib/wagmi";
 import { TOKENS } from "@/styles/tokens";
 import { useChainId } from "wagmi";
 import { readContract } from "wagmi/actions";
 import { isDeviceFlagged, formatTimestamp } from "@/lib/status";
-import { ParsedDeviceResult } from "@/types";
+
+// Override type to include notFound field
+interface SearchResult {
+  flagged: boolean;
+  timestamp: bigint;
+  formattedDate: string;
+  notFound?: boolean;
+}
 
 const isValidIMEI = (value: string) => /^\d{15}$/.test(value.trim());
 
@@ -43,9 +50,15 @@ const getSearchErrorMessage = (error: Error): string => {
 export default function SearchPage() {
   const chainId = useChainId();
   const [imei, setImei] = useState("");
+  const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<ParsedDeviceResult | null>(null);
+  const [result, setResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const imeiError = useMemo(() => {
+    if (!touched || imei.length === 0) return null;
+    return isValidIMEI(imei) ? null : "Invalid device ID";
+  }, [imei, touched]);
 
   const formattedDate = useMemo(() => {
     if (!result?.timestamp || result.timestamp === BigInt(0)) return "";
@@ -53,30 +66,48 @@ export default function SearchPage() {
   }, [result]);
 
   const handleSearch = async () => {
-    if (!isValidIMEI(imei)) return;
+    if (!isValidIMEI(imei)) {
+      setTouched(true);
+      return;
+    }
     setLoading(true);
     setError(null);
     setResult(null);
 
     try {
       const imeiHash = hashIMEI(imei);
-      const contractAddr = "0x90afC5fDaD522Bd0a71CE62Cf3b28cA024DCb392" as `0x${string}`;
-
+      const activeChainId = chainId || 84532;
+      console.log(`[SearchPage] activeChainId: ${activeChainId}`);
+      
       const data = await readContract(config, {
-        address: contractAddr,
+        address: getContractAddress(activeChainId),
         abi: PAYLESS_ABI,
         functionName: "registry",
         args: [imeiHash],
       });
-      
+      console.log("[SearchPage] raw data:", data);
       const record = data as readonly [string, bigint, number];
+      
       setResult({
         flagged: isDeviceFlagged(Number(record[2])),
         timestamp: record[1] as bigint,
         formattedDate: formatTimestamp(record[1] as bigint),
       });
     } catch (err) {
-      setError(getSearchErrorMessage(err as Error));
+      console.error("[SearchPage] error:", err);
+      const msg = (err as Error).message.toLowerCase();
+      
+      // Handle "zero data" (0x) error which means device was never flagged
+      if (msg.includes("zero data") || msg.includes("0x") || msg.includes("zerodata")) {
+        setResult({
+          flagged: false,
+          timestamp: BigInt(0),
+          formattedDate: "Never registered",
+          notFound: true
+        });
+      } else {
+        setError(getSearchErrorMessage(err as Error));
+      }
     } finally {
       setLoading(false);
     }
@@ -87,29 +118,97 @@ export default function SearchPage() {
       <Navbar />
       <GateShell maxWidth={760}>
         <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <Pill tone="blue">🔍 Search Gate</Pill>
-          <h1 style={{ margin: "22px 0 10px", fontFamily: "'Syne', sans-serif", fontSize: "clamp(28px, 6vw, 42px)", lineHeight: 1.04, color: TOKENS.heading, fontWeight: 800 }}>
-            Search <span style={{ color: TOKENS.accent }}>IMEI</span> Status
+          <div style={{ marginBottom: 12, color: TOKENS.muted, fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            Search
+          </div>
+          <h1
+            style={{
+              margin: "22px 0 10px",
+              fontFamily: "'Syne', sans-serif",
+              fontSize: "clamp(28px, 6vw, 42px)",
+              lineHeight: 1.04,
+              letterSpacing: "-0.02em",
+              color: TOKENS.heading,
+              fontWeight: 800,
+            }}
+          >
+            Check <span style={{ color: TOKENS.accent }}>IMEI</span> Status
           </h1>
+          <div
+            style={{
+              maxWidth: 440,
+              margin: "10px auto 0",
+              color: TOKENS.body,
+              fontSize: 15,
+              lineHeight: 1.7,
+            }}
+          >
+            Look up a 15-digit IMEI to see whether it has been reported lost or stolen.
+          </div>
         </div>
 
         <Panel style={{ maxWidth: 520 }}>
-          <TextInput value={imei} onChange={(v) => setImei(v.replace(/\D/g, "").slice(0, 15))} placeholder="Enter 15-digit IMEI" />
+          <TextInput 
+            value={imei} 
+            onChange={(v) => {
+              setImei(v.replace(/\D/g, "").slice(0, 15));
+              setTouched(true);
+            }} 
+            placeholder="Enter 15-digit IMEI"
+            error={imeiError}
+          />
           <Button fullWidth loading={loading} onClick={handleSearch} variant="primary" style={{ marginTop: 24 }}>Check Status</Button>
         </Panel>
 
         {result && (
           result.flagged ? (
-            <StatusCard tone="danger" icon={<WarningIcon />} title="⚠️ Device Flagged — Do Not Buy">
-              Reported on {formattedDate}. Verified on Base blockchain.
+            <StatusCard
+              tone="danger"
+              icon={<WarningIcon />}
+              title="Device Reported Lost or Stolen"
+              action={
+                <Link
+                  href="/report"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "10px 16px",
+                    borderRadius: 10,
+                    background: "transparent",
+                    border: "1px solid rgba(239,68,68,0.28)",
+                    color: TOKENS.heading,
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    textDecoration: "none",
+                  }}
+                >
+                  Report a Different Device
+                </Link>
+              }
+            >
+              This IMEI was reported lost or stolen on {formattedDate || "an unknown date"}.
             </StatusCard>
           ) : (
-            <StatusCard tone="success" icon={<CheckIcon />} title="Device is Clean">
-              No reports found for IMEI ending in ...{imei.slice(-4)}.
+            <StatusCard
+              tone="success"
+              icon={<CheckIcon />}
+              title={result.notFound ? "No Registry Entry" : "Device Not Reported"}
+            >
+              {result.notFound ? (
+                <>
+                  No registry entry was found for this IMEI. This usually means it has never been flagged.
+                </>
+              ) : (
+                <>
+                  No reports were found for IMEI ending in ...{imei.slice(-4)}.
+                </>
+              )}
             </StatusCard>
           )
         )}
-        {error && <StatusCard tone="danger" title="Error">{error}</StatusCard>}
+        {error && <StatusCard tone="danger" title="Query Failed">{error}</StatusCard>}
       </GateShell>
     </>
   );

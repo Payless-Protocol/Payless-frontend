@@ -2,20 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { usePrivy } from "@privy-io/react-auth";
 import Navbar from "@/components/Navbar";
 import {
   Button,
   CodeBlock,
   ConnectWalletCard,
   GateShell,
-  MiniStepCard,
   Panel,
-  Pill,
   Spinner,
-  StatusCard,
   TextInput,
 } from "@/components/gates/GateKit";
-import { useAccount, useChainId, useConnect, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useAccount, useChainId, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { useCapabilities, useSendCalls, useCallsStatus } from "wagmi/experimental";
 import { encodeFunctionData } from "viem";
 import { hashIMEI, hashSecret } from "@/lib/hash";
@@ -24,7 +22,6 @@ import { getTxUrl } from "@/lib/basescan";
 import { TOKENS } from "@/styles/tokens";
 
 const isValidIMEI = (value: string) => /^\d{15}$/.test(value.trim());
-const trimTxMessage = (message: string) => (message.length > 120 ? `${message.slice(0, 120)}...` : message);
 
 const getRetrieveErrorMessage = (error: Error): string => {
   const msg = error.message.toLowerCase();
@@ -75,7 +72,6 @@ function TxStateCard({
   icon,
   link,
   linkLabel,
-  secondary,
   tone = "blue",
   action,
 }: {
@@ -84,7 +80,6 @@ function TxStateCard({
   icon: ReactNode;
   link?: string;
   linkLabel?: string;
-  secondary?: string;
   tone?: "blue" | "green" | "red";
   action?: React.ReactNode;
 }) {
@@ -117,7 +112,7 @@ function TxStateCard({
         border: `1px solid ${palette.border}`,
         background: palette.background,
         padding: 28,
-        boxShadow: "0 24px 60px rgba(0,0,0,0.24)",
+        boxShadow: "0 14px 32px rgba(0,0,0,0.14)",
       }}
     >
       <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
@@ -136,7 +131,6 @@ function TxStateCard({
             {title}
           </div>
           <div style={{ color: TOKENS.body, fontSize: 14, lineHeight: 1.7 }}>{body}</div>
-          {secondary ? <div style={{ marginTop: 12, color: "rgba(255,255,255,0.72)", fontSize: 13 }}>{secondary}</div> : null}
           {link && linkLabel ? (
             <div style={{ marginTop: 14 }}>
               <a
@@ -159,7 +153,8 @@ function TxStateCard({
 export default function RetrievePage() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
-  const { connectAsync, connectors, isPending: isWalletConnecting } = useConnect();
+  const { login } = usePrivy();
+  const isWalletConnecting = false; // Privy handles its own pending state internally
   const { writeContract, data: txHash, isPending: isWritePending, error: writeError, reset: resetWrite } = useWriteContract();
   const [submittedHash, setSubmittedHash] = useState<`0x${string}` | undefined>(undefined);
   const { isLoading: isWaitConfirming, isSuccess: isWaitConfirmed, error: waitError } = useWaitForTransactionReceipt({
@@ -246,9 +241,7 @@ export default function RetrievePage() {
   };
 
   const handleConnect = async () => {
-    const connector = connectors[0];
-    if (!connector) return;
-    await connectAsync({ connector });
+    login();
   };
 
   const handleRetrieve = () => {
@@ -318,7 +311,9 @@ export default function RetrievePage() {
       <Navbar />
       <GateShell maxWidth={760}>
         <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <Pill tone="green">🔓 Retrieve Gate</Pill>
+          <div style={{ marginBottom: 12, color: TOKENS.muted, fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            Retrieve
+          </div>
           <h1
             style={{
               margin: "22px 0 10px",
@@ -341,23 +336,8 @@ export default function RetrievePage() {
               lineHeight: 1.7,
             }}
           >
-            Prove ownership using your secret phrase to remove the stolen flag from the registry.
+            Use the 3-word recovery phrase to remove the flag from the registry.
           </div>
-        </div>
-
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            gap: 16,
-            justifyContent: "center",
-            flexWrap: "wrap",
-            marginBottom: 36,
-          }}
-        >
-          <MiniStepCard number="1" title="Enter IMEI" body="Type your 15-digit device IMEI" />
-          <MiniStepCard number="2" title="Enter Secret" body="Provide your 3-word recovery phrase" />
-          <MiniStepCard number="3" title="Unflag Device" body="Transaction removes the flag on-chain" />
         </div>
 
         <Panel style={{ maxWidth: 560 }}>
@@ -405,7 +385,6 @@ export default function RetrievePage() {
                     border: `1px solid ${TOKENS.inputBorder}`,
                     borderRadius: TOKENS.buttonRadius,
                     padding: "13px 14px",
-                    minHeight: 48,
                     color: TOKENS.heading,
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: 14,
@@ -426,9 +405,6 @@ export default function RetrievePage() {
                   Secret hash
                 </div>
                 <CodeBlock>{hashPreview}</CodeBlock>
-                <div style={{ marginTop: 6, color: TOKENS.muted, fontSize: 11, lineHeight: 1.5 }}>
-                  This must match the hash stored on-chain when the device was flagged.
-                </div>
               </div>
             ) : null}
           </div>
@@ -452,7 +428,6 @@ export default function RetrievePage() {
             body="This usually takes a few seconds on Base."
             link={txUrl}
             linkLabel={currentTxHash ? `${currentTxHash.slice(0, 8)}...${currentTxHash.slice(-6)}` : undefined}
-            secondary="Base Sepolia"
           />
         ) : null}
 
@@ -460,8 +435,8 @@ export default function RetrievePage() {
           <TxStateCard
             tone="green"
             icon={<GreenCheckIcon />}
-            title="Device Unflagged Successfully ✓"
-            body="The stolen flag has been removed from the Base registry. This device will now appear clean in future searches."
+            title="Device Unflagged Successfully"
+            body="The flag has been removed from the registry."
             link={txUrl}
             linkLabel={`Transaction: ${currentTxHash.slice(0, 8)}...${currentTxHash.slice(-6)}`}
             action={
@@ -499,7 +474,6 @@ export default function RetrievePage() {
             icon={<RedXIcon />}
             title="Unflag Failed"
             body={getRetrieveErrorMessage(transactionError)}
-            secondary="If this failed, it likely means the secret phrase does not match what was used when the device was originally flagged. Double-check the exact 3 words and their order."
             action={<Button variant="outline" onClick={resetErrorOnly}>Try Again</Button>}
           />
         ) : null}
