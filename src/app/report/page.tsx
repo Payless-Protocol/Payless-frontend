@@ -7,17 +7,17 @@ import Navbar from "@/components/Navbar";
 import {
   Button,
   CodeBlock,
-  ConnectWalletCard,
   GateShell,
   Panel,
   Spinner,
   TextInput,
+  Pill,
 } from "@/components/gates/GateKit";
 import { useAccount, useChainId, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { useCapabilities, useSendCalls, useCallsStatus } from "wagmi/experimental";
 import { encodeFunctionData } from "viem";
 import { hashIMEI, hashSecret } from "@/lib/hash";
-import { PAYLESS_ABI, getContractAddress } from "@/lib/contract";
+import { PAYLESS_ABI } from "@/lib/contract";
 import { getTxUrl } from "@/lib/basescan";
 import { TOKENS } from "@/styles/tokens";
 
@@ -57,7 +57,6 @@ function BlueSpinner() {
 function TxStateCard({
   title,
   body,
-  secondary,
   icon,
   link,
   linkLabel,
@@ -66,7 +65,6 @@ function TxStateCard({
 }: {
   title: string;
   body: string;
-  secondary?: string;
   icon: ReactNode;
   link?: string;
   linkLabel?: string;
@@ -87,7 +85,7 @@ function TxStateCard({
         border: `1px solid ${palette.border}`,
         background: palette.background,
         padding: 28,
-        boxShadow: "0 24px 60px rgba(0,0,0,0.24)",
+        boxShadow: "0 14px 32px rgba(0,0,0,0.14)",
       }}
     >
       <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
@@ -95,7 +93,6 @@ function TxStateCard({
         <div style={{ flex: "1 1 auto" }}>
           <div style={{ fontFamily: "'Syne', sans-serif", color: palette.title, fontSize: 20, fontWeight: 800, marginBottom: 8, letterSpacing: "-0.02em" }}>{title}</div>
           <div style={{ color: TOKENS.body, fontSize: 14, lineHeight: 1.7 }}>{body}</div>
-          {secondary && <div style={{ marginTop: 12, color: "rgba(255,255,255,0.72)", fontSize: 13 }}>{secondary}</div>}
           {link && linkLabel && (
             <div style={{ marginTop: 14 }}>
               <a href={link} target="_blank" rel="noreferrer" style={{ color: TOKENS.accent, textDecoration: "none", fontSize: 13, fontWeight: 600 }}>{linkLabel}</a>
@@ -112,7 +109,6 @@ export default function ReportPage() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const { login } = usePrivy();
-  const isWalletConnecting = false; // Privy handles its own pending state internally
   const { writeContract, data: txHash, isPending: isWritePending, error: writeError, reset: resetWrite } = useWriteContract();
   const [submittedHash, setSubmittedHash] = useState<`0x${string}` | undefined>(undefined);
   const { isLoading: isWaitConfirming, isSuccess: isWaitConfirmed, error: waitError } = useWaitForTransactionReceipt({ hash: submittedHash });
@@ -131,7 +127,6 @@ export default function ReportPage() {
   const [manualError, setManualError] = useState<string | null>(null);
 
   const activeChainId = chainId || 84532;
-
   const imeiError = useMemo(() => {
     if (!touched || imei.length === 0) return null;
     return isValidIMEI(imei) ? null : "Invalid device ID";
@@ -159,16 +154,6 @@ export default function ReportPage() {
   const isConfirming = isWaitConfirming || (!!actualCallsId && callsStatus?.status === "pending");
   const isConfirmed = isWaitConfirmed || callsStatus?.status === "success";
 
-  const canSubmit =
-    isConnected &&
-    isValidIMEI(imei) &&
-    secretReady &&
-    confirmed &&
-    !isPending &&
-    !isConfirming;
-
-  const secretError = submitAttempted && !secretReady ? "Enter all 3 secret words." : null;
-  const confirmationError = submitAttempted && !confirmed ? "Please confirm this is your device before submitting." : null;
   const transactionError = manualError ? new Error(manualError) : (writeError ?? waitError ?? sendCallsError ?? (callsStatus?.status === "failure" ? new Error("Transaction failed") : null));
 
   const currentTxHash = txHash || callsStatus?.receipts?.[0]?.transactionHash;
@@ -194,10 +179,6 @@ export default function ReportPage() {
     setManualError(null);
   };
 
-  const handleConnect = async () => {
-    login();
-  };
-
   const handleFlag = () => {
     setSubmitAttempted(true);
     setManualError(null);
@@ -213,7 +194,7 @@ export default function ReportPage() {
     
     if (!confirmed || isWritePending || isSendCallsPending || isWaitConfirming || !address) return;
 
-    const contractAddr = getContractAddress(activeChainId);
+    const contractAddr = "0x90afC5fDaD522Bd0a71CE62Cf3b28cA024DCb392" as `0x${string}`;
     const imeiHash = hashIMEI(imei.trim());
     const secretHash = hashSecret(words);
 
@@ -246,49 +227,33 @@ export default function ReportPage() {
 
   if (!isConnected) {
     return (
-      <><Navbar /><GateShell maxWidth={760}><ConnectWalletCard onConnect={handleConnect} isConnecting={isWalletConnecting} address={address} /></GateShell></>
+      <>
+        <Navbar />
+        <GateShell maxWidth={760}>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <Pill tone="red">Report Gate</Pill>
+            <h1 style={{ margin: "22px 0 10px", fontFamily: "'Syne', sans-serif", fontSize: "clamp(28px, 6vw, 42px)", lineHeight: 1.04, color: TOKENS.heading, fontWeight: 800 }}>
+              Wallet Connection Required
+            </h1>
+            <p style={{ color: TOKENS.body, fontSize: 15 }}>Please connect your wallet to report a lost or stolen device.</p>
+          </div>
+          <Button onClick={login} variant="primary">Connect Wallet</Button>
+        </GateShell>
+      </>
     );
   }
-
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   return (
     <>
       <Navbar />
       <GateShell maxWidth={760}>
         <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <div style={{ marginBottom: 12, color: TOKENS.muted, fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            Report
-          </div>
-          <h1
-            style={{
-              margin: "22px 0 10px",
-              fontFamily: "'Syne', sans-serif",
-              fontSize: "clamp(28px, 6vw, 42px)",
-              lineHeight: 1.04,
-              letterSpacing: "-0.02em",
-              color: TOKENS.heading,
-              fontWeight: 800,
-            }}
-          >
+          <Pill tone="red">Report Gate</Pill>
+          <h1 style={{ margin: "22px 0 10px", fontFamily: "'Syne', sans-serif", fontSize: "clamp(28px, 6vw, 42px)", lineHeight: 1.04, letterSpacing: "-0.02em", color: TOKENS.heading, fontWeight: 800 }}>
             Report <span style={{ color: TOKENS.danger }}>Lost or Stolen</span> Device
           </h1>
-          <div
-            style={{
-              maxWidth: 480,
-              margin: "10px auto 0",
-              color: TOKENS.body,
-              fontSize: 15,
-              lineHeight: 1.7,
-            }}
-          >
-            Write the IMEI hash to the registry from a connected wallet so others can see the report.
+          <div style={{ maxWidth: 480, margin: "10px auto 0", color: TOKENS.body, fontSize: 15, lineHeight: 1.7 }}>
+            Flag your device IMEI on-chain. Once flagged, any buyer can instantly see it has been reported.
           </div>
         </div>
 
@@ -336,7 +301,7 @@ export default function ReportPage() {
             <div style={{ color: TOKENS.muted, fontSize: 11, lineHeight: 1.5, marginBottom: 10 }}>
               Choose 3 unique words. This is your recovery key to unflag the device later.
             </div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flexDirection: isMobile ? "column" : "row" }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {words.map((word, index) => (
                 <input
                   key={`word-${index}`}
@@ -364,7 +329,6 @@ export default function ReportPage() {
                 />
               ))}
             </div>
-            {secretError ? <div style={{ marginTop: 8, color: TOKENS.danger, fontSize: 12 }}>{secretError}</div> : null}
             {hashPreview ? (
               <div style={{ marginTop: 14 }}>
                 <div style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: 500 }}>
@@ -397,77 +361,38 @@ export default function ReportPage() {
               <span>I confirm this is my device and I am flagging it as lost or stolen.</span>
             </label>
           </div>
-          <Button fullWidth loading={isWritePending || isSendCallsPending || isWaitConfirming} onClick={handleFlag} variant="danger" style={{ marginTop: 20 }}>
+          <Button fullWidth loading={isPending || isConfirming} onClick={handleFlag} variant="danger" style={{ marginTop: 20 }}>
             Flag Device on Base
           </Button>
         </Panel>
 
-        {isPending ? (
-          <TxStateCard
-            tone="blue"
-            icon={<BlueSpinner />}
-            title="Submitting to Base..."
-            body="Please confirm in your wallet."
-          />
-        ) : null}
-
-        {isConfirming ? (
-          <TxStateCard
-            tone="blue"
-            icon={<BlueSpinner />}
-            title="Transaction submitted. Waiting for confirmation..."
-            body="This usually takes a few seconds on Base."
-            link={txUrl}
-            linkLabel={currentTxHash ? `${currentTxHash.slice(0, 8)}...${currentTxHash.slice(-6)}` : undefined}
-          />
-        ) : null}
-
-        {isConfirmed && currentTxHash ? (
+        {isPending && <TxStateCard tone="blue" icon={<BlueSpinner />} title="Submitting..." body="Confirm in your wallet." />}
+        {isConfirming && <TxStateCard tone="blue" icon={<BlueSpinner />} title="Waiting..." body="Confirming on Base Sepolia." link={txUrl} linkLabel="View on Explorer" />}
+        {isConfirmed && (
           <TxStateCard
             tone="green"
             icon={<GreenCheckIcon />}
-            title="Device Flagged Successfully"
-            body="Your IMEI has been registered in the registry."
+            title="Success!"
+            body="Device flagged."
             link={txUrl}
-            linkLabel={`Transaction: ${currentTxHash.slice(0, 8)}...${currentTxHash.slice(-6)}`}
+            linkLabel="View on Explorer"
             action={
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                <Link
-                  href="/search"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "10px 16px",
-                    borderRadius: 10,
-                    background: "transparent",
-                    border: "1px solid rgba(34,197,94,0.28)",
-                    color: TOKENS.heading,
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    textDecoration: "none",
-                  }}
-                >
-                  Search This IMEI
-                </Link>
-                <Button variant="outline" onClick={resetForm}>
-                  Flag Another Device
-                </Button>
+              <div style={{ display: "flex", gap: 12 }}>
+                <Link href="/search" style={{ color: TOKENS.accent, textDecoration: "none", fontWeight: 600 }}>Verify in Search</Link>
+                <Button variant="outline" onClick={resetForm}>Flag Another</Button>
               </div>
             }
           />
-        ) : null}
-
-        {transactionError ? (
+        )}
+        {transactionError && (
           <TxStateCard
             tone="red"
             icon={<RedXIcon />}
-            title="Transaction Failed"
+            title="Failed"
             body={getReportErrorMessage(transactionError)}
             action={<Button variant="outline" onClick={resetErrorOnly}>Try Again</Button>}
           />
-        ) : null}
+        )}
       </GateShell>
     </>
   );
