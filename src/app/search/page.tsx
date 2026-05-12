@@ -75,37 +75,58 @@ export default function SearchPage() {
 
     try {
       const imeiHash = hashIMEI(imei);
-      const activeChainId = chainId || 84532;
-      console.log(`[SearchPage] activeChainId: ${activeChainId}`);
-      
-        const data = await readContract(config, {
-          address: getContractAddress(activeChainId),
+      const activeChainId = 84532;
+      const contractAddress = (process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS || 
+        process.env.NEXT_PUBLIC_CONTRACT_ADDRESS) as `0x${string}`;
+
+      let data;
+      try {
+        data = await readContract(config, {
+          address: contractAddress,
           abi: PAYLESS_ABI,
           functionName: "registry",
           args: [imeiHash],
         });
-        console.log("[SearchPage] raw data:", data);
-        const record = data as readonly [string, bigint, number];
+      } catch (innerErr: unknown) {
+        const msg = innerErr instanceof Error ? innerErr.message : String(innerErr);
+        if (
+          msg.toLowerCase().includes("zero data") ||
+          msg.toLowerCase().includes("0x") ||
+          msg.toLowerCase().includes("zerodata")
+        ) {
+          setResult({
+            flagged: false,
+            timestamp: BigInt(0),
+            formattedDate: "Never registered",
+            notFound: true,
+          });
+          return;
+        }
+        throw innerErr;
+      }
+
+      const record = data as readonly [string, bigint, number];
+      const status = Number(record[2]);
+
+      if (status === 0) {
+        setResult({
+          flagged: false,
+          timestamp: record[1] as bigint,
+          formattedDate: "Never registered",
+          notFound: true,
+        });
+        return;
+      }
+
       setResult({
-        flagged: isDeviceFlagged(Number(record[2])),
+        flagged: true,
         timestamp: record[1] as bigint,
-        formattedDate: formatTimestamp(record[1] as bigint),
+        formattedDate: "",
+        notFound: false,
       });
     } catch (err) {
       console.error("[SearchPage] error:", err);
-      const msg = (err as Error).message.toLowerCase();
-      
-      // Handle "zero data" (0x) error which means device was never flagged
-      if (msg.includes("zero data") || msg.includes("0x") || msg.includes("zerodata")) {
-        setResult({
-          flagged: false,
-          timestamp: BigInt(0),
-          formattedDate: "Never registered",
-          notFound: true
-        });
-      } else {
-        setError(getSearchErrorMessage(err as Error));
-      }
+      setError(getSearchErrorMessage(err as Error));
     } finally {
       setLoading(false);
     }
