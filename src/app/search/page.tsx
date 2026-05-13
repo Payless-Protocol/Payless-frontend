@@ -4,13 +4,10 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import { Button, GateShell, Panel, StatusCard, TextInput } from "@/components/gates/GateKit";
-import { PAYLESS_ABI, getContractAddress } from "@/lib/contract";
+import { PAYLESS_ABI } from "@/lib/contract";
 import { hashIMEI } from "@/lib/hash";
-import { config } from "@/lib/wagmi";
 import { TOKENS } from "@/styles/tokens";
-import { useChainId } from "wagmi";
-import { readContract } from "wagmi/actions";
-import { isDeviceFlagged, formatTimestamp } from "@/lib/status";
+import { formatTimestamp } from "@/lib/status";
 
 // Override type to include notFound field
 interface SearchResult {
@@ -48,7 +45,6 @@ const getSearchErrorMessage = (error: Error): string => {
 };
 
 export default function SearchPage() {
-  const chainId = useChainId();
   const [imei, setImei] = useState("");
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -65,79 +61,85 @@ export default function SearchPage() {
   }, [result]);
 
   const handleSearch = async () => {
-    if (!isValidIMEI(imei)) {
-      setTouched(true);
-      return;
-    }
+    if (!isValidIMEI(imei)) return;
     setLoading(true);
-    setError(null);
     setResult(null);
+    setError(null);
 
     try {
-      const imeiHash = hashIMEI(imei);
-      const activeChainId = 84532;
-      const contractAddress = (
-        process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS ||
-        process.env.NEXT_PUBLIC_CONTRACT_ADDRESS
-      ) as `0x${string}`;
+      const imeiHash = hashIMEI(imei.trim());
+      const contractAddress = "0x90afC5fDaD522Bd0a71CE62Cf3b28cA024DCb392" as `0x${string}`;
 
-      let data;
-      try {
-        data = await readContract(config, {
-          address: contractAddress,
-          abi: PAYLESS_ABI,
-          functionName: "registry",
-          args: [imeiHash],
-        });
-      } catch (innerErr: unknown) {
-        // Only treat as error if it's a real network/RPC failure
-        console.error("[SearchPage] readContract error:", innerErr);
-        throw innerErr;
-      }
+      // Use publicClient directly so we can handle 0x response
+      const { createPublicClient, http, encodeFunctionData, decodeFunctionResult } = await import("viem");
+      const { baseSepolia } = await import("viem/chains");
 
-      const record = data as readonly [`0x${string}`, bigint, number];
-      const statusValue = Number(record[2]);
-      const secretHash = record[0];
+      const publicClient = createPublicClient({
+        chain: baseSepolia,
+        transport: http("https://sepolia.base.org"),
+      });
 
-      // Case 1: Never registered (status 0, secretHash is zero bytes)
-      const isZeroHash = secretHash === '0x0000000000000000000000000000000000000000000000000000000000000000' 
-        || secretHash === '0x' 
-        || BigInt(secretHash) === BigInt(0);
+      // Encode the call
+      const calldata = encodeFunctionData({
+        abi: PAYLESS_ABI,
+        functionName: "registry",
+        args: [imeiHash],
+      });
 
-      if (statusValue === 0 && isZeroHash) {
+      // Raw eth_call — does not throw on 0x response
+      const raw = await publicClient.call({
+        to: contractAddress,
+        data: calldata,
+      });
+
+      // If result is empty or 0x — device was never flagged
+      if (!raw.data || raw.data === "0x") {
         setResult({
           flagged: false,
           timestamp: BigInt(0),
           formattedDate: "Never registered",
           notFound: true,
         });
-        setError(null);
+        setLoading(false);
         return;
       }
 
-      // Case 2: Device is flagged (status 1)
-      if (statusValue === 1) {
+      // Decode the result
+      const decoded = decodeFunctionResult({
+        abi: PAYLESS_ABI,
+        functionName: "registry",
+        data: raw.data,
+      }) as readonly [`0x${string}`, bigint, number];
+
+      const secretHash = decoded[0];
+      const updateAt = decoded[1];
+      const statusValue = Number(decoded[2]);
+
+      // Check if secretHash is zero (unflagged/retrieved device)
+      const isZeroHash =
+        secretHash ===
+        "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+      if (statusValue === 0 || isZeroHash) {
+        setResult({
+          flagged: false,
+          timestamp: updateAt,
+          formattedDate:
+            updateAt > BigInt(0) ? formatTimestamp(updateAt) : "Never registered",
+          notFound: updateAt === BigInt(0),
+        });
+      } else {
+        // statusValue === 1 — device is flagged
         setResult({
           flagged: true,
-          timestamp: record[1],
-          formattedDate: formatTimestamp(record[1]),
+          timestamp: updateAt,
+          formattedDate: formatTimestamp(updateAt),
           notFound: false,
         });
-        setError(null);
-        return;
       }
-
-      // Case 3: Status 0 but has a secretHash (unflagged/retrieved)
-      setResult({
-        flagged: false,
-        timestamp: record[1],
-        formattedDate: formatTimestamp(record[1]),
-        notFound: false,
-      });
-      setError(null);
     } catch (err) {
       console.error("[SearchPage] error:", err);
-      setError(getSearchErrorMessage(err as Error));
+      setError("Query failed. Please try again.");
     } finally {
       setLoading(false);
     }
