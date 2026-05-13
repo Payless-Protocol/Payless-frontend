@@ -76,8 +76,10 @@ export default function SearchPage() {
     try {
       const imeiHash = hashIMEI(imei);
       const activeChainId = 84532;
-      const contractAddress = (process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS || 
-        process.env.NEXT_PUBLIC_CONTRACT_ADDRESS) as `0x${string}`;
+      const contractAddress = (
+        process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS ||
+        process.env.NEXT_PUBLIC_CONTRACT_ADDRESS
+      ) as `0x${string}`;
 
       let data;
       try {
@@ -88,42 +90,51 @@ export default function SearchPage() {
           args: [imeiHash],
         });
       } catch (innerErr: unknown) {
-        const msg = innerErr instanceof Error ? innerErr.message : String(innerErr);
-        if (
-          msg.toLowerCase().includes("zero data") ||
-          msg.toLowerCase().includes("0x") ||
-          msg.toLowerCase().includes("zerodata")
-        ) {
-          setResult({
-            flagged: false,
-            timestamp: BigInt(0),
-            formattedDate: "Never registered",
-            notFound: true,
-          });
-          return;
-        }
+        // Only treat as error if it's a real network/RPC failure
+        console.error("[SearchPage] readContract error:", innerErr);
         throw innerErr;
       }
 
-      const record = data as readonly [string, bigint, number];
-      const status = Number(record[2]);
+      const record = data as readonly [`0x${string}`, bigint, number];
+      const statusValue = Number(record[2]);
+      const secretHash = record[0];
 
-      if (status === 0) {
+      // Case 1: Never registered (status 0, secretHash is zero bytes)
+      const isZeroHash = secretHash === '0x0000000000000000000000000000000000000000000000000000000000000000' 
+        || secretHash === '0x' 
+        || BigInt(secretHash) === BigInt(0);
+
+      if (statusValue === 0 && isZeroHash) {
         setResult({
           flagged: false,
-          timestamp: record[1] as bigint,
+          timestamp: BigInt(0),
           formattedDate: "Never registered",
           notFound: true,
         });
+        setError(null);
         return;
       }
 
+      // Case 2: Device is flagged (status 1)
+      if (statusValue === 1) {
+        setResult({
+          flagged: true,
+          timestamp: record[1],
+          formattedDate: formatTimestamp(record[1]),
+          notFound: false,
+        });
+        setError(null);
+        return;
+      }
+
+      // Case 3: Status 0 but has a secretHash (unflagged/retrieved)
       setResult({
-        flagged: true,
-        timestamp: record[1] as bigint,
-        formattedDate: "",
+        flagged: false,
+        timestamp: record[1],
+        formattedDate: formatTimestamp(record[1]),
         notFound: false,
       });
+      setError(null);
     } catch (err) {
       console.error("[SearchPage] error:", err);
       setError(getSearchErrorMessage(err as Error));
