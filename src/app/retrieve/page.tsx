@@ -83,24 +83,13 @@ function TxStateCard({
   tone?: "blue" | "green" | "red";
   action?: React.ReactNode;
 }) {
-  const palette =
-    tone === "green"
-      ? {
-          border: "rgba(34,197,94,0.3)",
-          background: "rgba(34,197,94,0.06)",
-          title: TOKENS.success,
-        }
-      : tone === "red"
-      ? {
-          border: "rgba(239,68,68,0.3)",
-          background: "rgba(239,68,68,0.06)",
-          title: TOKENS.danger,
-        }
-      : {
-          border: "rgba(74,124,247,0.28)",
-          background: "rgba(74,124,247,0.08)",
-          title: TOKENS.accent,
-        };
+  let palette = { border: "rgba(74,124,247,0.28)", background: "rgba(74,124,247,0.08)", title: TOKENS.accent };
+  
+  if (tone === "green") {
+    palette = { border: "rgba(34,197,94,0.3)", background: "rgba(34,197,94,0.06)", title: TOKENS.success };
+  } else if (tone === "red") {
+    palette = { border: "rgba(239,68,68,0.3)", background: "rgba(239,68,68,0.06)", title: TOKENS.danger };
+  }
 
   return (
     <div
