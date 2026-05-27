@@ -133,15 +133,6 @@ function registry(bytes32 imeiHash)
 - `Tier1(bytes32 indexed imeiHash, bytes32 secretHash)`
 - `UnflagTier1(bytes32 indexed imeiHash, bytes32 secretHash)`
 
-## Contributing
-
-Core team:
-
-- Paul Dada — Lead Founder
-- Andrea — Smart Contracts
-- Martin — Design
-- Ngbede Bawa (Sidney) — Frontend / Web3
-
 Guidelines for contributors:
 
 - All hashing must remain client-side
