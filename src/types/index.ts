@@ -1,27 +1,10 @@
-// Device registry result from contract
-export interface DeviceRecord {
+export type DeviceRecord = {
   secretHash: `0x${string}`;
   updateAt: bigint;
-  status: number;
-}
+  status: 0 | 1 | 2;
+};
 
-// Parsed device result for UI
-export interface ParsedDeviceResult {
-  flagged: boolean;
-  timestamp: bigint;
-  formattedDate: string;
-}
-
-// Waitlist form data
-export interface WaitlistEntry {
+export type WaitlistEntry = {
   name: string;
   email: string;
-}
-
-// Gate page shared state shape
-export interface GateState {
-  imei: string;
-  words: [string, string, string];
-  isLoading: boolean;
-  error: string | null;
-}
+};

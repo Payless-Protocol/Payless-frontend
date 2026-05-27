@@ -106,7 +106,7 @@ export default function AuthModal() {
           onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'}
           onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'}
         >
-          Sign Up
+          Log in
         </button>
       )}
       <button
@@ -126,7 +126,7 @@ export default function AuthModal() {
         onMouseOver={(e) => e.currentTarget.style.background = '#2563EB'}
         onMouseOut={(e) => e.currentTarget.style.background = '#3B82F6'}
       >
-        Login Now
+        Connect Wallet
       </button>
     </div>
   );

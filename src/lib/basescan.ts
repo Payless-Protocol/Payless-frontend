@@ -1,9 +1,15 @@
+import { BASE_SEPOLIA_CHAIN_ID } from "./constants";
+
+function getBaseUrl(chainId: number) {
+  return chainId === BASE_SEPOLIA_CHAIN_ID
+    ? "https://sepolia.basescan.org"
+    : "https://basescan.org";
+}
+
 export function getTxUrl(txHash: string, chainId: number): string {
-  const base = chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org";
-  return `${base}/tx/${txHash}`;
+  return `${getBaseUrl(chainId)}/tx/${txHash}`;
 }
 
 export function getAddressUrl(address: string, chainId: number): string {
-  const base = chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org";
-  return `${base}/address/${address}`;
+  return `${getBaseUrl(chainId)}/address/${address}`;
 }

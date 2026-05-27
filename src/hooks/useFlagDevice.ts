@@ -1,0 +1,57 @@
+"use client";
+
+import { BrowserProvider } from "ethers";
+import { useState } from "react";
+import { getWriteContract, formatContractError } from "@/lib/contract";
+import { buildHashedPayload } from "@/lib/hash";
+import { ACTIVE_CHAIN_ID } from "@/lib/constants";
+
+async function getBrowserSigner() {
+  if (typeof window === "undefined") {
+    throw new Error("Wallet provider is not available.");
+  }
+
+  const ethereum = (window as Window & { ethereum?: any }).ethereum;
+
+  if (!ethereum) {
+    throw new Error("Wallet provider is not available.");
+  }
+
+  const provider = new BrowserProvider(ethereum);
+
+  return provider.getSigner();
+}
+
+export function useFlagDevice() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>();
+
+  const flag = async (
+    imei: string,
+    words: [string, string, string]
+  ): Promise<void> => {
+    setIsLoading(true);
+    setIsSuccess(false);
+    setError(null);
+    setTxHash(undefined);
+
+    try {
+      const { imeiHash, secretHash } = buildHashedPayload(imei, words);
+      const signer = await getBrowserSigner();
+      const contract = getWriteContract(signer, ACTIVE_CHAIN_ID);
+      const tx = await contract.flagDevice(imeiHash, secretHash);
+      setTxHash(tx.hash as `0x${string}`);
+      await tx.wait();
+      setIsSuccess(true);
+    } catch (err) {
+      setError(formatContractError(err, "Transaction failed. Please try again."));
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { flag, isLoading, isSuccess, error, txHash };
+}

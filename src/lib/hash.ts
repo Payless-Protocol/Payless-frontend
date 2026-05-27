@@ -1,12 +1,30 @@
-import { keccak256, encodePacked } from 'viem';
+import { keccak256 } from "ethereum-cryptography/keccak.js";
+import { utf8ToBytes, bytesToHex } from "ethereum-cryptography/utils.js";
 
-export const hashIMEI = (imei: string) => {
-  return keccak256(encodePacked(['string'], [imei]));
-};
+type Bytes32 = `0x${string}`;
 
-export const hashSecret = (words: string[]) => {
-  const combined = words.map(w => w.toLowerCase().trim()).join("");
-  return keccak256(encodePacked(['string'], [combined]));
-};
+function toBytes32(text: string): Bytes32 {
+  const bytes = utf8ToBytes(text.trim());
+  const digest = keccak256(bytes);
+  return `0x${bytesToHex(digest)}` as Bytes32;
+}
 
+export function hashIMEI(imei: string): Bytes32 {
+  return toBytes32(imei);
+}
+
+export function hashSecret(words: [string, string, string]): Bytes32 {
+  const normalized = words.map((w) => w.trim().toLowerCase()).join(" ");
+  return toBytes32(normalized);
+}
+
+export function buildHashedPayload(
+  imei: string,
+  words: [string, string, string]
+) {
+  return {
+    imeiHash: hashIMEI(imei),
+    secretHash: hashSecret(words),
+  };
+}
 

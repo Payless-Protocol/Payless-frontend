@@ -1,24 +1,20 @@
-// Matches the on-chain enum Payless.Status
-export enum DeviceStatus {
-  Unflagged = 0,
-  Flagged = 1,
-}
+export const STATUS = {
+  CLEAN: 0,
+  FLAGGED: 1,
+  VERIFIED: 2,
+} as const;
 
-export function parseStatus(raw: number): DeviceStatus {
-  if (raw === 1) return DeviceStatus.Flagged;
-  return DeviceStatus.Unflagged;
-}
+export type DeviceStatus = (typeof STATUS)[keyof typeof STATUS];
 
-export function isDeviceFlagged(raw: number): boolean {
-  return raw === 1;
-}
-
-export function formatTimestamp(updateAt: bigint): string {
-  if (updateAt === BigInt(0)) return "Unknown";
-  // uint64 is seconds since epoch
-  return new Date(Number(updateAt) * 1000).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+export function getStatusLabel(status: DeviceStatus): string {
+  switch (status) {
+    case STATUS.CLEAN:
+      return "Clean";
+    case STATUS.FLAGGED:
+      return "Flagged";
+    case STATUS.VERIFIED:
+      return "Verified";
+    default:
+      return "Unknown";
+  }
 }

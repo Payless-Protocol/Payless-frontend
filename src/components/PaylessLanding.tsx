@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
-import SharedNavbar from "./Navbar";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import WaitlistModal from "./WaitlistModal";
 
 const COLORS = {
@@ -257,7 +258,8 @@ function NavLink({ label, active = false, href = "#", style = {} }: any) {
   );
 }
 
-function Navbar() {
+// TODO: Remove this legacy landing-specific navbar helper after the shared layout navbar fully replaces it.
+function LandingNavbar() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -335,8 +337,8 @@ function Navbar() {
         >
           <NavLink label="Home" active />
           <NavLink label="Search" />
-          <NavLink label="Report" />
-          <NavLink label="Retrieve" />
+          <NavLink label="Flag" />
+          <NavLink label="Recover" />
         </nav>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 auto" }}>
@@ -442,7 +444,7 @@ function HeroSection() {
         }}
       >
         <SectionBadge style={{ marginBottom: 36 }}>
-          Search, report, and recover device records from the registry.
+          Search, flag, and recover device records from the registry.
         </SectionBadge>
 
         <h1
@@ -483,7 +485,7 @@ function HeroSection() {
             lineHeight: 1.7,
           }}
         >
-          Search an IMEI before you buy, report a lost device from a connected wallet, or
+          Search an IMEI before you buy, flag a lost device from a connected wallet, or
           recover the 15-digit number when you need it.
         </p>
 
@@ -511,9 +513,9 @@ function HeroSection() {
             size="lg"
             style={{ borderRadius: 10, paddingLeft: 26, paddingRight: 26 }}
             hoverStyle={{ borderColor: "rgba(255,255,255,0.7)" }}
-            href="/report"
+          href="/flag"
           >
-            Report Lost Device
+            Flag Lost Device
           </HoverButton>
         </div>
 
@@ -592,7 +594,7 @@ function ToolCard({ title, desc, cta, accent = false, isMobile = false, alignBut
           hoverStyle={{
             opacity: 0.9,
           }}
-          href={cta === "Retrieve Now" ? "/retrieve" : cta === "Start Searching" ? "/search" : cta === "Report Lost Device" ? "/report" : undefined}
+          href={cta === "Recover Now" ? "/recover" : cta === "Start Searching" ? "/search" : cta === "Flag Lost Device" ? "/flag" : undefined}
         >
           {cta}
         </HoverButton>
@@ -647,7 +649,7 @@ function ToolsSection() {
             maxWidth: 800,
           }}
         >
-          Search, report, or
+          Search, flag, or
           <br />
           recover a device record.
         </h2>
@@ -663,17 +665,17 @@ function ToolsSection() {
           <ToolCard isMobile={isMobile}
             title={
               <>
-                Retrieve <span style={{ color: "#4a7cf7" }}>IMEI</span>
+                Recover <span style={{ color: "#4a7cf7" }}>IMEI</span>
               </>
             }
-            desc="Recover the 15-digit IMEI from a device before you search or report it."
-            cta="Retrieve Now"
+            desc="Recover the 15-digit IMEI from a device before you search or flag it."
+            cta="Recover Now"
             alignButton="flex-start"
           />
           <ToolCard isMobile={isMobile}
-            title="Report Lost Or Stolen Device"
+            title="Flag Lost Or Stolen Device"
             desc="Write the device hash and recovery phrase to the registry from a connected wallet."
-            cta="Report Lost Device"
+            cta="Flag Lost Device"
             accent
             alignButton="flex-end"
           />
@@ -683,7 +685,7 @@ function ToolsSection() {
                 Search <span style={{ color: "#4a7cf7" }}>IMEI</span> Status
               </>
             }
-            desc="Check whether an IMEI is reported lost or stolen before a purchase."
+            desc="Check whether an IMEI is flagged lost or stolen before a purchase."
             cta="Start Searching"
             alignButton="flex-end"
           />
@@ -772,7 +774,7 @@ function BenefitsSection() {
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 14 }}>
-            {["Search before purchase", "Report from a connected wallet", "Recover with the 3-word phrase"].map(
+            {["Search before purchase", "Flag from a connected wallet", "Recover with the 3-word phrase"].map(
               (benefit) => (
                 <div
                   key={benefit}
@@ -848,7 +850,7 @@ function CTASection({ onOpenWaitlist }: any) {
           />
 
           <div style={{ position: "relative", zIndex: 2 }}>
-            <SectionBadge>Check a device or report one from the app.</SectionBadge>
+            <SectionBadge>Check a device or flag one from the app.</SectionBadge>
 
             <h2
               style={{
@@ -876,7 +878,7 @@ function CTASection({ onOpenWaitlist }: any) {
                 lineHeight: 1.65,
               }}
             >
-              Search an IMEI before you buy or report a lost or stolen device from a connected wallet.
+              Search an IMEI before you buy or flag a lost or stolen device from a connected wallet.
             </p>
 
             <div
@@ -914,7 +916,8 @@ function CTASection({ onOpenWaitlist }: any) {
   );
 }
 
-function Footer() {
+// TODO: Remove this legacy footer after confirming the standalone layout/footer component is the only one needed.
+function LandingFooter() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -973,8 +976,8 @@ function Footer() {
           />
           {[
             { label: "Search", href: "/search" },
-            { label: "Report", href: "/report" },
-            { label: "Retrieve", href: "/retrieve" },
+            { label: "Flag", href: "/flag" },
+            { label: "Recover", href: "/recover" },
           ].map((link) => (
             <NavLink 
               key={link.href} 
@@ -1009,7 +1012,7 @@ export default function PaylessLanding() {
   if (isMobile) {
     return (
       <div style={{ ...pageStyle, paddingTop: "64px" }}>
-        <SharedNavbar />
+        <Navbar />
         <main>
           {/* MOBILE SECTION 1 — TOP BAR */}
           <div style={{ padding: "20px 20px 0px" }}>
@@ -1094,14 +1097,14 @@ export default function PaylessLanding() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "48px" }}>
                 <div>
                   <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, color: "#fff", marginBottom: "4px", margin: 0 }}>
-                    Report.
+                    Flag.
                   </h2>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.75)", margin: 0 }}>
                     Flag a lost or stolen device
                   </p>
                 </div>
                 <button 
-                  onClick={() => router.push("/report")}
+                  onClick={() => router.push("/flag")}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -1168,14 +1171,14 @@ export default function PaylessLanding() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
                   <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, color: "#fff", marginBottom: "4px", margin: 0 }}>
-                    Retrieve
+                    Recover
                   </h2>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.5)", margin: 0 }}>
                     Need your IMEI?
                   </p>
                 </div>
                 <button 
-                  onClick={() => router.push("/retrieve")}
+                  onClick={() => router.push("/recover")}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -1201,7 +1204,7 @@ export default function PaylessLanding() {
                 </button>
               </div>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.5)", lineHeight: 1.6, marginTop: "48px", margin: 0 }}>
-                Recover the IMEI before you search or report a device.
+                Recover the IMEI before you search or flag a device.
               </p>
               {/* DECORATIVE CIRCLES */}
               <div style={{
@@ -1237,7 +1240,7 @@ export default function PaylessLanding() {
   return (
     <>
       <div style={pageStyle}>
-      <SharedNavbar />
+      <Navbar />
         <main>
           <HeroSection />
           <ToolsSection />

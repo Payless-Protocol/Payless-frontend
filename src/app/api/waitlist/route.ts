@@ -3,13 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const userAgent = req.headers.get("user-agent");
-    const forwardedFor = req.headers.get("x-forwarded-for");
 
     if (!userAgent) {
       return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
-
-    console.log(`Waitlist submission from: ${forwardedFor || "unknown"}`);
 
     const { name, email } = await req.json();
 

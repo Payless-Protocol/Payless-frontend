@@ -1,36 +1,41 @@
 import { BrowserProvider, Contract, JsonRpcProvider, type Signer } from "ethers";
 import { PAYLESS_ABI } from "./abi";
+import {
+  ACTIVE_CHAIN_ID,
+  BASE_MAINNET_CHAIN_ID,
+  BASE_MAINNET_RPC,
+  BASE_SEPOLIA_CHAIN_ID,
+  BASE_SEPOLIA_RPC,
+  CONTRACT_ADDRESS,
+  SEPOLIA_CONTRACT_ADDRESS,
+} from "./constants";
 
-export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
-export const SEPOLIA_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS as `0x${string}`;
-export const RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL ?? "";
-export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? "8453");
 export { PAYLESS_ABI };
 
-export function getContractAddress(chainId?: number): `0x${string}` {
-  const addr = (chainId === 8453) ? CONTRACT_ADDRESS : SEPOLIA_CONTRACT_ADDRESS;
-  console.log(`[getContractAddress] chainId: ${chainId}, returning: ${addr}`);
-  return addr;
+export function getContractAddress(chainId: number = ACTIVE_CHAIN_ID): `0x${string}` {
+  const address =
+    chainId === BASE_MAINNET_CHAIN_ID ? CONTRACT_ADDRESS : SEPOLIA_CONTRACT_ADDRESS;
+
+  return address as `0x${string}`;
 }
 
 export function getReadProvider() {
-  const rpcUrl = process.env.NEXT_PUBLIC_BASE_RPC_URL;
-  if (!rpcUrl) {
-    throw new Error(
-      "NEXT_PUBLIC_BASE_RPC_URL is not set. " +
-      "Add it to .env.local and restart the dev server."
-    );
-  }
+  const isMainnet = ACTIVE_CHAIN_ID === BASE_MAINNET_CHAIN_ID;
+  const rpcUrl = isMainnet ? BASE_MAINNET_RPC : BASE_SEPOLIA_RPC;
+  const chainId = isMainnet ? BASE_MAINNET_CHAIN_ID : BASE_SEPOLIA_CHAIN_ID;
 
-  return new JsonRpcProvider(rpcUrl, CHAIN_ID);
+  return new JsonRpcProvider(rpcUrl, chainId);
 }
 
-export function getReadContract(chainId = CHAIN_ID) {
+export function getReadContract(chainId = ACTIVE_CHAIN_ID) {
   const address = getContractAddress(chainId);
   return new Contract(address, PAYLESS_ABI, getReadProvider());
 }
 
-export function getWriteContract(signer: Signer | BrowserProvider, chainId = CHAIN_ID) {
+export function getWriteContract(
+  signer: Signer | BrowserProvider,
+  chainId = ACTIVE_CHAIN_ID
+) {
   const address = getContractAddress(chainId);
   return new Contract(address, PAYLESS_ABI, signer);
 }
@@ -40,13 +45,13 @@ export function formatContractError(error: unknown, fallback: string) {
     error instanceof Error
       ? error.message
       : typeof error === "object" && error && "message" in error
-      ? String((error as { message?: unknown }).message ?? "")
-      : "";
+        ? String((error as { message?: unknown }).message ?? "")
+        : "";
 
-  if (/InvalidImei/i.test(message)) return "Invalid device ID";
-  if (/InvalidSecret/i.test(message)) return "Wrong secret key";
-  if (/Unauthorized/i.test(message)) return "Not allowed";
-  if (/AlreadyUnflagged/i.test(message)) return "Device already clean";
+  if (/AlreadyUnflagged/i.test(message)) return "Device is already clean.";
+  if (/InvalidImei/i.test(message)) return "Invalid device ID.";
+  if (/InvalidSecret/i.test(message)) return "Invalid secret phrase.";
+  if (/Unauthorized/i.test(message)) return "You are not authorized to unflag this device.";
 
   return fallback;
 }

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 import AuthModal from "@/components/AuthModal";
 import { TOKENS } from "@/styles/tokens";
@@ -11,8 +11,8 @@ import { TOKENS } from "@/styles/tokens";
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Search", href: "/search" },
-  { label: "Report", href: "/report" },
-  { label: "Retrieve", href: "/retrieve" },
+  { label: "Flag", href: "/flag" },
+  { label: "Recover", href: "/recover" },
 ] as const;
 
 function NavLink({
@@ -47,14 +47,23 @@ function NavLink({
 
 function UserAvatarIcon({ size = 16 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
     </svg>
   );
 }
 
-export default function Navbar() {
+export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -108,7 +117,6 @@ export default function Navbar() {
             position: "relative",
           }}
         >
-          {/* Logo Section */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>
             <Image
               src="/logo.png"
@@ -137,8 +145,7 @@ export default function Navbar() {
             </span>
           </div>
 
-          {/* Center Navigation (Desktop Only) */}
-          {!isMobile && (
+          {!isMobile ? (
             <nav
               style={{
                 display: "flex",
@@ -150,54 +157,65 @@ export default function Navbar() {
               }}
             >
               {NAV_LINKS.map((link) => (
-                <NavLink key={link.href} href={link.href} label={link.label} active={pathname === link.href} />
+                <NavLink
+                  key={link.href}
+                  href={link.href}
+                  label={link.label}
+                  active={pathname === link.href}
+                />
               ))}
             </nav>
-          )}
+          ) : null}
 
-          {/* Right Section (Auth) */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 auto" }}>
             <AuthModal />
           </div>
         </div>
       </header>
 
-      {/* Mobile-only Authenticated Row */}
-      {isMobile && isConnected && address && (
-        <div style={{
-          position: 'fixed',
-          top: 64,
-          left: 0,
-          right: 0,
-          zIndex: 90,
-          padding: '16px 20px',
-          background: '#0a0a0e',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-        }}>
-          <div style={{
-            width: 40,
-            height: 40,
-            borderRadius: '50%',
-            background: '#3B82F6',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(59,130,246,0.2)',
-          }}>
+      {isMobile && isConnected && address ? (
+        <div
+          style={{
+            position: "fixed",
+            top: 64,
+            left: 0,
+            right: 0,
+            zIndex: 90,
+            padding: "16px 20px",
+            background: "#0a0a0e",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "#3B82F6",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 12px rgba(59,130,246,0.2)",
+            }}
+          >
             <UserAvatarIcon size={20} />
           </div>
-          <span style={{
-            color: '#fff',
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 15,
-            fontWeight: 700,
-          }}>
+          <span
+            style={{
+              color: "#fff",
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 15,
+              fontWeight: 700,
+            }}
+          >
             {shortenedAddress}
           </span>
         </div>
-      )}
+      ) : null}
     </>
   );
 }
+
+export default Navbar;

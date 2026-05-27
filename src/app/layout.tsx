@@ -1,15 +1,15 @@
 import "./globals.css";
 import type { ReactNode } from "react";
-import Providers from "@/components/Providers";
+import { Web3Provider } from "@/providers/Web3Provider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export const metadata = {
   title: "Payless Protocol - IMEI Registry",
-  description: "Search, report, and recover IMEI records.",
-  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+  description: "Search, flag, and recover IMEI records.",
+  metadataBase: new URL("https://paylessprotocol.xyz"),
   openGraph: {
     title: "Payless Protocol",
-    description: "Search, report, and recover IMEI records.",
+    description: "Search, flag, and recover IMEI records.",
     url: "https://paylessprotocol.xyz",
     siteName: "Payless Protocol",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
@@ -19,9 +19,15 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Payless Protocol",
-    description: "Search, report, and recover IMEI records.",
+    description: "Search, flag, and recover IMEI records.",
     images: ["/og-image.png"],
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -29,7 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body>
         <ErrorBoundary>
-          <Providers>{children}</Providers>
+          <Web3Provider>{children}</Web3Provider>
         </ErrorBoundary>
       </body>
     </html>
