@@ -6,7 +6,7 @@ A decentralized stolen-device registry on Base. Users can search a device IMEI b
 
 Payless Protocol is built around a privacy-first model. Raw IMEI numbers and recovery phrases are normalized and hashed client-side before any contract interaction. The smart contract only receives `bytes32` hashes — no personally identifiable data is ever stored on-chain.
 
-The protocol supports three tiers:
+The protocol will support three tiers:
 
 - **Tier 1** — User-initiated flag via IMEI and a 3-word secret phrase
 - **Tier 2** — Physically verified flag via OCR and Chainlink oracle commit-reveal (in development)
