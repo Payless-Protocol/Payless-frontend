@@ -46,6 +46,10 @@ export function Web3Provider({ children }: { children: ReactNode }) {
             createOnLogin: "users-without-wallets",
           },
         },
+        // FIXED: Explicitly enable the smart wallet framework inside Privy context
+        smartWallets: {
+          enabled: true,
+        },
       }}
     >
       <QueryClientProvider client={queryClient}>
