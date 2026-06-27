@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useWallets } from "@privy-io/react-auth";
-import { createWalletClient, custom } from "viem";
+import { createWalletClient, custom, keccak256, toBytes } from "viem";
 import { baseSepolia } from "viem/chains";
 import { getContractAddress, PAYLESS_ABI } from "@/lib/contract";
 import { formatContractError } from "@/lib/contract";
@@ -26,7 +26,7 @@ export default function RecoverGate() {
       if (!wallet) throw new Error("Please connect your wallet first.");
 
       await wallet.switchChain(baseSepolia.id);
-      
+
       const provider = await wallet.getEthereumProvider();
       const walletClient = createWalletClient({
         account: wallet.address as `0x${string}`,
@@ -36,11 +36,18 @@ export default function RecoverGate() {
 
       const contractAddress = getContractAddress(baseSepolia.id);
 
+      // ── Hash IMEI + secret client-side, identical to FlagGate ──────
+      // Must use the exact same trim() + keccak256(toBytes()) logic
+      // as flagDevice(), or the contract will revert with
+      // Unauthorized() because the hashes won't match.
+      const imeiHash   = keccak256(toBytes(imei.trim()));
+      const secretHash = keccak256(toBytes(secretPhrase.trim()));
+
       const { request } = await walletClient.simulateContract({
         address: contractAddress,
         abi: PAYLESS_ABI,
         functionName: "unflagDevice",
-        args: [imei, secretPhrase],
+        args: [imeiHash, secretHash],
       });
 
       const hash = await walletClient.writeContract(request);
@@ -74,7 +81,7 @@ export default function RecoverGate() {
             value={secretPhrase}
             onChange={(e) => setSecretPhrase(e.target.value)}
             className="mt-1 block w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm text-white focus:outline-none focus:border-indigo-500"
-            placeholder="Enter 3-word secret"
+            placeholder="Enter the secret you used when flagging"
           />
         </div>
         <button
