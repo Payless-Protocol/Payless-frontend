@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { useAccount, useChainId, useSwitchChain } from "wagmi";
-import { useCallsStatus, useCapabilities, useSendCalls } from "wagmi/experimental";
+// 1. Import Privy's native Smart Wallet management hook
+import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
+import { useAccount, useChainId } from "wagmi";
 import { encodeFunctionData } from "viem";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/primitives/Button";
@@ -13,11 +14,10 @@ import { Input } from "@/components/primitives/Input";
 import { StepIndicator } from "@/components/primitives/StepIndicator";
 import { TOKENS } from "@/styles/tokens";
 import { PAYLESS_ABI } from "@/lib/abi";
-import { ACTIVE_CHAIN_ID, BASE_SEPOLIA_CHAIN_ID } from "@/lib/constants";
+import { ACTIVE_CHAIN_ID } from "@/lib/constants";
 import { getTxUrl } from "@/lib/basescan";
 import { getContractAddress } from "@/lib/contract";
 import { useHashedPayload } from "@/hooks/useHashedPayload";
-import { useUnflagDevice } from "@/hooks/useUnflagDevice";
 
 const isValidIMEI = (value: string) => /^\d{15}$/.test(value.trim());
 
@@ -167,22 +167,9 @@ export function RecoverGate() {
   const { address } = useAccount();
   const chainId = useChainId();
   const { login, authenticated } = usePrivy();
-  const { switchChainAsync } = useSwitchChain();
-  const { data: capabilities } = useCapabilities();
-  const {
-    sendCalls,
-    data: callsIdData,
-    isPending: isSendCallsPending,
-    error: sendCallsError,
-    reset: resetSendCalls,
-  } = useSendCalls();
-  const actualCallsId = typeof callsIdData === "string" ? callsIdData : (callsIdData as any)?.id;
-  const { data: callsStatus } = useCallsStatus({
-    id: actualCallsId as string,
-    query: { enabled: !!actualCallsId },
-  });
-  const { unflag, isLoading: isLocalLoading, isSuccess: isLocalSuccess, error: localError, txHash: localTxHash } =
-    useUnflagDevice();
+  
+  // 2. Grab the authenticated Privy Smart Wallet Client
+  const { client } = useSmartWallets();
 
   const [imei, setImei] = useState("");
   const [words, setWords] = useState<[string, string, string]>(["", "", ""]);
@@ -190,6 +177,10 @@ export function RecoverGate() {
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [manualError, setManualError] = useState<string | null>(null);
   const [submittedHash, setSubmittedHash] = useState<`0x${string}` | undefined>();
+
+  // Use clean internal lifecycle states rather than relying on Wagmi's execution hooks
+  const [isPending, setIsPending] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   const imeiError = useMemo(() => {
     if (!touched || imei.length === 0) return null;
@@ -199,31 +190,9 @@ export function RecoverGate() {
   const secretReady = words.every((word) => word.trim().length > 0);
   const payload = useHashedPayload(imei, words);
 
-  useEffect(() => {
-    if (localTxHash) {
-      setSubmittedHash(localTxHash);
-    }
-  }, [localTxHash]);
-
   const activeChainId = chainId || ACTIVE_CHAIN_ID;
-  const isPaymasterSupported = Boolean(capabilities?.[activeChainId]?.paymasterService?.supported);
-  const isPaymasterPending = isSendCallsPending;
-  const isPaymasterConfirming = !!actualCallsId && callsStatus?.status === "pending";
-  const isPaymasterConfirmed = callsStatus?.status === "success";
-
-  const isPending = isPaymasterPending || (isLocalLoading && !localTxHash);
-  const isConfirming =
-    isPaymasterConfirming || (isLocalLoading && !!localTxHash && !isLocalSuccess);
-  const isConfirmed = isPaymasterConfirmed || isLocalSuccess;
-
-  const currentTxHash =
-    (typeof callsStatus?.receipts?.[0]?.transactionHash === "string"
-      ? (callsStatus.receipts[0].transactionHash as `0x${string}`)
-      : undefined) ?? submittedHash;
-
-  const txUrl = currentTxHash
-    ? getTxUrl(currentTxHash, activeChainId)
-    : "";
+  const currentTxHash = submittedHash;
+  const txUrl = currentTxHash ? getTxUrl(currentTxHash, activeChainId) : "";
 
   const resetAll = () => {
     setImei("");
@@ -232,38 +201,26 @@ export function RecoverGate() {
     setSubmitAttempted(false);
     setSubmittedHash(undefined);
     setManualError(null);
-    resetSendCalls();
+    setIsPending(false);
+    setIsConfirmed(false);
   };
 
   const resetErrorOnly = () => {
-    resetSendCalls();
     setSubmittedHash(undefined);
     setManualError(null);
+    setIsPending(false);
   };
 
-  const canSubmit = isValidIMEI(imei) && secretReady && !isPending && !isConfirming;
+  const canSubmit = isValidIMEI(imei) && secretReady && !isPending;
   const secretError = submitAttempted && !secretReady ? "Enter all 3 secret words." : null;
-  const transactionErrorMessage =
-    manualError ||
-    (sendCallsError instanceof Error
-      ? sendCallsError.message
-      : sendCallsError
-        ? String(sendCallsError)
-        : "") ||
-    localError ||
-    "Transaction failed. Please try again.";
   const currentStep = !isValidIMEI(imei) ? 0 : !secretReady ? 1 : 2;
-
-  const handleConnect = async () => {
-    login();
-  };
 
   const handleRecover = async () => {
     setSubmitAttempted(true);
     setManualError(null);
 
     if (!authenticated) {
-      handleConnect();
+      login();
       setManualError("Please connect your wallet or log in first.");
       return;
     }
@@ -278,11 +235,13 @@ export function RecoverGate() {
       return;
     }
 
-    if (isPending || isConfirming || !address) {
+    if (!address || !client || isPending) {
       return;
     }
 
-    let txSuccess = false;
+    setIsPending(true);
+    const contractAddr = getContractAddress(activeChainId);
+
     try {
       const calldata = encodeFunctionData({
         abi: PAYLESS_ABI,
@@ -290,36 +249,21 @@ export function RecoverGate() {
         args: [payload.imeiHash, payload.secretHash],
       });
 
-      if (isPaymasterSupported) {
-        await sendCalls({
-          account: address,
-          calls: [
-            {
-              to: getContractAddress(activeChainId),
-              data: calldata,
-              value: 0n,
-            },
-          ],
-          capabilities: { paymasterService: { url: process.env.NEXT_PUBLIC_PAYMASTER_URL! } },
-        });
-        txSuccess = true;
-      }
-    } catch (sponsoredErr) {
-      console.warn("Paymaster failed, trying standard tx...", sponsoredErr);
-    }
+      // Forces Privy's embedded wallet instance to pass this UserOperation straight to the Pimlico paymaster 
+      const txHash = await client.sendTransaction({
+        to: contractAddr,
+        data: calldata,
+        value: 0n,
+        paymasterServiceUrl: "https://api.pimlico.io/v2/84532/rpc?apikey=pim_mKLpMxsj1NVzvBZZVaP5zU"
+      });
 
-    if (!txSuccess) {
-      try {
-        try {
-          await switchChainAsync({ chainId: BASE_SEPOLIA_CHAIN_ID });
-        } catch (switchErr) {
-          console.warn("Chain switch failed:", switchErr);
-        }
-
-        await unflag(imei.trim(), words);
-      } catch {
-        // The hook already formats and stores the error for the UI.
-      }
+      setSubmittedHash(txHash as `0x${string}`);
+      setIsConfirmed(true);
+    } catch (err: any) {
+      console.error("Smart wallet recovery failed:", err);
+      setManualError(err?.message || "Sponsorship pipeline dropped. Check your dashboard configuration.");
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -370,7 +314,7 @@ export function RecoverGate() {
                 lineHeight: 1.7,
               }}
             >
-              Use the 3-word recovery phrase to remove the flag from the registry.
+              Use the 3-word recovery phrase to remove the flag from the registry seamlessly.
             </div>
           </div>
 
@@ -410,7 +354,7 @@ export function RecoverGate() {
                 }}
                 placeholder="Enter 15-digit IMEI"
                 error={imeiError}
-                disabled={isPending || isConfirming}
+                disabled={isPending}
               />
             </div>
 
@@ -426,7 +370,7 @@ export function RecoverGate() {
                   <Input
                     key={`recover-word-${index}`}
                     value={word}
-                    disabled={isPending || isConfirming}
+                    disabled={isPending}
                     onChange={(value) => {
                       const sanitized = value.toLowerCase().replace(/[^a-z]/g, "");
                       setWords((current) =>
@@ -453,8 +397,8 @@ export function RecoverGate() {
             </div>
 
             <div>
-              <Button loading={isPending || isConfirming} disabled={!canSubmit} onClick={handleRecover}>
-                {isPending ? "Submitting unflag request..." : isConfirming ? "Transaction submitted..." : "Unflag My Device"}
+              <Button loading={isPending} disabled={!canSubmit} onClick={handleRecover}>
+                {isPending ? "Submitting unflag request..." : "Unflag My Device"}
               </Button>
             </div>
           </div>
@@ -464,18 +408,7 @@ export function RecoverGate() {
               tone="blue"
               icon={<BlueSpinner />}
               title="Submitting unflag request to Base..."
-              body="Please confirm in your wallet."
-            />
-          ) : null}
-
-          {isConfirming ? (
-            <TxStateCard
-              tone="blue"
-              icon={<BlueSpinner />}
-              title="Transaction submitted. Waiting for confirmation..."
-              body="This usually takes a few seconds on Base."
-              link={txUrl}
-              linkLabel={currentTxHash ? `${currentTxHash.slice(0, 8)}...${currentTxHash.slice(-6)}` : undefined}
+              body="Sponsoring transaction gas fees via Pimlico..."
             />
           ) : null}
 
@@ -516,12 +449,12 @@ export function RecoverGate() {
             />
           ) : null}
 
-          {transactionErrorMessage ? (
+          {manualError ? (
             <TxStateCard
               tone="red"
               icon={<RedXIcon />}
               title="Unflag Failed"
-              body={transactionErrorMessage}
+              body={manualError}
               action={
                 <Button variant="secondary" onClick={resetErrorOnly} style={{ width: "auto" }}>
                   Try Again
