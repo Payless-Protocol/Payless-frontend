@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useWallets } from "@privy-io/react-auth";
-import { createWalletClient, custom } from "viem";
+import { createWalletClient, custom, keccak256, toBytes } from "viem";
 import { baseSepolia } from "viem/chains";
 import { getContractAddress, PAYLESS_ABI } from "@/lib/contract";
 import { formatContractError } from "@/lib/contract";
@@ -10,12 +10,13 @@ import { formatContractError } from "@/lib/contract";
 export default function FlagGate() {
   const { wallets } = useWallets();
   const [imei, setImei] = useState("");
+  const [secretPhrase, setSecretPhrase] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleFlagDevice = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!imei) return;
+    if (!imei || !secretPhrase) return;
 
     setLoading(true);
     setMessage("");
@@ -26,7 +27,7 @@ export default function FlagGate() {
 
       // Switch to the target network
       await wallet.switchChain(baseSepolia.id);
-      
+
       const provider = await wallet.getEthereumProvider();
       const walletClient = createWalletClient({
         account: wallet.address as `0x${string}`,
@@ -36,11 +37,18 @@ export default function FlagGate() {
 
       const contractAddress = getContractAddress(baseSepolia.id);
 
+      // ── Hash IMEI + secret client-side before submitting ──────────
+      // The contract stores bytes32 hashes, never raw values.
+      // trim() + keccak256(toBytes()) must match exactly what
+      // unflagDevice() uses later, or recovery will fail.
+      const imeiHash   = keccak256(toBytes(imei.trim()));
+      const secretHash = keccak256(toBytes(secretPhrase.trim()));
+
       const { request } = await walletClient.simulateContract({
         address: contractAddress,
         abi: PAYLESS_ABI,
         functionName: "flagDevice",
-        args: [imei],
+        args: [imeiHash, secretHash],
       });
 
       const hash = await walletClient.writeContract(request);
@@ -66,6 +74,19 @@ export default function FlagGate() {
             className="mt-1 block w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
             placeholder="Enter device IMEI"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-neutral-400">Secret Recovery Phrase</label>
+          <input
+            type="password"
+            value={secretPhrase}
+            onChange={(e) => setSecretPhrase(e.target.value)}
+            className="mt-1 block w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
+            placeholder="Choose a secret you'll remember"
+          />
+          <p className="mt-1 text-xs text-neutral-500">
+            Store this safely — you'll need it to unflag the device later.
+          </p>
         </div>
         <button
           type="submit"
