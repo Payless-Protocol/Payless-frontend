@@ -1,34 +1,11 @@
 "use client";
 
 import { PrivyProvider } from "@privy-io/react-auth";
-// 1. Import the smart wallets structural provider component
 import { SmartWalletsProvider } from "@privy-io/react-auth/smart-wallets";
-import { WagmiProvider } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createConfig, http } from "wagmi";
-import { base, baseSepolia } from "wagmi/chains";
-import { useState, type ReactNode } from "react";
-import {
-  BASE_MAINNET_RPC,
-  BASE_SEPOLIA_RPC,
-} from "@/lib/constants";
+import { useState } from "react";
 
-const wagmiConfig = createConfig({
-  chains: [base, baseSepolia],
-  ssr: true,
-  transports: {
-    [base.id]: http(BASE_MAINNET_RPC),
-    [baseSepolia.id]: http(BASE_SEPOLIA_RPC),
-  },
-});
-
-declare module "wagmi" {
-  interface Register {
-    config: typeof wagmiConfig;
-  }
-}
-
-export function Web3Provider({ children }: { children: ReactNode }) {
+export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
@@ -37,30 +14,18 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       config={{
         appearance: {
           theme: "dark",
-          accentColor: "#00F0FF",
-          logo: "/logo.png",
+          accentColor: "#676FFF",
         },
-        loginMethods: ["google", "wallet"],
-        defaultChain: baseSepolia,
-        supportedChains: [base, baseSepolia],
         embeddedWallets: {
-          ethereum: {
-            createOnLogin: "users-without-wallets",
-          },
-        },
-        smartWallets: {
-          enabled: true,
+          createOnLogin: "users-without-wallets",
         },
       }}
     >
-      {/* 2. Wrap children inside SmartWalletsProvider right here */}
       <SmartWalletsProvider>
         <QueryClientProvider client={queryClient}>
-          <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
+          {children}
         </QueryClientProvider>
       </SmartWalletsProvider>
     </PrivyProvider>
   );
 }
-
-export default Web3Provider;
