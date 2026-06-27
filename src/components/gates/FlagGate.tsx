@@ -162,7 +162,7 @@ function BlueSpinner() {
 
 const steps = ["IMEI", "Secret phrase", "Submit"];
 
-export function RecoverGate() {
+export function FlagGate() {
   const { address } = useAccount();
   const chainId = useChainId();
   const { login, authenticated } = usePrivy();
@@ -212,7 +212,7 @@ export function RecoverGate() {
   const secretError = submitAttempted && !secretReady ? "Enter all 3 secret words." : null;
   const currentStep = !isValidIMEI(imei) ? 0 : !secretReady ? 1 : 2;
 
-  const handleRecover = async () => {
+  const handleFlag = async () => {
     setSubmitAttempted(true);
     setManualError(null);
 
@@ -242,7 +242,7 @@ export function RecoverGate() {
     try {
       const calldata = encodeFunctionData({
         abi: PAYLESS_ABI,
-        functionName: "unflagDevice",
+        functionName: "flagDevice",
         args: [payload.imeiHash, payload.secretHash],
       });
 
@@ -256,7 +256,7 @@ export function RecoverGate() {
       setSubmittedHash(txHash as `0x${string}`);
       setIsConfirmed(true);
     } catch (err: any) {
-      console.error("Smart wallet recovery failed:", err);
+      console.error("Smart wallet flagging failed:", err);
       setManualError(err?.message || "Sponsorship pipeline dropped. Check your dashboard configuration.");
     } finally {
       setIsPending(false);
@@ -286,7 +286,7 @@ export function RecoverGate() {
                 textTransform: "uppercase",
               }}
             >
-              Recover
+              Registry
             </div>
             <h1
               style={{
@@ -299,7 +299,7 @@ export function RecoverGate() {
                 fontWeight: 800,
               }}
             >
-              <span style={{ color: TOKENS.success }}>Recover</span> Your Device
+              <span style={{ color: TOKENS.danger }}>Flag</span> Lost Device
             </h1>
             <div
               style={{
@@ -310,7 +310,7 @@ export function RecoverGate() {
                 lineHeight: 1.7,
               }}
             >
-              Use the 3-word recovery phrase to remove the flag from the registry seamlessly.
+              Report a device missing by indexing its hashed identity into the global blocklist registry.
             </div>
           </div>
 
@@ -356,15 +356,15 @@ export function RecoverGate() {
 
             <div>
               <div style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 500 }}>
-                Your Secret Recovery Phrase
+                Set Secret Recovery Phrase
               </div>
               <div style={{ color: TOKENS.muted, fontSize: 11, lineHeight: 1.5, marginBottom: 10 }}>
-                Enter the exact 3 words you used when flagging this device. Order matters.
+                Choose 3 memorable words. You will need them exactly as entered to unflag this device later.
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
                 {words.map((word, index) => (
                   <Input
-                    key={`recover-word-${index}`}
+                    key={`flag-word-${index}`}
                     value={word}
                     disabled={isPending}
                     onChange={(value) => {
@@ -393,8 +393,8 @@ export function RecoverGate() {
             </div>
 
             <div>
-              <Button loading={isPending} disabled={!canSubmit} onClick={handleRecover}>
-                {isPending ? "Submitting unflag request..." : "Unflag My Device"}
+              <Button loading={isPending} disabled={!canSubmit} onClick={handleFlag}>
+                {isPending ? "Submitting registry flag..." : "Flag Device as Stolen"}
               </Button>
             </div>
           </div>
@@ -403,7 +403,7 @@ export function RecoverGate() {
             <TxStateCard
               tone="blue"
               icon={<BlueSpinner />}
-              title="Submitting unflag request to Base..."
+              title="Submitting flag request to Base..."
               body="Sponsoring transaction gas fees via Pimlico..."
             />
           ) : null}
@@ -412,8 +412,8 @@ export function RecoverGate() {
             <TxStateCard
               tone="green"
               icon={<GreenCheckIcon />}
-              title="Device Unflagged Successfully"
-              body="The flag has been removed from the registry."
+              title="Device Flagged Successfully"
+              body="The item has been mapped on-chain into the loss registry."
               link={txUrl}
               linkLabel={`Transaction: ${currentTxHash.slice(0, 8)}...${currentTxHash.slice(-6)}`}
               action={
@@ -438,7 +438,7 @@ export function RecoverGate() {
                     Verify with Search
                   </Link>
                   <Button variant="secondary" onClick={resetAll} style={{ width: "auto" }}>
-                    Try Another Device
+                    Flag Another Device
                   </Button>
                 </div>
               }
@@ -449,7 +449,7 @@ export function RecoverGate() {
             <TxStateCard
               tone="red"
               icon={<RedXIcon />}
-              title="Unflag Failed"
+              title="Flagging Failed"
               body={manualError}
               action={
                 <Button variant="secondary" onClick={resetErrorOnly} style={{ width: "auto" }}>
