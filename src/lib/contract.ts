@@ -1,4 +1,4 @@
-import { BrowserProvider, Contract, JsonRpcProvider, type Signer } from "ethers";
+import { Contract, JsonRpcProvider } from "ethers";
 import { PAYLESS_ABI } from "./abi";
 import {
   ACTIVE_CHAIN_ID,
@@ -30,14 +30,6 @@ export function getReadProvider() {
 export function getReadContract(chainId = ACTIVE_CHAIN_ID) {
   const address = getContractAddress(chainId);
   return new Contract(address, PAYLESS_ABI, getReadProvider());
-}
-
-export function getWriteContract(
-  signer: Signer | BrowserProvider,
-  chainId = ACTIVE_CHAIN_ID
-) {
-  const address = getContractAddress(chainId);
-  return new Contract(address, PAYLESS_ABI, signer);
 }
 
 export function formatContractError(error: unknown, fallback: string) {
