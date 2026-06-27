@@ -1,6 +1,8 @@
 "use client";
 
 import { PrivyProvider } from "@privy-io/react-auth";
+// 1. Import the smart wallets structural provider component
+import { SmartWalletsProvider } from "@privy-io/react-auth/smart-wallets";
 import { WagmiProvider } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createConfig, http } from "wagmi";
@@ -46,15 +48,17 @@ export function Web3Provider({ children }: { children: ReactNode }) {
             createOnLogin: "users-without-wallets",
           },
         },
-        // FIXED: Explicitly enable the smart wallet framework inside Privy context
         smartWallets: {
           enabled: true,
         },
       }}
     >
-      <QueryClientProvider client={queryClient}>
-        <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
-      </QueryClientProvider>
+      {/* 2. Wrap children inside SmartWalletsProvider right here */}
+      <SmartWalletsProvider>
+        <QueryClientProvider client={queryClient}>
+          <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
+        </QueryClientProvider>
+      </SmartWalletsProvider>
     </PrivyProvider>
   );
 }
