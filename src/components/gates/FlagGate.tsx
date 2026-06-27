@@ -3,16 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import {
-  useAccount,
-  useChainId,
-  useSwitchChain,
-} from "wagmi";
-import {
-  useCallsStatus,
-  useCapabilities,
-  useSendCalls,
-} from "wagmi/experimental";
+// 1. Import Privy's native Smart Wallet management hook
+import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
+import { useAccount, useChainId } from "wagmi";
 import { encodeFunctionData } from "viem";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/primitives/Button";
@@ -21,11 +14,10 @@ import { Input } from "@/components/primitives/Input";
 import { StepIndicator } from "@/components/primitives/StepIndicator";
 import { TOKENS } from "@/styles/tokens";
 import { PAYLESS_ABI } from "@/lib/abi";
-import { ACTIVE_CHAIN_ID, BASE_SEPOLIA_CHAIN_ID } from "@/lib/constants";
+import { ACTIVE_CHAIN_ID } from "@/lib/constants";
 import { getTxUrl } from "@/lib/basescan";
 import { getContractAddress } from "@/lib/contract";
 import { useHashedPayload } from "@/hooks/useHashedPayload";
-import { useFlagDevice } from "@/hooks/useFlagDevice";
 
 const isValidIMEI = (value: string) => /^\d{15}$/.test(value.trim());
 
@@ -175,22 +167,9 @@ export function FlagGate() {
   const { address } = useAccount();
   const chainId = useChainId();
   const { login, authenticated } = usePrivy();
-  const { switchChainAsync } = useSwitchChain();
-  const { data: capabilities } = useCapabilities();
-  const {
-    sendCalls,
-    data: callsIdData,
-    isPending: isSendCallsPending,
-    error: sendCallsError,
-    reset: resetSendCalls,
-  } = useSendCalls();
-  const actualCallsId = typeof callsIdData === "string" ? callsIdData : (callsIdData as any)?.id;
-  const { data: callsStatus } = useCallsStatus({
-    id: actualCallsId as string,
-    query: { enabled: !!actualCallsId },
-  });
-  const { flag, isLoading: isLocalLoading, isSuccess: isLocalSuccess, error: localError, txHash: localTxHash } =
-    useFlagDevice();
+  
+  // 2. Extract the authenticated client instance directly from Privy's AA layer
+  const { client } = useSmartWallets();
 
   const [imei, setImei] = useState("");
   const [words, setWords] = useState<[string, string, string]>(["", "", ""]);
@@ -200,6 +179,10 @@ export function FlagGate() {
   const [manualError, setManualError] = useState<string | null>(null);
   const [submittedHash, setSubmittedHash] = useState<`0x${string}` | undefined>();
 
+  // Use simple transaction lifecycle states since we aren't dependent on Wagmi's execution hooks
+  const [isPending, setIsPending] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+
   const imeiError = useMemo(() => {
     if (!touched || imei.length === 0) return null;
     return isValidIMEI(imei) ? null : "IMEI must be exactly 15 digits.";
@@ -208,31 +191,9 @@ export function FlagGate() {
   const secretReady = words.every((word) => word.trim().length > 0);
   const payload = useHashedPayload(imei, words);
 
-  useEffect(() => {
-    if (localTxHash) {
-      setSubmittedHash(localTxHash);
-    }
-  }, [localTxHash]);
-
   const activeChainId = chainId || ACTIVE_CHAIN_ID;
-  const isPaymasterSupported = Boolean(capabilities?.[activeChainId]?.paymasterService?.supported);
-  const isPaymasterPending = isSendCallsPending;
-  const isPaymasterConfirming = !!actualCallsId && callsStatus?.status === "pending";
-  const isPaymasterConfirmed = callsStatus?.status === "success";
-
-  const isPending = isPaymasterPending || (isLocalLoading && !localTxHash);
-  const isConfirming =
-    isPaymasterConfirming || (isLocalLoading && !!localTxHash && !isLocalSuccess);
-  const isConfirmed = isPaymasterConfirmed || isLocalSuccess;
-
-  const currentTxHash =
-    (typeof callsStatus?.receipts?.[0]?.transactionHash === "string"
-      ? (callsStatus.receipts[0].transactionHash as `0x${string}`)
-      : undefined) ?? submittedHash;
-
-  const txUrl = currentTxHash
-    ? getTxUrl(currentTxHash, activeChainId)
-    : "";
+  const currentTxHash = submittedHash;
+  const txUrl = currentTxHash ? getTxUrl(currentTxHash, activeChainId) : "";
 
   const resetForm = () => {
     setImei("");
@@ -242,28 +203,19 @@ export function FlagGate() {
     setSubmitAttempted(false);
     setSubmittedHash(undefined);
     setManualError(null);
-    resetSendCalls();
+    setIsPending(false);
+    setIsConfirmed(false);
   };
 
   const resetErrorOnly = () => {
-    resetSendCalls();
     setSubmittedHash(undefined);
     setManualError(null);
+    setIsPending(false);
   };
 
-  const canSubmit = isValidIMEI(imei) && secretReady && confirmed && !isPending && !isConfirming;
+  const canSubmit = isValidIMEI(imei) && secretReady && confirmed && !isPending;
   const secretError = submitAttempted && !secretReady ? "Enter all 3 secret words." : null;
   const confirmationError = submitAttempted && !confirmed ? "Please confirm this is your device before submitting." : null;
-  const transactionErrorMessage =
-    manualError ||
-    (sendCallsError instanceof Error
-      ? sendCallsError.message
-      : sendCallsError
-        ? String(sendCallsError)
-        : "") ||
-    localError ||
-    "Transaction failed. Please try again.";
-  const currentStep = !isValidIMEI(imei) ? 0 : !secretReady ? 1 : 2;
 
   const handleFlag = async () => {
     setSubmitAttempted(true);
@@ -285,15 +237,15 @@ export function FlagGate() {
       return;
     }
 
-    if (!confirmed || !address || isPending || isConfirming) {
+    if (!confirmed || !address || !client || isPending) {
       return;
     }
 
+    setIsPending(true);
     const contractAddr = getContractAddress(activeChainId);
     const imeiHash = payload.imeiHash;
     const secretHash = payload.secretHash;
 
-    let txSuccess = false;
     try {
       const calldata = encodeFunctionData({
         abi: PAYLESS_ABI,
@@ -301,32 +253,26 @@ export function FlagGate() {
         args: [imeiHash, secretHash],
       });
 
-      if (isPaymasterSupported) {
-        await sendCalls({
-          account: address,
-          calls: [{ to: contractAddr, data: calldata, value: 0n }],
-          capabilities: { paymasterService: { url: process.env.NEXT_PUBLIC_PAYMASTER_URL! } },
-        });
-        txSuccess = true;
-      }
-    } catch (sponsoredErr) {
-      console.warn("Paymaster failed, trying standard tx...", sponsoredErr);
-    }
+      // Directly passes transaction payload + sponsored paymaster RPC parameters 
+      // directly to the Privy Account Abstraction engine.
+      const txHash = await client.sendTransaction({
+        to: contractAddr,
+        data: calldata,
+        value: 0n,
+        paymasterServiceUrl: "https://api.pimlico.io/v2/84532/rpc?apikey=pim_mKLpMxsj1NVzvBZZVaP5zU"
+      });
 
-    if (!txSuccess) {
-      try {
-        try {
-          await switchChainAsync({ chainId: BASE_SEPOLIA_CHAIN_ID });
-        } catch (switchErr) {
-          console.warn("Chain switch failed:", switchErr);
-        }
-
-        await flag(imei.trim(), words);
-      } catch {
-        // The hook already formats and stores the error for the UI.
-      }
+      setSubmittedHash(txHash as `0x${string}`);
+      setIsConfirmed(true);
+    } catch (err: any) {
+      console.error("Smart wallet transaction failed:", err);
+      setManualError(err?.message || "Sponsorship failed. Please check setup configurations.");
+    } finally {
+      setIsPending(false);
     }
   };
+
+  const currentStep = !isValidIMEI(imei) ? 0 : !secretReady ? 1 : 2;
 
   return (
     <>
@@ -375,7 +321,7 @@ export function FlagGate() {
                 lineHeight: 1.7,
               }}
             >
-              Write the IMEI hash to the registry from a connected wallet so others can see the flag.
+              Write the IMEI hash to the registry seamlessly with automated gas sponsorship.
             </div>
           </div>
 
@@ -432,7 +378,7 @@ export function FlagGate() {
                 }}
                 placeholder="Enter 15-digit IMEI"
                 error={imeiError}
-                disabled={isPending || isConfirming}
+                disabled={isPending}
               />
             </div>
 
@@ -448,7 +394,7 @@ export function FlagGate() {
                   <Input
                     key={`word-${index}`}
                     value={word}
-                    disabled={isPending || isConfirming}
+                    disabled={isPending}
                     onChange={(value) => {
                       const sanitized = value.toLowerCase().replace(/[^a-z]/g, "");
                       setWords((current) =>
@@ -483,13 +429,13 @@ export function FlagGate() {
                   color: "rgba(255,255,255,0.6)",
                   fontSize: 13,
                   lineHeight: 1.6,
-                  cursor: isPending || isConfirming ? "not-allowed" : "pointer",
+                  cursor: isPending ? "not-allowed" : "pointer",
                 }}
               >
                 <input
                   type="checkbox"
                   checked={confirmed}
-                  disabled={isPending || isConfirming}
+                  disabled={isPending}
                   onChange={(event) => setConfirmed(event.target.checked)}
                   style={{ marginTop: 3 }}
                 />
@@ -502,7 +448,7 @@ export function FlagGate() {
               ) : null}
             </div>
 
-            <Button loading={isPending || isConfirming} disabled={!canSubmit} onClick={handleFlag}>
+            <Button loading={isPending} disabled={!canSubmit} onClick={handleFlag}>
               Flag Device on Base
             </Button>
           </div>
@@ -512,18 +458,7 @@ export function FlagGate() {
               tone="blue"
               icon={<BlueSpinner />}
               title="Submitting to Base..."
-              body="Please confirm in your wallet."
-            />
-          ) : null}
-
-          {isConfirming ? (
-            <TxStateCard
-              tone="blue"
-              icon={<BlueSpinner />}
-              title="Transaction submitted. Waiting for confirmation..."
-              body="This usually takes a few seconds on Base."
-              link={txUrl}
-              linkLabel={currentTxHash ? `${currentTxHash.slice(0, 8)}...${currentTxHash.slice(-6)}` : undefined}
+              body="Sponsoring transaction gas fees via Pimlico..."
             />
           ) : null}
 
@@ -552,8 +487,8 @@ export function FlagGate() {
                       fontSize: 13,
                       fontWeight: 600,
                       textDecoration: "none",
-                    }}
-                  >
+                }}
+              >
                     Search This IMEI
                   </Link>
                   <Button variant="secondary" onClick={resetForm} style={{ width: "auto" }}>
@@ -564,12 +499,12 @@ export function FlagGate() {
             />
           ) : null}
 
-          {transactionErrorMessage ? (
+          {manualError ? (
             <TxStateCard
               tone="red"
               icon={<RedXIcon />}
               title="Transaction Failed"
-              body={transactionErrorMessage}
+              body={manualError}
               action={
                 <Button variant="secondary" onClick={resetErrorOnly} style={{ width: "auto" }}>
                   Try Again
