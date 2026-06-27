@@ -2,8 +2,19 @@
 
 import { PrivyProvider } from "@privy-io/react-auth";
 import { SmartWalletsProvider } from "@privy-io/react-auth/smart-wallets";
+import { WagmiProvider, createConfig } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
+import { http } from "viem";
+import { baseSepolia } from "viem/chains";
+
+// Create the Wagmi config integrated with Privy
+const wagmiConfig = createConfig({
+  chains: [baseSepolia],
+  transports: {
+    [baseSepolia.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL || "https://sepolia.base.org"),
+  },
+});
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -24,9 +35,11 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       }}
     >
       <SmartWalletsProvider>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
+        <WagmiProvider config={wagmiConfig}>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </WagmiProvider>
       </SmartWalletsProvider>
     </PrivyProvider>
   );
