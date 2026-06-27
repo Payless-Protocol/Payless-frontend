@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-// 1. Import Privy's native Smart Wallet management hook
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { useAccount, useChainId } from "wagmi";
 import { encodeFunctionData } from "viem";
@@ -167,8 +166,7 @@ export function RecoverGate() {
   const { address } = useAccount();
   const chainId = useChainId();
   const { login, authenticated } = usePrivy();
-  
-  // 2. Grab the authenticated Privy Smart Wallet Client
+
   const { client } = useSmartWallets();
 
   const [imei, setImei] = useState("");
@@ -178,7 +176,6 @@ export function RecoverGate() {
   const [manualError, setManualError] = useState<string | null>(null);
   const [submittedHash, setSubmittedHash] = useState<`0x${string}` | undefined>();
 
-  // Use clean internal lifecycle states rather than relying on Wagmi's execution hooks
   const [isPending, setIsPending] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
@@ -249,12 +246,11 @@ export function RecoverGate() {
         args: [payload.imeiHash, payload.secretHash],
       });
 
-      // Forces Privy's embedded wallet instance to pass this UserOperation straight to the Pimlico paymaster 
+      // FIXED: Removed the inline type-breaking paymaster parameter
       const txHash = await client.sendTransaction({
         to: contractAddr,
         data: calldata,
         value: 0n,
-        paymasterServiceUrl: "https://api.pimlico.io/v2/84532/rpc?apikey=pim_mKLpMxsj1NVzvBZZVaP5zU"
       });
 
       setSubmittedHash(txHash as `0x${string}`);
