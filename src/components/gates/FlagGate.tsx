@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-// 1. Import Privy's native Smart Wallet management hook
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { useAccount, useChainId } from "wagmi";
 import { encodeFunctionData } from "viem";
@@ -163,23 +162,20 @@ function BlueSpinner() {
 
 const steps = ["IMEI", "Secret phrase", "Submit"];
 
-export function FlagGate() {
+export function RecoverGate() {
   const { address } = useAccount();
   const chainId = useChainId();
   const { login, authenticated } = usePrivy();
-  
-  // 2. Extract the authenticated client instance directly from Privy's AA layer
+
   const { client } = useSmartWallets();
 
   const [imei, setImei] = useState("");
   const [words, setWords] = useState<[string, string, string]>(["", "", ""]);
-  const [confirmed, setConfirmed] = useState(false);
   const [touched, setTouched] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [manualError, setManualError] = useState<string | null>(null);
   const [submittedHash, setSubmittedHash] = useState<`0x${string}` | undefined>();
 
-  // Use simple transaction lifecycle states since we aren't dependent on Wagmi's execution hooks
   const [isPending, setIsPending] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
@@ -195,10 +191,9 @@ export function FlagGate() {
   const currentTxHash = submittedHash;
   const txUrl = currentTxHash ? getTxUrl(currentTxHash, activeChainId) : "";
 
-  const resetForm = () => {
+  const resetAll = () => {
     setImei("");
     setWords(["", "", ""]);
-    setConfirmed(false);
     setTouched(false);
     setSubmitAttempted(false);
     setSubmittedHash(undefined);
@@ -213,11 +208,11 @@ export function FlagGate() {
     setIsPending(false);
   };
 
-  const canSubmit = isValidIMEI(imei) && secretReady && confirmed && !isPending;
+  const canSubmit = isValidIMEI(imei) && secretReady && !isPending;
   const secretError = submitAttempted && !secretReady ? "Enter all 3 secret words." : null;
-  const confirmationError = submitAttempted && !confirmed ? "Please confirm this is your device before submitting." : null;
+  const currentStep = !isValidIMEI(imei) ? 0 : !secretReady ? 1 : 2;
 
-  const handleFlag = async () => {
+  const handleRecover = async () => {
     setSubmitAttempted(true);
     setManualError(null);
 
@@ -237,42 +232,36 @@ export function FlagGate() {
       return;
     }
 
-    if (!confirmed || !address || !client || isPending) {
+    if (!address || !client || isPending) {
       return;
     }
 
     setIsPending(true);
     const contractAddr = getContractAddress(activeChainId);
-    const imeiHash = payload.imeiHash;
-    const secretHash = payload.secretHash;
 
     try {
       const calldata = encodeFunctionData({
         abi: PAYLESS_ABI,
-        functionName: "flagDevice",
-        args: [imeiHash, secretHash],
+        functionName: "unflagDevice",
+        args: [payload.imeiHash, payload.secretHash],
       });
 
-      // Directly passes transaction payload + sponsored paymaster RPC parameters 
-      // directly to the Privy Account Abstraction engine.
+      // FIXED: Removed the inline type-breaking paymaster parameter
       const txHash = await client.sendTransaction({
         to: contractAddr,
         data: calldata,
         value: 0n,
-        paymasterServiceUrl: "https://api.pimlico.io/v2/84532/rpc?apikey=pim_mKLpMxsj1NVzvBZZVaP5zU"
       });
 
       setSubmittedHash(txHash as `0x${string}`);
       setIsConfirmed(true);
     } catch (err: any) {
-      console.error("Smart wallet transaction failed:", err);
-      setManualError(err?.message || "Sponsorship failed. Please check setup configurations.");
+      console.error("Smart wallet recovery failed:", err);
+      setManualError(err?.message || "Sponsorship pipeline dropped. Check your dashboard configuration.");
     } finally {
       setIsPending(false);
     }
   };
-
-  const currentStep = !isValidIMEI(imei) ? 0 : !secretReady ? 1 : 2;
 
   return (
     <>
@@ -297,7 +286,7 @@ export function FlagGate() {
                 textTransform: "uppercase",
               }}
             >
-              Flag
+              Recover
             </div>
             <h1
               style={{
@@ -310,18 +299,18 @@ export function FlagGate() {
                 fontWeight: 800,
               }}
             >
-              Flag <span style={{ color: TOKENS.danger }}>Lost or Stolen</span> Device
+              <span style={{ color: TOKENS.success }}>Recover</span> Your Device
             </h1>
             <div
               style={{
-                maxWidth: 480,
+                maxWidth: 460,
                 margin: "10px auto 0",
                 color: TOKENS.body,
                 fontSize: 15,
                 lineHeight: 1.7,
               }}
             >
-              Write the IMEI hash to the registry seamlessly with automated gas sponsorship.
+              Use the 3-word recovery phrase to remove the flag from the registry seamlessly.
             </div>
           </div>
 
@@ -333,23 +322,6 @@ export function FlagGate() {
             }}
           >
             <StepIndicator steps={steps} currentStep={currentStep} />
-          </div>
-
-          <div
-            style={{
-              width: "100%",
-              maxWidth: 560,
-              marginBottom: 24,
-              background: "rgba(239,68,68,0.08)",
-              border: "1px solid rgba(239,68,68,0.2)",
-              borderRadius: 12,
-              padding: "14px 20px",
-              color: "rgba(255,255,255,0.65)",
-              fontSize: 13,
-              lineHeight: 1.65,
-            }}
-          >
-            This action writes to the registry and cannot be undone. Make sure the IMEI and secret phrase are correct.
           </div>
 
           <div
@@ -384,15 +356,15 @@ export function FlagGate() {
 
             <div>
               <div style={{ marginBottom: 8, color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 500 }}>
-                Secret Recovery Phrase (3 words)
+                Your Secret Recovery Phrase
               </div>
               <div style={{ color: TOKENS.muted, fontSize: 11, lineHeight: 1.5, marginBottom: 10 }}>
-                Choose 3 unique words. This is your recovery key to unflag the device later.
+                Enter the exact 3 words you used when flagging this device. Order matters.
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
                 {words.map((word, index) => (
                   <Input
-                    key={`word-${index}`}
+                    key={`recover-word-${index}`}
                     value={word}
                     disabled={isPending}
                     onChange={(value) => {
@@ -421,43 +393,17 @@ export function FlagGate() {
             </div>
 
             <div>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 10,
-                  color: "rgba(255,255,255,0.6)",
-                  fontSize: 13,
-                  lineHeight: 1.6,
-                  cursor: isPending ? "not-allowed" : "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={confirmed}
-                  disabled={isPending}
-                  onChange={(event) => setConfirmed(event.target.checked)}
-                  style={{ marginTop: 3 }}
-                />
-                <span>I confirm this is my device and I am flagging it as lost or stolen.</span>
-              </label>
-              {confirmationError ? (
-                <div style={{ marginTop: 8, color: TOKENS.danger, fontSize: 12 }}>
-                  {confirmationError}
-                </div>
-              ) : null}
+              <Button loading={isPending} disabled={!canSubmit} onClick={handleRecover}>
+                {isPending ? "Submitting unflag request..." : "Unflag My Device"}
+              </Button>
             </div>
-
-            <Button loading={isPending} disabled={!canSubmit} onClick={handleFlag}>
-              Flag Device on Base
-            </Button>
           </div>
 
           {isPending ? (
             <TxStateCard
               tone="blue"
               icon={<BlueSpinner />}
-              title="Submitting to Base..."
+              title="Submitting unflag request to Base..."
               body="Sponsoring transaction gas fees via Pimlico..."
             />
           ) : null}
@@ -466,8 +412,8 @@ export function FlagGate() {
             <TxStateCard
               tone="green"
               icon={<GreenCheckIcon />}
-              title="Device Flagged Successfully"
-              body="Your IMEI has been registered in the registry."
+              title="Device Unflagged Successfully"
+              body="The flag has been removed from the registry."
               link={txUrl}
               linkLabel={`Transaction: ${currentTxHash.slice(0, 8)}...${currentTxHash.slice(-6)}`}
               action={
@@ -487,12 +433,12 @@ export function FlagGate() {
                       fontSize: 13,
                       fontWeight: 600,
                       textDecoration: "none",
-                }}
-              >
-                    Search This IMEI
+                    }}
+                  >
+                    Verify with Search
                   </Link>
-                  <Button variant="secondary" onClick={resetForm} style={{ width: "auto" }}>
-                    Flag Another Device
+                  <Button variant="secondary" onClick={resetAll} style={{ width: "auto" }}>
+                    Try Another Device
                   </Button>
                 </div>
               }
@@ -503,7 +449,7 @@ export function FlagGate() {
             <TxStateCard
               tone="red"
               icon={<RedXIcon />}
-              title="Transaction Failed"
+              title="Unflag Failed"
               body={manualError}
               action={
                 <Button variant="secondary" onClick={resetErrorOnly} style={{ width: "auto" }}>
