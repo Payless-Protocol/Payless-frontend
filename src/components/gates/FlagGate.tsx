@@ -3,16 +3,14 @@
 import { useState } from "react";
 import { useWallets } from "@privy-io/react-auth";
 import { createWalletClient, custom, publicActions } from "viem";
-import { baseSepolia } from "viem/chains";
 import { getContractAddress, PAYLESS_ABI } from "@/lib/contract";
 import { formatContractError } from "@/lib/contract";
 import { hashIMEI, hashSecret } from "@/lib/hash";
+import { ACTIVE_CHAIN_ID, getActiveChain } from "@/lib/constants";
 
 export default function FlagGate() {
   const { wallets } = useWallets();
   const [imei, setImei] = useState("");
-  // hashSecret() requires a 3-word tuple — must match the shape used
-  // everywhere else in the app (lib/hash.ts: words.map(trim+toLowerCase).join(" "))
   const [word1, setWord1] = useState("");
   const [word2, setWord2] = useState("");
   const [word3, setWord3] = useState("");
@@ -32,29 +30,24 @@ export default function FlagGate() {
       const wallet = wallets[0];
       if (!wallet) throw new Error("Please connect your wallet first.");
 
-      // Switch to the target network
-      await wallet.switchChain(baseSepolia.id);
+      // ── Driven by env config, not hardcoded ─────────────────────
+      // ACTIVE_CHAIN_ID / getActiveChain() come from lib/constants.ts.
+      // Switching networks later is a single env var change —
+      // never edit this component to change chains.
+      const chain = getActiveChain();
+      await wallet.switchChain(ACTIVE_CHAIN_ID);
 
       const provider = await wallet.getEthereumProvider();
 
-      // ── Extend with publicActions ──────────────────────────────
-      // createWalletClient() alone only exposes wallet actions
-      // (writeContract, sendTransaction). simulateContract is a
-      // public client action — .extend(publicActions) merges both
-      // action sets onto one client object.
       const walletClient = createWalletClient({
         account: wallet.address as `0x${string}`,
-        chain: baseSepolia,
+        chain,
         transport: custom(provider),
       }).extend(publicActions);
 
-      const contractAddress = getContractAddress(baseSepolia.id);
+      const contractAddress = getContractAddress(ACTIVE_CHAIN_ID);
 
       // ── Canonical hashing — must match lib/hash.ts exactly ──────
-      // Do NOT hash inline here. Any drift from hashIMEI/hashSecret
-      // (different normalization, encoding, or word-joining logic)
-      // will make this device unrecoverable via RecoverGate, since
-      // the contract compares hashes byte-for-byte.
       const imeiHash   = hashIMEI(imei.trim());
       const secretHash = hashSecret([word1, word2, word3]);
 
