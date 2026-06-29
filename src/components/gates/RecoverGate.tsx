@@ -3,17 +3,14 @@
 import { useState } from "react";
 import { useWallets } from "@privy-io/react-auth";
 import { createWalletClient, custom, publicActions } from "viem";
-import { baseSepolia } from "viem/chains";
 import { getContractAddress, PAYLESS_ABI } from "@/lib/contract";
 import { formatContractError } from "@/lib/contract";
 import { hashIMEI, hashSecret } from "@/lib/hash";
+import { ACTIVE_CHAIN_ID, getActiveChain } from "@/lib/constants";
 
 export default function RecoverGate() {
   const { wallets } = useWallets();
   const [imei, setImei] = useState("");
-  // Must be entered in the exact same order as when the device was
-  // flagged — hashSecret() is order-sensitive (words are joined in
-  // the order given, not sorted).
   const [word1, setWord1] = useState("");
   const [word2, setWord2] = useState("");
   const [word3, setWord3] = useState("");
@@ -33,25 +30,21 @@ export default function RecoverGate() {
       const wallet = wallets[0];
       if (!wallet) throw new Error("Please connect your wallet first.");
 
-      await wallet.switchChain(baseSepolia.id);
+      // ── Driven by env config, not hardcoded ─────────────────────
+      const chain = getActiveChain();
+      await wallet.switchChain(ACTIVE_CHAIN_ID);
 
       const provider = await wallet.getEthereumProvider();
 
-      // ── Extend with publicActions ──────────────────────────────
-      // Same fix as FlagGate.tsx — createWalletClient() alone does
-      // not expose simulateContract, only writeContract.
       const walletClient = createWalletClient({
         account: wallet.address as `0x${string}`,
-        chain: baseSepolia,
+        chain,
         transport: custom(provider),
       }).extend(publicActions);
 
-      const contractAddress = getContractAddress(baseSepolia.id);
+      const contractAddress = getContractAddress(ACTIVE_CHAIN_ID);
 
       // ── Canonical hashing — identical call as FlagGate.tsx ──────
-      // Both gates MUST import from the same lib/hash.ts functions.
-      // Any inline reimplementation here would silently break
-      // recovery for devices flagged through the real hashSecret().
       const imeiHash   = hashIMEI(imei.trim());
       const secretHash = hashSecret([word1, word2, word3]);
 
