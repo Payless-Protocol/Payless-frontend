@@ -1194,7 +1194,7 @@ export default function PaylessLanding() {
                     cursor: "pointer"
                   }}
                 >
-                  Let's go!
+                  Let&apos;s go!
                   <svg width="14" height="14" viewBox="0 0 24 24"
                        fill="none" stroke="#0a0a0e" strokeWidth="2.5"
                        strokeLinecap="round">

@@ -143,7 +143,7 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
 
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.45)", textAlign: "center", maxWidth: 320, margin: "0 auto", marginBottom: 28 }}>
               Be among the first to use Payless Protocol 
-              when we launch. We'll notify you directly.
+              when we launch. We&apos;ll notify you directly.
             </p>
 
             <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.7)", display: "block", marginBottom: 8 }}>
@@ -247,11 +247,11 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
             </div>
 
             <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 22, fontWeight: 800, color: "#fff", textAlign: "center", marginBottom: 10 }}>
-              You're on the list
+              You&apos;re on the list
             </h2>
 
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.5)", textAlign: "center", maxWidth: 300, margin: "0 auto", marginBottom: 28 }}>
-              We'll email {name} when the waitlist opens.
+              We&apos;ll email {name} when the waitlist opens.
             </p>
 
             <button

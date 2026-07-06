@@ -89,7 +89,7 @@ export default function FlagGate() {
             Secret Recovery Phrase (3 words)
           </label>
           <p className="mt-1 text-xs text-neutral-500">
-            Choose 3 words. Order matters — you'll need the exact same words and order to unflag later.
+            Choose 3 words. Order matters — you&apos;ll need the exact same words and order to unflag later.
           </p>
           <div className="mt-2 grid grid-cols-3 gap-2">
             <input
