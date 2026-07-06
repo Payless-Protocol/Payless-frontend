@@ -6,13 +6,14 @@ import { WagmiProvider, createConfig } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { http } from "viem";
-import { baseSepolia } from "viem/chains";
+import { base, baseSepolia } from "viem/chains";
 
 // Create the Wagmi config integrated with Privy
 const wagmiConfig = createConfig({
-  chains: [baseSepolia],
+  chains: [base, baseSepolia],
   transports: {
-    [baseSepolia.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL || "https://sepolia.base.org"),
+    [base.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL || "https://mainnet.base.org"),
+    [baseSepolia.id]: http("https://sepolia.base.org"),
   },
 });
 
