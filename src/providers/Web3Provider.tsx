@@ -35,11 +35,11 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       }}
     >
       <SmartWalletsProvider>
-        <WagmiProvider config={wagmiConfig}>
-          <QueryClientProvider client={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <WagmiProvider config={wagmiConfig}>
             {children}
-          </QueryClientProvider>
-        </WagmiProvider>
+          </WagmiProvider>
+        </QueryClientProvider>
       </SmartWalletsProvider>
     </PrivyProvider>
   );
