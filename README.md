@@ -48,13 +48,14 @@ Create `.env.local` in the project root:
 ```env
 NEXT_PUBLIC_CONTRACT_ADDRESS=0xYourMainnetAddress
 NEXT_PUBLIC_BASE_RPC_URL=https://mainnet.base.org
-NEXT_PUBLIC_CHAIN_ID=8453
+NEXT_PUBLIC_CHAIN_ID=84532
 
 NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS=0xYourSepoliaAddress
 NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
-NEXT_PUBLIC_PAYMASTER_URL=your_paymaster_url
+NEXT_PUBLIC_PAYMASTER_URL=https://api.developer.coinbase.com/rpc/v1/base-sepolia/YOUR_COINBASE_PAYMASTER_KEY
 
+# The waitlist modal is live, so both Notion variables are required unless you disable the feature.
 NOTION_WAITLIST_TOKEN=your_notion_token
 NOTION_WAITLIST_DATABASE_ID=your_notion_database_id
 ```
