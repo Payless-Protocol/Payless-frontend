@@ -33,7 +33,7 @@ export const viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>
+      <body className="bg-surface text-primary min-h-screen">
         <ErrorBoundary>
           <Web3Provider>{children}</Web3Provider>
         </ErrorBoundary>
