@@ -25,10 +25,12 @@ if (typeof window !== "undefined") {
   const isMainnet = ACTIVE_CHAIN_ID === BASE_MAINNET_CHAIN_ID;
   const activeAddress = isMainnet ? CONTRACT_ADDRESS : SEPOLIA_CONTRACT_ADDRESS;
   if (!activeAddress) {
-    console.error(
-      `[constants] Missing contract address for chain ${ACTIVE_CHAIN_ID}. ` +
-      `Set NEXT_PUBLIC_${isMainnet ? "" : "SEPOLIA_"}CONTRACT_ADDRESS.`
-    );
+    if (process.env.NODE_ENV === "development") {
+      console.error(
+        `[constants] Missing contract address for chain ${ACTIVE_CHAIN_ID}. ` +
+        `Set NEXT_PUBLIC_${isMainnet ? "" : "SEPOLIA_"}CONTRACT_ADDRESS.`
+      );
+    }
   }
 }
 

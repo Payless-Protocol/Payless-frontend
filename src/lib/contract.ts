@@ -16,6 +16,14 @@ export function getContractAddress(chainId: number = ACTIVE_CHAIN_ID): `0x${stri
   const address =
     chainId === BASE_MAINNET_CHAIN_ID ? CONTRACT_ADDRESS : SEPOLIA_CONTRACT_ADDRESS;
 
+  // ✅ NEW: Verify addresses are set
+  if (!address) {
+    const isMainnet = chainId === BASE_MAINNET_CHAIN_ID;
+    throw new Error(
+      `${isMainnet ? "Mainnet" : "Sepolia"} contract address not configured. Set NEXT_PUBLIC_${isMainnet ? "" : "SEPOLIA_"}CONTRACT_ADDRESS in .env`
+    );
+  }
+
   return address as `0x${string}`;
 }
 

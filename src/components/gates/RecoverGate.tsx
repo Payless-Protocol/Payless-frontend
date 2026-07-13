@@ -23,6 +23,20 @@ export default function RecoverGate() {
     e.preventDefault();
     if (!imei || !wordsValid) return;
 
+    // ✅ NEW: Validate IMEI format
+    const imeiRegex = /^\d{15}$/;
+    if (!imeiRegex.test(imei.trim())) {
+      setMessage("IMEI must be exactly 15 digits (0-9 only)");
+      return;
+    }
+
+    // ✅ NEW: Validate secret phrase
+    const wordRegex = /^[a-zA-Z]{2,50}$/;
+    if (![word1, word2, word3].every(word => wordRegex.test(word.trim()))) {
+      setMessage("Each secret word must be 2-50 letters (A-Z only)");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
@@ -33,8 +47,15 @@ export default function RecoverGate() {
       // ── Driven by env config, not hardcoded ─────────────────────
       const chain = getActiveChain();
       await wallet.switchChain(ACTIVE_CHAIN_ID);
-
+      
       const provider = await wallet.getEthereumProvider();
+      
+      // ✅ NEW: Verify chain actually switched
+      const currentChainIdHex = await provider.request({ method: 'eth_chainId' });
+      const currentChainId = parseInt(currentChainIdHex as string, 16);
+      if (currentChainId !== ACTIVE_CHAIN_ID) {
+        throw new Error(`Failed to switch to Base. Currently on chain ${currentChainId}`);
+      }
 
       const walletClient = createWalletClient({
         account: wallet.address as `0x${string}`,
@@ -66,23 +87,23 @@ export default function RecoverGate() {
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-neutral-900 rounded-xl shadow-md space-y-4 text-white">
+    <div className="p-6 max-w-md mx-auto bg-neutral-900 border border-neutral-700 rounded-xl shadow-md space-y-4 text-white">
       <h2 className="text-xl font-bold">Recover / Unflag Device</h2>
       <form onSubmit={handleUnflagDevice} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-neutral-400">15-Digit IMEI</label>
+          <label className="block text-sm font-semibold text-white mb-2">15-Digit IMEI</label>
           <input
             type="text"
             maxLength={15}
             value={imei}
             onChange={(e) => setImei(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm text-white focus:outline-none focus:border-indigo-500"
+            className="mt-1 block w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
             placeholder="Enter device IMEI"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-neutral-400">
+          <label className="block text-sm font-semibold text-white mb-2">
             Secret Recovery Phrase (3 words)
           </label>
           <p className="mt-1 text-xs text-neutral-500">
@@ -93,21 +114,21 @@ export default function RecoverGate() {
               type="text"
               value={word1}
               onChange={(e) => setWord1(e.target.value)}
-              className="px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
               placeholder="Word 1"
             />
             <input
               type="text"
               value={word2}
               onChange={(e) => setWord2(e.target.value)}
-              className="px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
               placeholder="Word 2"
             />
             <input
               type="text"
               value={word3}
               onChange={(e) => setWord3(e.target.value)}
-              className="px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
               placeholder="Word 3"
             />
           </div>
@@ -116,7 +137,7 @@ export default function RecoverGate() {
         <button
           type="submit"
           disabled={loading || !imei || !wordsValid}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none disabled:opacity-50"
+          className="w-full flex justify-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none disabled:opacity-50"
         >
           {loading ? "Processing..." : "Unflag Device"}
         </button>
