@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npm run build",
+  "env": {
+    "NEXT_PUBLIC_PRIVY_APP_ID": "@NEXT_PUBLIC_PRIVY_APP_ID",
+    "NEXT_PUBLIC_BASE_RPC_URL": "@NEXT_PUBLIC_BASE_RPC_URL"
+  }
+}

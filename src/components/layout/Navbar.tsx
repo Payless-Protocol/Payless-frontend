@@ -1,19 +1,80 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useAccount } from "wagmi";
+import AuthModal from "@/components/AuthModal";
+import { TOKENS } from "@/styles/tokens";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Search", href: "/search" },
-  { label: "Report", href: "/flag" },
-  { label: "Retrieve", href: "/retrieve" },
-];
+  { label: "Flag", href: "/flag" },
+  { label: "Recover", href: "/recover" },
+] as const;
 
-export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
+function NavLink({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <Link
+      href={href}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        color: active || hovered ? "#fff" : "rgba(255,255,255,0.5)",
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: 14,
+        fontWeight: active ? 700 : 400,
+        textDecoration: "none",
+        transition: "all 0.2s ease",
+      }}
+    >
+      {label}
+    </Link>
+  );
+}
+
+function UserAvatarIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+export function Navbar() {
   const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const { address, isConnected } = useAccount();
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -22,61 +83,139 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const shortenedAddress = useMemo(() => {
+    if (!address) return "";
+    return `${address.slice(0, 6)}...`.toUpperCase();
+  }, [address]);
+
   return (
-    <header
-      className={[
-        "fixed inset-x-0 top-0 z-50 border-b border-transparent transition-all duration-300",
-        scrolled ? "border-white/10 bg-[#0a0a0e]/92 backdrop-blur-xl" : "bg-[#0a0a0e]/70 backdrop-blur-xl",
-      ].join(" ")}
-    >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-10">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-gradient-to-br from-[#6b8fff] to-[#89a6ff] text-sm font-bold text-white shadow-lg shadow-[#6b8fff]/20">
-            P
-          </span>
-          <span className="font-display text-[15px] font-semibold tracking-[0.02em] text-white">
-            Payless Protocol
-          </span>
-        </Link>
-
-        <div className="hidden items-center gap-9 md:flex">
-          {NAV_LINKS.map((link, index) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={[
-                "text-sm transition-colors duration-200",
-                pathname === link.href || (link.href === "/" && pathname === "/")
-                  ? "font-semibold text-white"
-                  : index === 0
-                    ? "text-white/65 hover:text-white"
-                    : "text-white/55 hover:text-white",
-              ].join(" ")}
+    <>
+      <header
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          height: 64,
+          padding: isMobile ? "0 20px" : "0 40px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: scrolled ? "rgba(10,10,14,0.98)" : "#0a0a0e",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          transition: "background 0.3s ease",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            maxWidth: TOKENS.pageWidth,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            position: "relative",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>
+            <Image
+              src="/logo.png"
+              alt="Payless Protocol"
+              width={24}
+              height={24}
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 4,
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
+            <span
+              style={{
+                color: "#fff",
+                fontFamily: "'Syne', sans-serif",
+                fontWeight: 600,
+                fontSize: 15,
+                letterSpacing: "0.01em",
+                whiteSpace: "nowrap",
+              }}
             >
-              {link.label}
-            </Link>
-          ))}
-        </div>
+              Payless Protocol
+            </span>
+          </div>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/flag"
-            className="hidden rounded-[10px] border border-white/20 px-4 py-2 text-[13px] font-medium text-white transition hover:border-white/50 hover:bg-white/5 sm:inline-flex"
-          >
-            Report Device
-          </Link>
-          <Link
-            href="/search"
-            className="inline-flex items-center gap-2 rounded-[10px] bg-gradient-to-r from-[#6b8fff] to-[#89a6ff] px-4 py-2 text-[13px] font-medium text-white shadow-[0_12px_28px_rgba(107,143,255,0.24)] transition hover:opacity-90"
-          >
-            Connect Wallet
-            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </Link>
+          {!isMobile ? (
+            <nav
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 36,
+                position: "absolute",
+                left: "50%",
+                transform: "translateX(-50%)",
+              }}
+            >
+              {NAV_LINKS.map((link) => (
+                <NavLink
+                  key={link.href}
+                  href={link.href}
+                  label={link.label}
+                  active={pathname === link.href}
+                />
+              ))}
+            </nav>
+          ) : null}
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 auto" }}>
+            <AuthModal />
+          </div>
         </div>
-      </nav>
-    </header>
+      </header>
+
+      {isMobile && isConnected && address ? (
+        <div
+          style={{
+            position: "fixed",
+            top: 64,
+            left: 0,
+            right: 0,
+            zIndex: 90,
+            padding: "16px 20px",
+            background: "#0a0a0e",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "#3B82F6",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 12px rgba(59,130,246,0.2)",
+            }}
+          >
+            <UserAvatarIcon size={20} />
+          </div>
+          <span
+            style={{
+              color: "#fff",
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 15,
+              fontWeight: 700,
+            }}
+          >
+            {shortenedAddress}
+          </span>
+        </div>
+      ) : null}
+    </>
   );
 }
+
+export default Navbar;

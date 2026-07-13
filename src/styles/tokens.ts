@@ -1,20 +1,24 @@
-export const colors = {
-  accent: "var(--accent)",
-  bg: "var(--bg)",
-  surface: "var(--surface)",
-  success: "var(--success)",
-  danger: "var(--danger)",
-  textPrimary: "var(--text-primary)",
-  textSecondary: "var(--text-secondary)",
-} as const;
-
-export const radii = {
-  sm: "8px",
-  md: "12px",
-  lg: "20px",
-  xl: "28px",
-} as const;
-
-export const layout = {
-  contentWidth: "1280px",
-} as const;
+export const TOKENS = {
+  background: "#0a0a0e",
+  surface: "rgba(255,255,255,0.04)",
+  surfaceElevated: "#141420",
+  inputBackground: "rgba(255,255,255,0.06)",
+  inputBorder: "rgba(255,255,255,0.12)",
+  inputFocusBorder: "#4a7cf7",
+  accent: "#4a7cf7",
+  accentLight: "#6b9bff",
+  success: "#22C55E",
+  danger: "#EF4444",
+  heading: "#ffffff",
+  body: "rgba(255,255,255,0.5)",
+  muted: "rgba(255,255,255,0.3)",
+  borderSubtle: "rgba(255,255,255,0.08)",
+  cardRadius: 20,
+  buttonRadius: 10,
+  pillBg: "rgba(255,255,255,0.07)",
+  pillBorder: "rgba(255,255,255,0.12)",
+  tagBg: "rgba(20,25,60,0.85)",
+  tagBorder: "rgba(255,255,255,0.1)",
+  ctaBg: "linear-gradient(135deg, #1c0a08, #2e0e0a, #1a0808)",
+  pageWidth: 1280,
+};

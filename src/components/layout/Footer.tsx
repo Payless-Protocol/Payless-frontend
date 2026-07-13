@@ -1,48 +1,97 @@
-const footerLinks = [
+"use client";
+
+import Link from "next/link";
+import { TOKENS } from "@/styles/tokens";
+
+const FOOTER_LINKS = [
   { label: "Home", href: "/" },
   { label: "Search", href: "/search" },
-  { label: "Report", href: "/flag" },
-  { label: "Retrieve", href: "/retrieve" },
-];
+  { label: "Flag", href: "/flag" },
+  { label: "Recover", href: "/recover" },
+] as const;
 
-export default function Footer() {
+export function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-[#0a0a0e] px-4 py-5 sm:px-6 lg:px-10">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-gradient-to-br from-[#6b8fff] to-[#89a6ff] text-xs font-bold text-white">
-            P
-          </span>
-          <span className="font-display text-sm font-semibold text-white/85">
+    <footer
+      style={{
+        background: "#0a0a0e",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        padding: "18px 60px",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: TOKENS.pageWidth,
+          margin: "0 auto",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 24,
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 8,
+              background: "linear-gradient(135deg, #4a7cf7, #6b9bff)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 12px 24px rgba(74,124,247,0.18)",
+              flex: "0 0 auto",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "'Syne', sans-serif",
+                color: "#fff",
+                fontWeight: 800,
+                fontSize: 14,
+                lineHeight: 1,
+              }}
+            >
+              P
+            </span>
+          </div>
+          <span
+            style={{
+              fontFamily: "'Syne', sans-serif",
+              color: "#fff",
+              fontWeight: 600,
+              fontSize: 14,
+              whiteSpace: "nowrap",
+            }}
+          >
             Payless Protocol
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 md:gap-3">
-          {footerLinks.map((link, index) => (
+        <nav style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
+          {FOOTER_LINKS.map((link, index) => (
             <Link
               key={link.href}
               href={link.href}
-              className={[
-                "rounded-full px-3 py-2 text-sm transition",
-                index === 0 ? "bg-white/[0.08] font-semibold text-white" : "text-white/45 hover:text-white",
-              ].join(" ")}
+              style={{
+                color: index === 0 ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)",
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 13,
+                fontWeight: index === 0 ? 600 : 400,
+                textDecoration: "none",
+                padding: index === 0 ? "4px 12px" : "0",
+                borderRadius: 6,
+                background: index === 0 ? "rgba(255,255,255,0.08)" : "transparent",
+              }}
             >
               {link.label}
             </Link>
           ))}
-        </div>
-
-        <div className="flex flex-col gap-2 text-sm text-white/45 sm:flex-row sm:items-center sm:gap-4">
-          <span className="inline-flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#22c55e]" />
-            Base network online
-          </span>
-          <a href="https://basescan.org" target="_blank" rel="noreferrer" className="text-[#89a6ff] transition hover:text-white">
-            BaseScan
-          </a>
-        </div>
+        </nav>
       </div>
     </footer>
   );
 }
+
+export default Footer;

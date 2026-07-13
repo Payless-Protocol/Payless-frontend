@@ -8,7 +8,7 @@ import { formatContractError } from "@/lib/contract";
 import { hashIMEI, hashSecret } from "@/lib/hash";
 import { ACTIVE_CHAIN_ID, getActiveChain } from "@/lib/constants";
 
-export default function FlagGate() {
+export default function RecoverGate() {
   const { wallets } = useWallets();
   const [imei, setImei] = useState("");
   const [word1, setWord1] = useState("");
@@ -19,7 +19,7 @@ export default function FlagGate() {
 
   const wordsValid = [word1, word2, word3].every((w) => w.trim().length >= 2);
 
-  const handleFlagDevice = async (e: React.FormEvent) => {
+  const handleUnflagDevice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!imei || !wordsValid) return;
 
@@ -31,9 +31,6 @@ export default function FlagGate() {
       if (!wallet) throw new Error("Please connect your wallet first.");
 
       // ── Driven by env config, not hardcoded ─────────────────────
-      // ACTIVE_CHAIN_ID / getActiveChain() come from lib/constants.ts.
-      // Switching networks later is a single env var change —
-      // never edit this component to change chains.
       const chain = getActiveChain();
       await wallet.switchChain(ACTIVE_CHAIN_ID);
 
@@ -47,22 +44,22 @@ export default function FlagGate() {
 
       const contractAddress = getContractAddress(ACTIVE_CHAIN_ID);
 
-      // ── Canonical hashing — must match lib/hash.ts exactly ──────
+      // ── Canonical hashing — identical call as FlagGate.tsx ──────
       const imeiHash   = hashIMEI(imei.trim());
       const secretHash = hashSecret([word1, word2, word3]);
 
       const { request } = await walletClient.simulateContract({
         address: contractAddress,
         abi: PAYLESS_ABI,
-        functionName: "flagDevice",
+        functionName: "unflagDevice",
         args: [imeiHash, secretHash],
         account: wallet.address as `0x${string}`,
       });
 
       const hash = await walletClient.writeContract(request);
-      setMessage(`Device successfully flagged! Tx Hash: ${hash}`);
+      setMessage(`Device successfully unflagged! Tx Hash: ${hash}`);
     } catch (error: unknown) {
-      setMessage(formatContractError(error, "Failed to flag device. Please try again."));
+      setMessage(formatContractError(error, "Failed to clear device. Please verify credentials."));
     } finally {
       setLoading(false);
     }
@@ -70,8 +67,8 @@ export default function FlagGate() {
 
   return (
     <div className="p-6 max-w-md mx-auto bg-neutral-900 border border-neutral-700 rounded-xl shadow-md space-y-4 text-white">
-      <h2 className="text-xl font-bold">Flag Trusted Device</h2>
-      <form onSubmit={handleFlagDevice} className="space-y-4">
+      <h2 className="text-xl font-bold">Recover / Unflag Device</h2>
+      <form onSubmit={handleUnflagDevice} className="space-y-4">
         <div>
           <label className="block text-sm font-semibold text-white mb-2">15-Digit IMEI</label>
           <input
@@ -79,7 +76,7 @@ export default function FlagGate() {
             maxLength={15}
             value={imei}
             onChange={(e) => setImei(e.target.value)}
-            className="mt-1 block w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
+            className="mt-1 block w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
             placeholder="Enter device IMEI"
           />
         </div>
@@ -89,7 +86,7 @@ export default function FlagGate() {
             Secret Recovery Phrase (3 words)
           </label>
           <p className="mt-1 text-xs text-neutral-500">
-            Choose 3 words. Order matters — you&apos;ll need the exact same words and order to unflag later.
+            Enter the exact 3 words you used when flagging this device. Order matters.
           </p>
           <div className="mt-2 grid grid-cols-3 gap-2">
             <input
@@ -119,9 +116,9 @@ export default function FlagGate() {
         <button
           type="submit"
           disabled={loading || !imei || !wordsValid}
-          className="w-full flex justify-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-red-500 hover:bg-red-600 focus:outline-none disabled:opacity-50"
+          className="w-full flex justify-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none disabled:opacity-50"
         >
-          {loading ? "Processing..." : "Flag Device"}
+          {loading ? "Processing..." : "Unflag Device"}
         </button>
       </form>
       {message && <p className="text-sm mt-2 text-neutral-300 break-words">{message}</p>}

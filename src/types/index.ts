@@ -1,21 +1,10 @@
-import type { ReactNode } from "react";
+export type DeviceRecord = {
+  secretHash: `0x${string}`;
+  updateAt: bigint;
+  status: 0 | 1 | 2;
+};
 
-export type DeviceStatus = "clean" | "flagged";
-
-export interface DeviceRecord {
-  imeiHash: `0x${string}`;
-  status: DeviceStatus;
-  reporter?: string;
-  reportedAt?: string;
-  lastUpdated?: string;
-  notes?: string;
-}
-
-export interface NavLink {
-  label: string;
-  href: string;
-}
-
-export interface ButtonProps {
-  children: ReactNode;
-}
+export type WaitlistEntry = {
+  name: string;
+  email: string;
+};

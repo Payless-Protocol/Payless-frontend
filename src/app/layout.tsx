@@ -1,39 +1,42 @@
-import type { Metadata } from "next";
+import "./globals.css";
 import type { ReactNode } from "react";
-import { DM_Sans, Syne } from "next/font/google";
+import { Web3Provider } from "@/providers/Web3Provider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-import Footer from "@/components/layout/Footer";
-import Navbar from "@/components/layout/Navbar";
-import "@/styles/globals.css";
-
-const displayFont = Syne({
-  subsets: ["latin"],
-  variable: "--font-display",
-});
-
-const sansFont = DM_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-export const metadata: Metadata = {
-  title: "Payless Registry",
-  description: "A decentralized stolen device registry built on Base.",
+export const metadata = {
+  title: "Payless Protocol - IMEI Registry",
+  description: "Search, flag, and recover IMEI records.",
+  metadataBase: new URL("https://paylessprotocol.xyz"),
+  openGraph: {
+    title: "Payless Protocol",
+    description: "Search, flag, and recover IMEI records.",
+    url: "https://paylessprotocol.xyz",
+    siteName: "Payless Protocol",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Payless Protocol",
+    description: "Search, flag, and recover IMEI records.",
+    images: ["/og-image.png"],
+  },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: ReactNode;
-}>) {
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${displayFont.variable} ${sansFont.variable}`}>
-      <body className="min-h-screen bg-bg font-sans text-text-primary antialiased">
-        <div className="flex min-h-screen flex-col">
-          <Navbar />
-          <main className="flex-1 pt-16">{children}</main>
-          <Footer />
-        </div>
+    <html lang="en">
+      <body className="bg-surface text-primary min-h-screen">
+        <ErrorBoundary>
+          <Web3Provider>{children}</Web3Provider>
+        </ErrorBoundary>
       </body>
     </html>
   );
