@@ -32,7 +32,9 @@ export async function POST(req: NextRequest) {
     const databaseId = process.env.NOTION_WAITLIST_DATABASE_ID;
 
     if (!notionToken || !databaseId) {
-      console.error("Missing Notion env vars");
+      if (process.env.NODE_ENV === "development") {
+        console.error("Missing Notion env vars");
+      }
       return NextResponse.json(
         { error: "Failed to save. Please try again." },
         { status: 500 }
@@ -63,7 +65,9 @@ export async function POST(req: NextRequest) {
     });
 
     if (!response.ok) {
-      console.error("Notion API error occurred");
+      if (process.env.NODE_ENV === "development") {
+        console.error("Notion API error occurred");
+      }
       return NextResponse.json(
         { error: "Failed to save. Please try again." },
         { status: 500 }
@@ -72,7 +76,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Waitlist route error occurred");
+    if (process.env.NODE_ENV === "development") {
+      console.error("Waitlist route error occurred");
+    }
     return NextResponse.json(
       { error: "Failed to save. Please try again." },
       { status: 500 }

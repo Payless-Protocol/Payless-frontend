@@ -23,6 +23,20 @@ export default function FlagGate() {
     e.preventDefault();
     if (!imei || !wordsValid) return;
 
+    // ✅ NEW: Validate IMEI format
+    const imeiRegex = /^\d{15}$/;
+    if (!imeiRegex.test(imei.trim())) {
+      setMessage("IMEI must be exactly 15 digits (0-9 only)");
+      return;
+    }
+
+    // ✅ NEW: Validate secret phrase
+    const wordRegex = /^[a-zA-Z]{2,50}$/;
+    if (![word1, word2, word3].every(word => wordRegex.test(word.trim()))) {
+      setMessage("Each secret word must be 2-50 letters (A-Z only)");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
@@ -36,8 +50,15 @@ export default function FlagGate() {
       // never edit this component to change chains.
       const chain = getActiveChain();
       await wallet.switchChain(ACTIVE_CHAIN_ID);
-
+      
       const provider = await wallet.getEthereumProvider();
+      
+      // ✅ NEW: Verify chain actually switched
+      const currentChainIdHex = await provider.request({ method: 'eth_chainId' });
+      const currentChainId = parseInt(currentChainIdHex as string, 16);
+      if (currentChainId !== ACTIVE_CHAIN_ID) {
+        throw new Error(`Failed to switch to Base. Currently on chain ${currentChainId}`);
+      }
 
       const walletClient = createWalletClient({
         account: wallet.address as `0x${string}`,
