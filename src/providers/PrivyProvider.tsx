@@ -44,6 +44,9 @@ export function PrivyProvider({ children }: PrivyProviderProps) {
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
         },
+        fiatOnRamp: {
+          enabled: false,
+        },
       }}
     >
       <WagmiProvider config={wagmiConfig}>
