@@ -13,6 +13,7 @@
     "@privy-io/react-auth": "^3.35.2",
     "@privy-io/wagmi": "^4.0.15",
     "@stripe/crypto": "^1.1.2",
+    "@stripe/stripe-js": "^9.12.0",
     "@tanstack/react-query": "^5.100.9",
     "ethereum-cryptography": "^2.2.1",
     "ethers": "^6.13.4",
