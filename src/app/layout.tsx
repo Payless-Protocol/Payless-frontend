@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { ReactNode } from "react";
-import { Web3Provider } from "@/providers/Web3Provider";
+import { PrivyProvider } from "@/providers/PrivyProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export const metadata = {
@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body className="bg-surface text-primary min-h-screen">
         <ErrorBoundary>
-          <Web3Provider>{children}</Web3Provider>
+          <PrivyProvider>{children}</PrivyProvider>
         </ErrorBoundary>
       </body>
     </html>

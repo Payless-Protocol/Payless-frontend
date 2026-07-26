@@ -1,21 +1,25 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useWallets } from "@privy-io/react-auth";
-import { createWalletClient, custom, publicActions } from "viem";
-import { getContractAddress, PAYLESS_ABI } from "@/lib/contract";
-import { formatContractError } from "@/lib/contract";
-import { hashIMEI, hashSecret } from "@/lib/hash";
-import { ACTIVE_CHAIN_ID, getActiveChain } from "@/lib/constants";
+import { useState } from 'react';
+import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
+import { getContractAddress, PAYLESS_ABI } from '@/lib/contract';
+import { formatContractError } from '@/lib/contract';
+import { hashIMEI, hashSecret } from '@/lib/hash';
+import { ACTIVE_CHAIN_ID } from '@/lib/constants';
+import { usePimlicTransaction } from '@/hooks/usePimlicTransaction';
 
 export default function RecoverGate() {
-  const { wallets } = useWallets();
-  const [imei, setImei] = useState("");
-  const [word1, setWord1] = useState("");
-  const [word2, setWord2] = useState("");
-  const [word3, setWord3] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const { address } = useAccount();
+  const { authenticated } = usePrivy();
+  const { sendSponsoredTransaction, loading, error } = usePimlicTransaction();
+
+  const [imei, setImei] = useState('');
+  const [word1, setWord1] = useState('');
+  const [word2, setWord2] = useState('');
+  const [word3, setWord3] = useState('');
+  const [message, setMessage] = useState('');
+  const [txHash, setTxHash] = useState('');
 
   const wordsValid = [word1, word2, word3].every((w) => w.trim().length >= 2);
 
@@ -23,105 +27,182 @@ export default function RecoverGate() {
     e.preventDefault();
     if (!imei || !wordsValid) return;
 
-    setLoading(true);
-    setMessage("");
+    setMessage('');
+    setTxHash('');
 
     try {
-      const wallet = wallets[0];
-      if (!wallet) throw new Error("Please connect your wallet first.");
+      if (!authenticated || !address) {
+        throw new Error('❌ Please connect your wallet first.');
+      }
 
-      // ── Driven by env config, not hardcoded ─────────────────────
-      const chain = getActiveChain();
-      await wallet.switchChain(ACTIVE_CHAIN_ID);
+      console.log('[RecoverGate] Recovering device:', { imei });
 
-      const provider = await wallet.getEthereumProvider();
+      const imeiHash = hashIMEI(imei);
+      const recoveryPhraseHash = hashSecret([word1, word2, word3].join(' '));
 
-      const walletClient = createWalletClient({
-        account: wallet.address as `0x${string}`,
-        chain,
-        transport: custom(provider),
-      }).extend(publicActions);
+      const contractAddress = getContractAddress();
+      if (!contractAddress) {
+        throw new Error('❌ Contract address not configured.');
+      }
 
-      const contractAddress = getContractAddress(ACTIVE_CHAIN_ID);
+      setMessage('⏳ Submitting transaction...');
 
-      // ── Canonical hashing — identical call as FlagGate.tsx ──────
-      const imeiHash   = hashIMEI(imei.trim());
-      const secretHash = hashSecret([word1, word2, word3]);
-
-      const { request } = await walletClient.simulateContract({
-        address: contractAddress,
+      const { txHash: hash } = await sendSponsoredTransaction({
+        contractAddress,
         abi: PAYLESS_ABI,
-        functionName: "unflagDevice",
-        args: [imeiHash, secretHash],
-        account: wallet.address as `0x${string}`,
+        functionName: 'unflagDevice',
+        args: [imeiHash, recoveryPhraseHash],
+        chainId: ACTIVE_CHAIN_ID,
       });
 
-      const hash = await walletClient.writeContract(request);
-      setMessage(`Device successfully unflagged! Tx Hash: ${hash}`);
-    } catch (error: unknown) {
-      setMessage(formatContractError(error, "Failed to clear device. Please verify credentials."));
-    } finally {
-      setLoading(false);
+      setTxHash(hash);
+      setMessage(`✅ Device recovered successfully! TX: ${hash.substring(0, 10)}...`);
+
+      // Reset form
+      setImei('');
+      setWord1('');
+      setWord2('');
+      setWord3('');
+
+      console.log('[RecoverGate] ✅ Device recovered:', hash);
+    } catch (err) {
+      const errorMsg = formatContractError(err, 'Failed to recover device');
+      setMessage(`❌ ${errorMsg}`);
+      console.error('[RecoverGate] Error:', err);
     }
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-neutral-900 border border-neutral-700 rounded-xl shadow-md space-y-4 text-white">
-      <h2 className="text-xl font-bold">Recover / Unflag Device</h2>
-      <form onSubmit={handleUnflagDevice} className="space-y-4">
-        <div>
-          <label className="block text-sm font-semibold text-white mb-2">15-Digit IMEI</label>
+    <div style={{ padding: '20px', maxWidth: '500px', margin: '0 auto' }}>
+      <h1>Recover Device</h1>
+      <p style={{ color: '#888', fontSize: '12px', marginBottom: '20px' }}>
+        ⛽ Gas sponsored by Pimlico • Zero cost to you
+      </p>
+
+      <form onSubmit={handleUnflagDevice}>
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ fontWeight: 600 }}>IMEI Number</label>
           <input
             type="text"
-            maxLength={15}
             value={imei}
             onChange={(e) => setImei(e.target.value)}
-            className="mt-1 block w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
-            placeholder="Enter device IMEI"
+            placeholder="Enter 15-digit IMEI"
+            required
+            style={{
+              width: '100%',
+              padding: '8px',
+              marginTop: '5px',
+              borderRadius: '6px',
+              border: '1px solid #333',
+              background: '#1A1A1A',
+              color: '#fff',
+            }}
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-white mb-2">
-            Secret Recovery Phrase (3 words)
-          </label>
-          <p className="mt-1 text-xs text-neutral-500">
-            Enter the exact 3 words you used when flagging this device. Order matters.
-          </p>
-          <div className="mt-2 grid grid-cols-3 gap-2">
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ fontWeight: 600 }}>Recovery Phrase (3 words)</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginTop: '5px' }}>
             <input
               type="text"
               value={word1}
               onChange={(e) => setWord1(e.target.value)}
-              className="px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
               placeholder="Word 1"
+              style={{
+                padding: '8px',
+                borderRadius: '6px',
+                border: '1px solid #333',
+                background: '#1A1A1A',
+                color: '#fff',
+              }}
             />
             <input
               type="text"
               value={word2}
               onChange={(e) => setWord2(e.target.value)}
-              className="px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
               placeholder="Word 2"
+              style={{
+                padding: '8px',
+                borderRadius: '6px',
+                border: '1px solid #333',
+                background: '#1A1A1A',
+                color: '#fff',
+              }}
             />
             <input
               type="text"
               value={word3}
               onChange={(e) => setWord3(e.target.value)}
-              className="px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500"
               placeholder="Word 3"
+              style={{
+                padding: '8px',
+                borderRadius: '6px',
+                border: '1px solid #333',
+                background: '#1A1A1A',
+                color: '#fff',
+              }}
             />
           </div>
         </div>
 
         <button
           type="submit"
-          disabled={loading || !imei || !wordsValid}
-          className="w-full flex justify-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none disabled:opacity-50"
+          disabled={loading || !wordsValid}
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: loading ? '#666' : '#00F0FF',
+            color: '#0F0F0F',
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: 700,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            transition: 'background 0.2s',
+          }}
         >
-          {loading ? "Processing..." : "Unflag Device"}
+          {loading ? '⏳ Recovering...' : '🔓 Recover Device'}
         </button>
+
+        {message && (
+          <div
+            style={{
+              marginTop: '15px',
+              padding: '12px',
+              borderRadius: '6px',
+              background: message.includes('✅') ? '#1a3a1a' : '#3a1a1a',
+              color: message.includes('✅') ? '#22C55E' : '#EF4444',
+              fontSize: '13px',
+            }}
+          >
+            {message}
+          </div>
+        )}
+
+        {txHash && (
+          <div
+            style={{
+              marginTop: '10px',
+              padding: '10px',
+              background: '#1A3A1A',
+              borderRadius: '6px',
+              fontSize: '11px',
+              color: '#22C55E',
+              wordBreak: 'break-all',
+            }}
+          >
+            <strong>TX Hash:</strong> {txHash}
+            <br />
+            <a
+              href={`https://sepolia.basescan.org/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#00F0FF', textDecoration: 'underline' }}
+            >
+              View on Block Explorer
+            </a>
+          </div>
+        )}
       </form>
-      {message && <p className="text-sm mt-2 text-neutral-300 break-words">{message}</p>}
     </div>
   );
 }
