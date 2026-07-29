@@ -18,6 +18,16 @@ export function hashSecret(words: [string, string, string]): Bytes32 {
   return toBytes32(normalized);
 }
 
+export function validateIMEI(imei: string): boolean {
+  // Must be exactly 15 digits, no spaces/dashes/special chars
+  return /^\d{15}$/.test(imei.trim());
+}
+
+export function validateWord(word: string): boolean {
+  // Words must be 2+ characters, letters only (no numbers/special chars)
+  return /^[a-zA-Z]{2,}$/.test(word.trim());
+}
+
 export function buildHashedPayload(
   imei: string,
   words: [string, string, string]

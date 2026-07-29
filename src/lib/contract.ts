@@ -12,9 +12,18 @@ import {
 
 export { PAYLESS_ABI };
 
+export function isValidHexAddress(address: string): boolean {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+}
+
 export function getContractAddress(chainId: number = ACTIVE_CHAIN_ID): `0x${string}` {
   const address =
     chainId === BASE_MAINNET_CHAIN_ID ? CONTRACT_ADDRESS : SEPOLIA_CONTRACT_ADDRESS;
+
+  if (!isValidHexAddress(address)) {
+    console.error(`[Contract] Invalid contract address format: ${address}`);
+    return '0x0000000000000000000000000000000000000000' as `0x${string}`;
+  }
 
   return address as `0x${string}`;
 }
@@ -40,10 +49,16 @@ export function formatContractError(error: unknown, fallback: string) {
         ? String((error as { message?: unknown }).message ?? "")
         : "";
 
-  if (/AlreadyUnflagged/i.test(message)) return "Device is already clean.";
-  if (/InvalidImei/i.test(message)) return "Invalid device ID.";
-  if (/InvalidSecret/i.test(message)) return "Invalid secret phrase.";
-  if (/Unauthorized/i.test(message)) return "You are not authorized to unflag this device.";
+  // SECURITY: Never log secrets, wallet addresses, or sensitive contract data
+  const sanitizedError = message
+    .replace(/0x[a-fA-F0-9]{40}/g, '0x****') // Hide addresses
+    .replace(/\b\d{15}\b/g, '****') // Hide IMEIs
+    .replace(/word1|word2|word3|secret|phrase/gi, '***'); // Hide secret references
+
+  if (/AlreadyUnflagged/i.test(sanitizedError)) return "Device is already clean.";
+  if (/InvalidImei/i.test(sanitizedError)) return "Invalid device ID.";
+  if (/InvalidSecret/i.test(sanitizedError)) return "Invalid secret phrase.";
+  if (/Unauthorized/i.test(sanitizedError)) return "You are not authorized to unflag this device.";
 
   return fallback;
 }

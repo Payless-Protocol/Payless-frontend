@@ -13,6 +13,15 @@ export const CONTRACT_ADDRESS =
 export const SEPOLIA_CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS ?? "";
 
+export function validateRpcEndpoint(): boolean {
+  const rpcUrl = process.env.NEXT_PUBLIC_BASE_RPC_URL;
+  if (!rpcUrl) {
+    console.warn('[Constants] ⚠️ NEXT_PUBLIC_BASE_RPC_URL not configured');
+    return false;
+  }
+  return rpcUrl.startsWith('https://');
+}
+
 export const ACTIVE_CHAIN_ID = Number(
   process.env.NEXT_PUBLIC_CHAIN_ID ?? BASE_SEPOLIA_CHAIN_ID
 );

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
@@ -299,7 +300,7 @@ function LandingNavbar() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>
-          <img
+          <Image
             src="/logo.png"
             alt="Payless Protocol"
             width={32}
