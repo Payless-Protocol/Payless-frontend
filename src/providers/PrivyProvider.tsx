@@ -48,7 +48,9 @@ export function PrivyProvider({ children }: PrivyProviderProps) {
           accentColor: '#00F0FF',
         },
         embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
+          ethereum: {
+            createOnLogin: 'users-without-wallets',
+          },
         },
         fiatOnRamp: {
           enabled: false,
