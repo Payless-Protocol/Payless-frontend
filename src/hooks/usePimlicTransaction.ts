@@ -24,7 +24,7 @@ export function usePimlicTransaction() {
     args,
     chainId,
   }: {
-    contractAddress: string;
+    contractAddress: `0x${string}`;
     abi: any[];
     functionName: string;
     args: any[];

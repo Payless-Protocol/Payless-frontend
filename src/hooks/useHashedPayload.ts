@@ -7,6 +7,6 @@ export function useHashedPayload(
 ) {
   return useMemo(
     () => buildHashedPayload(imei, words),
-    [imei, words.join('')]
+    [imei, words]
   );
 }
