@@ -13,6 +13,13 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const errorMessage = this.state.error?.message || 'An unexpected error occurred';
+      // Hide sensitive details
+      const sanitized = errorMessage
+        .replace(/0x[a-fA-F0-9]{40}/g, '[address]')
+        .replace(/\b\d{15}\b/g, '[device]')
+        .substring(0, 100); // Limit length
+
       return (
         <div style={{
           minHeight: "100vh",
@@ -35,6 +42,9 @@ export class ErrorBoundary extends Component<Props, State> {
           }}>
             Something went wrong
           </h2>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, maxWidth: 400 }}>
+            {sanitized}
+          </p>
           <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, maxWidth: 400 }}>
             Reload the page to continue.
           </p>
