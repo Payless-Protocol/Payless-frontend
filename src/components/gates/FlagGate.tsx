@@ -1,22 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { useWallets, usePrivy } from "@privy-io/react-auth";
-import { createWalletClient, custom, publicActions } from "viem";
+import { usePrivy } from "@privy-io/react-auth";
 import { getContractAddress, PAYLESS_ABI } from "@/lib/contract";
 import { formatContractError } from "@/lib/contract";
 import { hashIMEI, hashSecret, validateIMEI, validateWord } from "@/lib/hash";
 import { ACTIVE_CHAIN_ID, getActiveChain } from "@/lib/constants";
+import { useGaslessTransaction } from "@/hooks/usePimlicTransaction";
 
 export default function FlagGate() {
-  const { wallets } = useWallets();
   const { authenticated } = usePrivy();
+  const { sendGaslessTransaction, loading: txLoading } = useGaslessTransaction();
   const [imei, setImei] = useState("");
   const [word1, setWord1] = useState("");
   const [word2, setWord2] = useState("");
   const [word3, setWord3] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const wordsValid = [word1, word2, word3].every((w) => w.trim().length >= 2);
 
@@ -50,63 +51,46 @@ export default function FlagGate() {
       return;
     }
 
+    // Show confirmation step instead of executing immediately
+    setShowConfirm(true);
+  };
+
+  const confirmAndSubmit = async () => {
+    setShowConfirm(false);
     setLoading(true);
     setMessage("");
 
     try {
-      const wallet = wallets[0];
-      if (!wallet) throw new Error("Please connect your wallet first.");
-
       const chain = getActiveChain();
       
       // Validate chain ID
       if (ACTIVE_CHAIN_ID !== 84532 && ACTIVE_CHAIN_ID !== 8453) {
         throw new Error(`Invalid chain ID: ${ACTIVE_CHAIN_ID}. Expected Base Sepolia (84532) or Base (8453).`);
       }
-      
-      await wallet.switchChain(ACTIVE_CHAIN_ID);
-
-      const provider = await wallet.getEthereumProvider();
-
-      const walletClient = createWalletClient({
-        account: wallet.address as `0x${string}`,
-        chain,
-        transport: custom(provider),
-      }).extend(publicActions);
 
       const contractAddress = getContractAddress(ACTIVE_CHAIN_ID);
 
       const imeiHash = hashIMEI(imei.trim());
       const secretHash = hashSecret([word1, word2, word3]);
 
-      const { request } = await walletClient.simulateContract({
-        address: contractAddress,
+      // ✅ Use gasless transaction via Coinbase paymaster
+      const { txHash } = await sendGaslessTransaction({
+        contractAddress,
         abi: PAYLESS_ABI,
         functionName: "flagDevice",
         args: [imeiHash, secretHash],
-        account: wallet.address as `0x${string}`,
+        chain,
       });
 
-      const hash = await walletClient.writeContract(request);
+      setMessage(`✅ Device successfully flagged! Tx Hash: ${txHash}`);
 
-      // Verify receipt before showing success
-      try {
-        const receipt = await walletClient.getTransactionReceipt({ hash });
-        if (receipt.status === 'reverted') {
-          throw new Error('Transaction reverted on-chain');
-        }
-        setMessage(`✅ Device successfully flagged! Tx Hash: ${hash}`);
-
-        // Clear form state after successful transaction
-        setTimeout(() => {
-          setImei('');
-          setWord1('');
-          setWord2('');
-          setWord3('');
-        }, 2000); // Show success message for 2 seconds before clearing
-      } catch (receiptError) {
-        throw new Error(`Transaction may have failed. Hash: ${hash}. Error: ${(receiptError as any).message}`);
-      }
+      // Clear form state after successful transaction
+      setTimeout(() => {
+        setImei('');
+        setWord1('');
+        setWord2('');
+        setWord3('');
+      }, 2000); // Show success message for 2 seconds before clearing
     } catch (error: unknown) {
       setMessage(formatContractError(error, "Failed to flag device. Please try again."));
     } finally {
@@ -170,6 +154,34 @@ export default function FlagGate() {
           {loading ? "Processing..." : " Flag Device"}
         </button>
       </form>
+      
+      {showConfirm && (
+        <div className="mt-4 p-4 bg-neutral-800 border border-neutral-600 rounded-lg">
+          <h3 className="text-lg font-semibold text-white mb-2">Confirm Flag Device</h3>
+          <p className="text-sm text-neutral-300 mb-4">
+            You are about to flag device with IMEI: <span className="text-[#00F0FF] font-mono">{imei}</span>
+          </p>
+          <p className="text-xs text-neutral-400 mb-4">
+            This action writes to the blockchain and cannot be undone without the exact recovery phrase.
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowConfirm(false)}
+              className="flex-1 py-2 px-4 border border-neutral-600 rounded-lg text-sm font-semibold text-white hover:bg-neutral-700 focus:outline-none"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmAndSubmit}
+              disabled={loading}
+              className="flex-1 py-2 px-4 bg-[#00F0FF] border border-transparent rounded-lg text-sm font-semibold text-black hover:bg-[#00D9E8] focus:outline-none disabled:opacity-50"
+            >
+              {loading ? "Processing..." : "Confirm & Flag"}
+            </button>
+          </div>
+        </div>
+      )}
+      
       {message && <p className="text-sm mt-2 text-neutral-300 break-words">{message}</p>}
     </div>
   );

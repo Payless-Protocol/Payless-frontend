@@ -47,6 +47,8 @@ export function PrivyProvider({ children }: PrivyProviderProps) {
           theme: 'dark',
           accentColor: '#00F0FF',
         },
+        defaultChain: baseSepolia,
+        supportedChains: [baseSepolia, base],
         embeddedWallets: {
           ethereum: {
             createOnLogin: 'users-without-wallets',
