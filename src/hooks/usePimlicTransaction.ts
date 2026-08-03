@@ -5,7 +5,7 @@ import { useWallets, usePrivy } from '@privy-io/react-auth';
 import { createSmartAccountClient } from 'permissionless';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
 import { createPimlicoClient } from 'permissionless/clients/pimlico';
-import { http, createPublicClient, type Chain, type WalletClient } from 'viem';
+import { http, createPublicClient, type Chain, type WalletClient, type Abi } from 'viem';
 import { baseSepolia } from 'viem/chains';
 
 /**
@@ -26,7 +26,7 @@ export function useGaslessTransaction() {
     chain = baseSepolia,
   }: {
     contractAddress: `0x${string}`;
-    abi: any[];
+    abi: Abi;
     functionName: string;
     args: any[];
     chain?: Chain;
@@ -65,7 +65,7 @@ export function useGaslessTransaction() {
         account: embeddedWallet.address as `0x${string}`,
         chain,
         transport: custom(provider),
-      }) as WalletClient;
+      }) as any;
 
       // Create public client for the chain
       const publicClient = createPublicClient({
