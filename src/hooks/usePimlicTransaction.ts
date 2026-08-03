@@ -1,82 +1,144 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
-import { usePublicClient, useWalletClient } from 'wagmi';
-import { encodeFunctionData } from 'viem';
+import { useWallets, usePrivy } from '@privy-io/react-auth';
+import { createSmartAccountClient } from 'permissionless';
+import { toSimpleSmartAccount } from 'permissionless/accounts';
+import { createPimlicoClient } from 'permissionless/clients/pimlico';
+import { http, createPublicClient, type Chain, type WalletClient } from 'viem';
+import { baseSepolia } from 'viem/chains';
 
 /**
- * usePimlicTransaction: Handle gasless transactions via Pimlico paymaster
- * Automatically sponsors gas on Base Sepolia
+ * useGaslessTransaction: Handle gasless transactions via Coinbase paymaster
+ * Uses Account Abstraction (ERC-4337) with permissionless v0.2.57
  */
-export function usePimlicTransaction() {
-  const { address } = useAccount();
-  const publicClient = usePublicClient();
-  const { data: walletClient } = useWalletClient();
-
+export function useGaslessTransaction() {
+  const { wallets } = useWallets();
+  const { authenticated } = usePrivy();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const sendSponsoredTransaction = async ({
+  const sendGaslessTransaction = async ({
     contractAddress,
     abi,
     functionName,
     args,
-    chainId,
+    chain = baseSepolia,
   }: {
     contractAddress: `0x${string}`;
     abi: any[];
     functionName: string;
     args: any[];
-    chainId: number;
+    chain?: Chain;
   }) => {
-    if (!address || !walletClient) {
-      throw new Error('❌ Wallet not connected');
+    if (!authenticated) {
+      throw new Error('❌ Please log in first');
+    }
+
+    // Find Privy embedded wallet
+    const embeddedWallet = wallets.find(
+      (wallet) => wallet.walletClientType === 'privy'
+    );
+
+    if (!embeddedWallet) {
+      throw new Error('❌ No embedded wallet found. Please try logging in again.');
     }
 
     setLoading(true);
     setError(null);
 
     try {
-      console.log('[usePimlicTransaction] Starting sponsored transaction:', {
+      console.log('[useGaslessTransaction] Starting gasless transaction:', {
         to: contractAddress,
         function: functionName,
         args,
       });
 
-      // Encode the contract call
-      const data = encodeFunctionData({
+      // Get the embedded wallet's provider
+      const provider = await embeddedWallet.getEthereumProvider();
+
+      // Create a viem wallet client from the Privy provider
+      const { createWalletClient } = await import('viem');
+      const { custom } = await import('viem');
+
+      const walletClient = createWalletClient({
+        account: embeddedWallet.address as `0x${string}`,
+        chain,
+        transport: custom(provider),
+      }) as WalletClient;
+
+      // Create public client for the chain
+      const publicClient = createPublicClient({
+        chain,
+        transport: http(chain.rpcUrls.default.http[0]),
+      });
+
+      // Create smart account from the embedded wallet
+      const smartAccount = await toSimpleSmartAccount({
+        client: publicClient,
+        owner: walletClient,
+        entryPoint: {
+          address: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789', // ERC-4337 EntryPoint v0.6
+          version: '0.6',
+        },
+      });
+
+      // Get Pimlico API key and construct bundler URL
+      const pimlicoApiKey = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
+      if (!pimlicoApiKey) {
+        throw new Error('❌ NEXT_PUBLIC_PIMLICO_API_KEY not configured');
+      }
+
+      // Use Pimlico bundler URL for Base Sepolia (84532)
+      const paymasterUrl = `https://api.pimlico.io/v2/84532/rpc?apikey=${pimlicoApiKey}`;
+
+      // Create Pimlico client
+      const pimlicoClient = createPimlicoClient({
+        transport: http(paymasterUrl),
+        entryPoint: {
+          address: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+          version: '0.6',
+        },
+      });
+
+      // Create smart account client with Pimlico bundler
+      const smartAccountClient = createSmartAccountClient({
+        account: smartAccount,
+        chain,
+        bundlerTransport: http(paymasterUrl),
+        paymaster: pimlicoClient,
+        userOperation: {
+          estimateFeesPerGas: async () => {
+            const gasPrice = await pimlicoClient.getUserOperationGasPrice();
+            return gasPrice.fast; // { maxFeePerGas, maxPriorityFeePerGas }
+          },
+        },
+      });
+
+      console.log('[useGaslessTransaction] Sending UserOperation...');
+
+      // Send gasless transaction
+      const hash = await smartAccountClient.writeContract({
+        address: contractAddress,
         abi,
         functionName,
         args,
       });
 
-      console.log('[usePimlicTransaction] Encoded data:', data.substring(0, 50) + '...');
-
-      // Send transaction via wallet client
-      // Pimlico paymaster will automatically sponsor if configured
-      const txHash = await walletClient.sendTransaction({
-        account: address,
-        to: contractAddress,
-        data,
-        value: 0n,
-      });
-
-      console.log('[usePimlicTransaction] ✅ Transaction sent:', txHash);
+      console.log('[useGaslessTransaction] ✅ Transaction sent:', hash);
 
       // Wait for transaction confirmation
-      if (publicClient) {
-        const receipt = await publicClient.waitForTransactionReceipt({
-          hash: txHash,
-          timeout: 60_000,
-        });
-        console.log('[usePimlicTransaction] ✅ Transaction confirmed');
-      }
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash,
+        timeout: 60_000,
+      });
 
-      return { txHash };
+      console.log('[useGaslessTransaction] ✅ Transaction confirmed');
+
+      return { txHash: hash, receipt };
     } catch (err) {
       const errorMsg = (err as any).message || 'Unknown error';
-      console.error('[usePimlicTransaction] ❌ Error:', errorMsg);
+      console.error('[useGaslessTransaction] ❌ Error:', errorMsg);
       setError(errorMsg);
       throw err;
     } finally {
@@ -85,7 +147,7 @@ export function usePimlicTransaction() {
   };
 
   return {
-    sendSponsoredTransaction,
+    sendGaslessTransaction,
     loading,
     error,
   };

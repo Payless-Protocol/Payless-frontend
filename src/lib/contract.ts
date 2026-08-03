@@ -55,6 +55,11 @@ export function formatContractError(error: unknown, fallback: string) {
     .replace(/\b\d{15}\b/g, '****') // Hide IMEIs
     .replace(/word1|word2|word3|secret|phrase/gi, '***'); // Hide secret references
 
+  // Specific known revert: device was never flagged
+  if (sanitizedError.includes('0xabab6bd7')) {
+    return "This device hasn't been flagged as trusted, so there's nothing to recover. Double check the IMEI is correct.";
+  }
+
   if (/AlreadyUnflagged/i.test(sanitizedError)) return "Device is already clean.";
   if (/InvalidImei/i.test(sanitizedError)) return "Invalid device ID.";
   if (/InvalidSecret/i.test(sanitizedError)) return "Invalid secret phrase.";

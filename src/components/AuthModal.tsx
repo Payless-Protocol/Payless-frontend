@@ -2,7 +2,7 @@
 
 import { usePrivy } from '@privy-io/react-auth';
 import { useAccount } from 'wagmi';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 function SignOutIcon({ size = 14 }: { size?: number }) {
   return (
@@ -26,6 +26,15 @@ function SignOutIcon({ size = 14 }: { size?: number }) {
 export default function AuthModal() {
   const { ready, authenticated, login, logout, user } = usePrivy();
   const { address } = useAccount();
+  const [settled, setSettled] = useState(false);
+
+  useEffect(() => {
+    if (ready) {
+      // Small delay to let authenticated state stabilize after ready flips true
+      const timer = setTimeout(() => setSettled(true), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [ready]);
 
   useEffect(() => {
     if (ready) {
@@ -42,7 +51,7 @@ export default function AuthModal() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`.toUpperCase();
   }, [address]);
 
-  if (!ready) {
+  if (!ready || !settled) {
     return (
       <div
         style={{
