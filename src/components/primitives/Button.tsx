@@ -69,7 +69,7 @@ export function Button({
         gap: 8,
         borderRadius: TOKENS.buttonRadius,
         padding: "13px 22px",
-        fontFamily: "'Syne', sans-serif",
+        fontFamily: "var(--font-poppins), sans-serif",
         fontSize: 15,
         fontWeight: 700,
         cursor: isDisabled ? "not-allowed" : "pointer",

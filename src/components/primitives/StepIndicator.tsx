@@ -44,7 +44,7 @@ export function StepIndicator({
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "var(--font-poppins), sans-serif",
                 fontSize: 12,
                 fontWeight: 700,
                 color: active || complete ? "#fff" : TOKENS.body,
@@ -59,7 +59,7 @@ export function StepIndicator({
             </span>
             <span
               style={{
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "var(--font-poppins), sans-serif",
                 fontSize: 12,
                 fontWeight: active ? 700 : 500,
                 color: active ? TOKENS.heading : TOKENS.body,

@@ -22,20 +22,20 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div style={{
-          minHeight: "100vh",
+          minHeight: "100dvh",
           background: "#0a0a0e",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexDirection: "column",
           gap: 16,
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "var(--font-poppins), sans-serif",
           color: "#fff",
           padding: 24,
           textAlign: "center",
         }}>
           <h2 style={{
-            fontFamily: "'Syne', sans-serif",
+            fontFamily: "var(--font-poppins), sans-serif",
             fontSize: 24,
             fontWeight: 800,
             color: "#EF4444",
@@ -56,7 +56,7 @@ export class ErrorBoundary extends Component<Props, State> {
               border: "none",
               borderRadius: 10,
               color: "#fff",
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "var(--font-poppins), sans-serif",
               fontSize: 14,
               fontWeight: 600,
               cursor: "pointer",

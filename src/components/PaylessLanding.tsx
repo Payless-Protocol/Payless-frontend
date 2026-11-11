@@ -1,91 +1,117 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
-import { useRouter } from "next/navigation";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import WaitlistModal from "./WaitlistModal";
+import { TOKENS } from "@/styles/tokens";
 
-const COLORS = {
-  bg: "#0a0a0e",
-  white: "#ffffff",
-  body: "rgba(255,255,255,0.5)",
-  muted: "rgba(255,255,255,0.35)",
-  accent: "#4a7cf7",
-  accentLight: "#6b9bff",
-  surfaceDark: "rgba(255,255,255,0.04)",
-  borderSubtle: "rgba(255,255,255,0.08)",
-  borderMid: "rgba(255,255,255,0.15)",
-  pillBg: "rgba(255,255,255,0.07)",
-  pillBorder: "rgba(255,255,255,0.12)",
-  tagBg: "rgba(20,25,60,0.85)",
-  tagBorder: "rgba(255,255,255,0.1)",
-  ctaBg: "linear-gradient(135deg, #1c0a08, #2e0e0a, #1a0808)",
-  heroCardBlue: "linear-gradient(145deg, #5b7fe8, #7399f5)",
-};
+const PAGE_WIDTH = 1384;
+const INK_SOFT = "#2E2F2D";
 
-
-const pageStyle: any = {
-  minHeight: "100vh",
-  background: COLORS.bg,
-  color: COLORS.white,
-  overflowX: "hidden",
-  position: "relative",
-  fontFamily: "'DM Sans', sans-serif",
-};
-
-const pillStyle = {
-  display: "inline-block",
-  padding: "6px 18px",
-  background: COLORS.pillBg,
-  border: `1px solid ${COLORS.pillBorder}`,
-  borderRadius: 100,
-  color: "rgba(255,255,255,0.75)",
-  fontFamily: "'DM Sans', sans-serif",
-  fontSize: 12,
-  fontWeight: 500,
-  letterSpacing: "0.01em",
-};
-
-const buttonBase = {
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 8,
-  borderRadius: 10,
-  cursor: "pointer",
-  transition: "all 0.2s ease",
-  fontFamily: "'DM Sans', sans-serif",
-  fontWeight: 600,
-  outline: "none",
-  textDecoration: "none",
-  userSelect: "none",
-  whiteSpace: "nowrap",
-  transform: "translateY(0) scale(1)",
-};
-
-function SearchIcon({ size = 16 }: any) {
+/* ── Icons ─────────────────────────────────────────────────────── */
+function SearchIcon({ size = 16 }: { size?: number }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.35-4.35" />
     </svg>
   );
 }
 
-function UserIcon({ size = 14 }: any) {
+function ArrowRight({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  );
+}
+
+/* ── Reusable bits ─────────────────────────────────────────────── */
+function Pill({ children, variant = "registry" }: { children: ReactNode; variant?: "registry" | "glass" }) {
+  const base: CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999,
+    fontFamily: "var(--font-poppins), sans-serif",
+    fontSize: 14,
+    fontWeight: 600,
+    letterSpacing: "0.01em",
+    textAlign: "center",
+    lineHeight: 1,
+    whiteSpace: "nowrap",
+  };
+
+  const style: CSSProperties =
+    variant === "glass"
+      ? {
+          ...base,
+          padding: "6px 12px",
+          background: "rgba(185,195,243,0.22)",
+          border: "1px solid rgba(185,195,243,0.5)",
+          color: TOKENS.cream,
+        }
+      : {
+          ...base,
+          minWidth: 112,
+          height: 39,
+          padding: "0 14px",
+          background: TOKENS.blueLightActive,
+          border: `2px solid ${TOKENS.ink}`,
+          color: TOKENS.inkText,
+        };
+
+  return <span style={style}>{children}</span>;
+}
+
+type BtnVariant = "dark" | "outline" | "inkOutline";
+
+function Button({
+  children,
+  href,
+  variant = "dark",
+  icon,
+  iconRight,
+  style,
+}: {
+  children: ReactNode;
+  href: string;
+  variant?: BtnVariant;
+  icon?: ReactNode;
+  iconRight?: ReactNode;
+  style?: CSSProperties;
+}) {
+  const base: CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    padding: "13px 24px",
+    borderRadius: 999,
+    fontFamily: "var(--font-poppins), sans-serif",
+    fontSize: 15,
+    fontWeight: 500,
+    textDecoration: "none",
+    whiteSpace: "nowrap",
+    transition: "transform 0.2s ease, opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease",
+  };
+
+  const variants: Record<BtnVariant, CSSProperties> = {
+    dark: { background: TOKENS.ink, color: TOKENS.cream, border: "1px solid transparent" },
+    outline: { background: "transparent", color: TOKENS.cream, border: `1px solid ${TOKENS.cream}` },
+    inkOutline: { background: "transparent", color: TOKENS.inkText, border: `1px solid ${TOKENS.ink}` },
+  };
+
+  return (
+    <Link href={href} className="payless-btn" style={{ ...base, ...variants[variant], ...style }}>
+      {iconRight ? <>{children}{icon}</> : <>{icon}{children}</>}
+    </Link>
+  );
+}
+
+/* ── Sections ──────────────────────────────────────────────────── */
+function SendIcon({ size = 16 }: { size?: number }) {
   return (
     <svg
       width={size}
@@ -93,387 +119,99 @@ function UserIcon({ size = 14 }: any) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function LogoMark({ size = 32 }: any) {
-  return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        borderRadius: 8,
-        background: `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentLight})`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxShadow: "0 12px 24px rgba(74,124,247,0.18)",
-        flex: "0 0 auto",
-      }}
-    >
-      <span
-        style={{
-          fontFamily: "'Syne', sans-serif",
-          color: COLORS.white,
-          fontWeight: 800,
-          fontSize: Math.max(12, size * 0.5),
-          lineHeight: 1,
-          transform: "translateY(-0.5px)",
-        }}
-      >
-        P
-      </span>
-    </div>
-  );
-}
-
-function HoverButton({
-  children,
-  variant = "primary",
-  size = "md",
-  rightIcon = null,
-  leftIcon = null,
-  style = {},
-  hoverStyle = {},
-  alignSelf,
-  onClick,
-  href = null,
-  type = "button",
-  title,
-}: any) {
-  const [hovered, setHovered] = useState(false);
-
-  const sizeStyle =
-    size === "sm"
-      ? { padding: "8px 18px", fontSize: 13 }
-      : size === "lg"
-      ? { padding: "13px 26px", fontSize: 14 }
-      : { padding: "10px 22px", fontSize: 13 };
-
-  const variantStyle =
-    variant === "primary"
-      ? {
-          background: `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentLight})`,
-          border: "none",
-          color: COLORS.white,
-          boxShadow: hovered
-            ? "0 16px 36px rgba(74,124,247,0.28)"
-            : "0 12px 28px rgba(74,124,247,0.24)",
-        }
-      : variant === "dark"
-      ? {
-          background: "#0a0a0e",
-          border: "none",
-          color: COLORS.white,
-          boxShadow: hovered ? "0 12px 26px rgba(0,0,0,0.28)" : "none",
-        }
-      : variant === "navPrimary"
-      ? {
-          background: `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentLight})`,
-          border: "none",
-          color: COLORS.white,
-          boxShadow: "0 12px 28px rgba(74,124,247,0.24)",
-        }
-      : {
-          background: "transparent",
-          border: `1.5px solid ${hovered ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)"}`,
-          color: COLORS.white,
-          boxShadow: hovered ? "0 12px 24px rgba(255,255,255,0.06)" : "none",
-        };
-
-  const sharedStyle = {
-    ...buttonBase,
-    ...sizeStyle,
-    ...variantStyle,
-    ...style,
-    ...(hovered ? hoverStyle : {}),
-    alignSelf,
-    transform: hovered ? "translateY(-1px) scale(1.02)" : "translateY(0) scale(1)",
-  };
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        title={title}
-        onClick={onClick}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={sharedStyle}
-      >
-        {leftIcon}
-        <span>{children}</span>
-        {rightIcon}
-      </Link>
-    );
-  }
-
-  return (
-    <button
-      type={type}
-      title={title}
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={sharedStyle}
-    >
-      {leftIcon}
-      <span>{children}</span>
-      {rightIcon}
-    </button>
-  );
-}
-
-function NavLink({ label, active = false, href = "#", style = {} }: any) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <Link
-      href={href}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        color: active || hovered ? COLORS.white : "rgba(255,255,255,0.5)",
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: 14,
-        fontWeight: active ? 600 : 400,
-        textDecoration: "none",
-        transition: "all 0.2s ease",
-        ...style,
-      }}
-    >
-      {label}
-    </Link>
-  );
-}
-
-// TODO: Remove this legacy landing-specific navbar helper after the shared layout navbar fully replaces it.
-function LandingNavbar() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <header
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        height: 64,
-        padding: "0 40px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: scrolled ? "rgba(10,10,14,0.95)" : "rgba(10,10,14,0.8)",
-        backdropFilter: "blur(14px)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-        transition: "background 0.3s ease",
-      }}
-    >
-      <div
-        className="w-full max-w-[1280px]"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 24,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>
-          <Image
-            src="/logo.png"
-            alt="Payless Protocol"
-            width={32}
-            height={32}
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              display: "block",
-              objectFit: "cover",
-            }}
-          />
-          <span
-            style={{
-              color: COLORS.white,
-              fontFamily: "'Syne', sans-serif",
-              fontWeight: 600,
-              fontSize: 15,
-              letterSpacing: "0.02em",
-              whiteSpace: "nowrap",
-            }}
-          >
-            Payless Protocol
-          </span>
-        </div>
-
-        <nav
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 36,
-            flex: "1 1 auto",
-            justifyContent: "center",
-          }}
-        >
-          <NavLink label="Home" active />
-          <NavLink label="Search" />
-          <NavLink label="Flag" />
-          <NavLink label="Recover" />
-        </nav>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 auto" }}>
-          <HoverButton
-            variant="outline"
-            size="sm"
-            style={{
-              borderRadius: 8,
-              border: "1px solid rgba(255,255,255,0.25)",
-              background: "transparent",
-            }}
-            hoverStyle={{
-              borderColor: "rgba(255,255,255,0.6)",
-            }}
-          >
-            Sign Up
-          </HoverButton>
-          <HoverButton
-            variant="navPrimary"
-            size="sm"
-            style={{
-              borderRadius: 8,
-              paddingLeft: 20,
-              paddingRight: 20,
-            }}
-            rightIcon={<UserIcon size={14} />}
-            hoverStyle={{
-              opacity: 0.9,
-            }}
-          >
-            Login Now
-          </HoverButton>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function SectionBadge({ children, style = {} }: any) {
-  return <div style={{ ...pillStyle, ...style }}>{children}</div>;
-}
-
-function HeroBlob() {
-  return (
-    <svg
-      viewBox="0 0 400 420"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{
-        position: "absolute",
-        right: -40,
-        top: "50%",
-        transform: "translateY(-52%)",
-        width: 400,
-        height: 420,
-        pointerEvents: "none",
-        zIndex: 0,
-      }}
-    >
-      <path
-        d="M 80,40 C 160,-20 280,20 340,100 C 410,190 390,310 310,370 
-           C 220,440 90,420 40,330 C -20,230 -10,110 80,40 Z"
-        fill="none"
-        stroke="rgba(74,124,247,0.18)"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M 90,55 C 165,-10 275,28 330,108 C 395,198 372,305 295,358 
-           C 210,418 88,398 42,312 C -12,218 8,122 90,55 Z"
-        fill="rgba(45,65,150,0.45)"
-      />
+      <polygon points="5 3 19 12 5 21" />
+      <line x1="19" y1="12" x2="5" y2="12" />
     </svg>
   );
 }
 
 function HeroSection() {
   return (
-    <section
-      style={{
-        position: "relative",
-        background: "#0a0a0e",
-        overflow: "hidden",
-      }}
-      className="px-6 py-16 md:py-20 md:px-[60px]"
-    >
-      <HeroBlob />
-
+    <section style={{ paddingTop: 150, paddingBottom: 0 }}>
       <div
         style={{
-          position: "relative",
-          zIndex: 2,
-          maxWidth: 640,
+          width: "100%",
+          maxWidth: PAGE_WIDTH,
           margin: "0 auto",
+          padding: "0 24px",
           textAlign: "center",
         }}
       >
-        <SectionBadge style={{ marginBottom: 36 }}>
-          Search, flag, and recover device records from the registry.
-        </SectionBadge>
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 508,
+            maxWidth: "100%",
+            height: 42,
+            padding: "0 18px",
+            borderRadius: 999,
+            background: TOKENS.blueLightActive,
+            border: `2px solid ${TOKENS.ink}`,
+            color: TOKENS.inkText,
+            fontFamily: "var(--font-poppins), sans-serif",
+            fontSize: 12,
+            fontWeight: 600,
+            letterSpacing: "0.01em",
+            lineHeight: 1,
+            marginBottom: 40,
+          }}
+        >
+          The decentralized IMEI registry that protects buyers, sellers, and marketplaces.
+        </span>
 
         <h1
           style={{
-            fontFamily: "'Syne', sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(48px, 7vw, 78px)",
-            lineHeight: 1,
-            letterSpacing: "-0.03em",
-            color: COLORS.white,
-            margin: "0 0 10px",
+            display: "block",
+            fontFamily: "var(--font-poppins), sans-serif",
+            fontWeight: 500,
+            fontSize: "clamp(42px, 6.1vw, 85px)",
+            lineHeight: 1.1,
+            letterSpacing: "-0.02em",
+            color: TOKENS.cream,
+            margin: "0 0 6px",
+            textAlign: "center",
           }}
-          className="md:text-[clamp(48px, 7vw, 78px)] text-[clamp(38px, 8vw, 82px)]"
         >
-          Make Stolen Devices
-        </h1>
-
-        <h1
-          style={{
-            fontFamily: "'Syne', sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(48px, 7vw, 78px)",
-            lineHeight: 1,
-            letterSpacing: "-0.03em",
-            margin: "0 0 28px",
-          }}
-          className="md:text-[clamp(48px, 7vw, 78px)] text-[clamp(38px, 8vw, 82px)]"
-        >
-          <span style={{ color: COLORS.accent }}>Worth</span>
-          <span style={{ color: COLORS.white }}>less.</span>
+          Make stolen device
+          <span
+            style={{
+              display: "block",
+              fontFamily: "var(--font-playfair), serif",
+              fontStyle: "italic",
+              fontWeight: 400,
+              fontSize: "clamp(44px, 6.4vw, 89px)",
+              lineHeight: 1.05,
+              letterSpacing: "-0.01em",
+              color: TOKENS.ink,
+              margin: 0,
+              textAlign: "center",
+            }}
+          >
+            worthless<span style={{ color: TOKENS.cream }}>.</span>
+          </span>
         </h1>
 
         <p
           style={{
-            maxWidth: 480,
-            margin: "0 auto 40px",
-            color: COLORS.body,
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14,
-            lineHeight: 1.7,
+            maxWidth: 595,
+            margin: "34px auto 0",
+            color: "rgba(255,255,255,0.9)",
+            fontFamily: "var(--font-poppins), sans-serif",
+            fontSize: 15,
+            lineHeight: 1.55,
+            textAlign: "center",
           }}
         >
-          Search an IMEI before you buy, flag a lost device from a connected wallet, or
-          recover the 15-digit number when you need it.
+          Payless Protocol makes stolen devices risky to buy or sell. Instantly flag an
+          IMEI on-chain and create a trusted record anyone can verify in seconds. Built on
+          Base — the Carfax for mobile devices.
         </p>
 
         <div
@@ -482,718 +220,456 @@ function HeroSection() {
             justifyContent: "center",
             gap: 14,
             flexWrap: "wrap",
-            marginBottom: 28,
+            marginTop: 36,
           }}
         >
-          <HoverButton
-            variant="primary"
-            size="lg"
-            leftIcon={<SearchIcon size={16} />}
-            style={{ borderRadius: 10, paddingLeft: 20, paddingRight: 20 }}
-            hoverStyle={{ opacity: 0.88 }}
+          <Button
             href="/search"
+            variant="outline"
+            icon={<SearchIcon size={16} />}
+            style={{ width: 150, height: 51, padding: 0 }}
           >
             Search IMEI
-          </HoverButton>
-          <HoverButton
-            variant="outline"
-            size="lg"
-            style={{ borderRadius: 10, paddingLeft: 26, paddingRight: 26 }}
-            hoverStyle={{ borderColor: "rgba(255,255,255,0.7)" }}
-          href="/flag"
+          </Button>
+          <Button
+            href="/flag"
+            variant="dark"
+            icon={<SendIcon size={16} />}
+            iconRight
+            style={{ width: 177, height: 49, padding: 0 }}
           >
-            Flag Lost Device
-          </HoverButton>
+            Flag lost device
+          </Button>
         </div>
 
+        <div
+          style={{
+            marginTop: 30,
+            color: "rgba(255,255,255,0.8)",
+            fontFamily: "var(--font-poppins), sans-serif",
+            fontSize: 13.5,
+          }}
+        >
+          Built on <span style={{ fontWeight: 700, color: TOKENS.ink }}>Base.</span>
+        </div>
       </div>
     </section>
   );
 }
 
-function ToolCard({ title, desc, cta, accent = false, alignButton = "flex-start" }: any) {
+/* Custom icons per design spec — replace with Figma SVG exports in /public/icons when available. */
+
+/* Retrieve IMEI: two overlapping rounded squares with circular arrows (recover/swap) */
+function RecoverIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2.5" y="2.5" width="11" height="11" rx="3" />
+      <rect x="10.5" y="10.5" width="11" height="11" rx="3" />
+      <path d="M6 8h4a1.5 1.5 0 0 1 1.5 1.5V11" />
+      <path d="m9.6 10.6 1.9 1.9 1.9-1.9" />
+      <path d="M18 16h-4a1.5 1.5 0 0 1-1.5-1.5V13" />
+      <path d="m14.4 13.4-1.9-1.9-1.9 1.9" />
+    </svg>
+  );
+}
+
+/* Report lost phone: dome / alarm-siren with small rays on top */
+function AlarmIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 17a8 8 0 0 1 16 0" />
+      <path d="M3 20.5h18" />
+      <path d="M12 9v3.5" />
+      <path d="M8.2 9.8A4.5 4.5 0 0 1 12 8" />
+      <path d="M15.8 9.8A4.5 4.5 0 0 0 12 8" />
+      <path d="M12 2.2v1.4" />
+      <path d="m6.6 4 1 1.2" />
+      <path d="m17.4 4-1 1.2" />
+    </svg>
+  );
+}
+
+/* Search IMEI status: magnifier combined with circular refresh arrow */
+function SearchRefreshIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M10.5 3a7.5 7.5 0 1 0 4.6 13.4" />
+      <path d="M10.5 0.9v4.2l-2-2" />
+      <path d="m8.5 3.1 2 2 2-2" />
+      <path d="m16.6 16.6 4.4 4.4" />
+      <path d="M14 7.4a6 6 0 0 1 3-1.1" />
+    </svg>
+  );
+}
+
+function ToolCard({
+  title,
+  desc,
+  cta,
+  href,
+  icon,
+  size,
+  step,
+  buttonVariant = "overlap",
+}: {
+  title: string;
+  desc: string;
+  cta: string;
+  href: string;
+  icon: ReactNode;
+  size: "wide" | "tall";
+  step: 1 | 2 | 3;
+  buttonVariant?: "overlap" | "below";
+}) {
   return (
     <div
-      style={{
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        minHeight: accent ? 310 : 280,
-        padding: 28,
-        borderRadius: 20,
-        border: accent ? "none" : "1px solid rgba(255,255,255,0.1)",
-        background: accent
-          ? "linear-gradient(145deg, #5b7fe8, #7399f5)"
-          : "rgba(255,255,255,0.04)",
-        transform: "translateY(0)",
-        boxShadow: accent ? "0 14px 28px rgba(74,124,247,0.1)" : "none",
-      }}
-      className="md:translate-y-[-14px]"
+      className={[
+        "rt-card",
+        size === "wide" ? "rt-card--wide" : "rt-card--tall",
+        step === 2 ? "rt-card--step2" : step === 3 ? "rt-card--step3" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
-      <div
-        style={{
-          width: 44,
-          height: 44,
-          borderRadius: "50%",
-          background: accent ? "rgba(0,0,0,0.28)" : "rgba(255,255,255,0.9)",
-          marginBottom: 48,
-          flex: "0 0 auto",
-        }}
-      />
-      <h3
-        style={{
-          fontFamily: "'Syne', sans-serif",
-          fontSize: 18,
-          fontWeight: 700,
-          lineHeight: 1.2,
-          margin: "0 0 12px",
-          color: COLORS.white,
-          maxWidth: 260,
-        }}
-      >
-        {title}
-      </h3>
-      <p
-        style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 13,
-          lineHeight: 1.65,
-          margin: "0 0 36px",
-          color: accent ? "rgba(255,255,255,0.82)" : "rgba(255,255,255,0.45)",
-          maxWidth: 290,
-          flex: 1,
-        }}
-      >
-        {desc}
-      </p>
-      <div style={{ marginTop: "auto", display: "flex", justifyContent: alignButton }}>
-        <HoverButton
-          variant={accent ? "dark" : "outline"}
-          size="sm"
+      <div className="rt-pill">
+        {icon}
+        <span
           style={{
-            borderRadius: 8,
-            padding: "10px 22px",
-            background: accent ? "#0a0a0e" : "transparent",
-            border: accent ? "none" : "1px solid rgba(255,255,255,0.25)",
-            color: COLORS.white,
-            fontSize: 13,
-            fontWeight: 600,
+            fontFamily: "var(--font-poppins), sans-serif",
+            fontWeight: 500,
+            fontSize: 17,
+            lineHeight: 1,
+            color: TOKENS.inkText,
           }}
-          hoverStyle={{
-            opacity: 0.9,
-          }}
-          href={cta === "Recover Now" ? "/recover" : cta === "Start Searching" ? "/search" : cta === "Flag Lost Device" ? "/flag" : undefined}
         >
-          {cta}
-        </HoverButton>
+          {title}
+        </span>
       </div>
+
+      <p className="rt-desc">{desc}</p>
+
+      <Link
+        href={href}
+        className={`rt-btn ${buttonVariant === "below" ? "rt-btn--below" : "rt-btn--overlap"}`}
+      >
+        {cta}
+        <ArrowRight size={14} />
+      </Link>
     </div>
   );
 }
 
-function ToolsSection() {
+function RegistryToolsSection() {
   return (
-    <section
-      style={{
-        position: "relative",
-        background: "#0a0a0e",
-      }}
-      className="px-6 py-20 md:py-20 md:px-[60px]"
-    >
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          right: 28,
-          top: 10,
-          width: 320,
-          height: 320,
-          borderRadius: "55% 45% 60% 40% / 50% 55% 45% 50%",
-          background: "rgba(74,124,247,0.28)",
-          filter: "blur(2px)",
-        }}
-        className="hidden md:block"
-      />
-      <div className="max-w-[1280px] mx-auto">
-        <SectionBadge style={{ marginBottom: 24 }}>Registry tools</SectionBadge>
-
-        <h2
-          style={{
-            fontFamily: "'Syne', sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(32px, 4vw, 52px)",
-            lineHeight: 1.1,
-            letterSpacing: "-0.02em",
-            color: COLORS.white,
-            margin: "0 0 56px",
-            maxWidth: 800,
-          }}
-        >
-          Search, flag, or
-          <br />
-          recover a device record.
-        </h2>
-
-        <div
-          style={{
-            display: "grid",
-            gap: 20,
-            alignItems: "start",
-          }}
-          className="grid-cols-1 md:grid-cols-[1fr_1.1fr_1fr]"
-        >
-          <ToolCard
-            title={
-              <>
-                Recover <span style={{ color: "#4a7cf7" }}>IMEI</span>
-              </>
-            }
-            desc="Recover the 15-digit IMEI from a device before you search or flag it."
-            cta="Recover Now"
-            alignButton="flex-start"
-          />
-          <ToolCard
-            title="Flag Lost Or Stolen Device"
-            desc="Write the device hash and recovery phrase to the registry from a connected wallet."
-            cta="Flag Lost Device"
-            accent
-            alignButton="flex-end"
-          />
-          <ToolCard
-            title={
-              <>
-                Search <span style={{ color: "#4a7cf7" }}>IMEI</span> Status
-              </>
-            }
-            desc="Check whether an IMEI is flagged lost or stolen before a purchase."
-            cta="Start Searching"
-            alignButton="flex-end"
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BenefitsSection() {
-  return (
-    <section
-      style={{
-        background: "#0a0a0e",
-      }}
-      className="px-6 py-20 md:py-20 md:px-[60px]"
-    >
-      <div
-        className="max-w-[1280px] mx-auto grid gap-20 md:gap-20 items-center grid-cols-1 md:grid-cols-[1fr_1fr]"
-        style={{
-          display: "grid",
-        }}
-      >
-        <div
-          style={{
-            position: "relative",
-            borderRadius: 20,
-            overflow: "hidden",
-            height: 380,
-            background: "linear-gradient(160deg, #e8e8ec 0%, #f4f4f6 45%, #d0d0d8 100%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          className="md:h-[380px] h-[280px]"
-        >
-          <svg width="170" height="320" viewBox="0 0 170 320"
-            fill="none" style={{ transform: "rotate(-4deg)" }}>
-            <rect x="8" y="0" width="154" height="320" rx="24"
-              fill="#1a1a22" stroke="rgba(255,255,255,0.12)"
-              strokeWidth="1.5"/>
-            <rect x="18" y="12" width="134" height="296" rx="18"
-              fill="url(#phoneScreen)"/>
-            <rect x="62" y="5" width="46" height="9" rx="4.5"
-              fill="#0a0a12"/>
-            <defs>
-              <linearGradient id="phoneScreen" x1="18" y1="12"
-                x2="152" y2="308" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#2a7a8a" stopOpacity="0.9"/>
-                <stop offset="55%" stopColor="#1a3a6a" stopOpacity="0.95"/>
-                <stop offset="100%" stopColor="#060818" stopOpacity="1"/>
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-
-        <div style={{ textAlign: "right" }}>
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <SectionBadge style={{ marginBottom: 24 }}>What the registry shows</SectionBadge>
-          </div>
+    <section style={{ paddingTop: 74 }}>
+      <div style={{ width: "100%", maxWidth: PAGE_WIDTH, margin: "0 auto", padding: "0 24px" }}>
+        <div className="rt-panel">
+          <Pill>Registry tools</Pill>
 
           <h2
             style={{
-              fontFamily: "'Syne', sans-serif",
-              fontWeight: 800,
-              fontSize: "clamp(28px, 3.5vw, 46px)",
-              lineHeight: 1.12,
-              letterSpacing: "-0.02em",
-              color: COLORS.white,
-              margin: "0 0 40px",
+              fontFamily: "var(--font-poppins), sans-serif",
+              fontWeight: 600,
+              fontSize: "clamp(26px, 2.19cqw, 40px)",
+              lineHeight: 1.35,
+              letterSpacing: "-0.01em",
+              margin: "28px 0 0",
+              color: TOKENS.inkText,
             }}
           >
-            What <span style={{ color: COLORS.accent }}>Payless</span> lets you verify.
+            <span style={{ color: TOKENS.blue }}>Search, flag,</span>{" "}
+            <span style={{ color: TOKENS.inkText }}>or</span>
+            <br />
+            <span style={{ color: TOKENS.blue }}>recover</span>{" "}
+            <span style={{ color: TOKENS.inkText }}>a device record.</span>
           </h2>
 
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 14 }}>
-            {["Search before purchase", "Flag from a connected wallet", "Recover with the 3-word phrase"].map(
-              (benefit) => (
+          <div className="rt-grid">
+            <ToolCard
+              title="Retrieve IMEI"
+              desc="Find your IMEI when it's unknown. We guide you through simple steps to retrieve it quickly and continue the process."
+              cta="Recover now"
+              href="/retrieve"
+              icon={<RecoverIcon size={24} />}
+              size="wide"
+              step={1}
+              buttonVariant="below"
+            />
+            <ToolCard
+              title="Report lost phone"
+              desc="Flags a device as lost or stolen, triggering an alert that helps prevent misuse and boosts recovery chances."
+              cta="Flag lost device"
+              href="/flag"
+              icon={<AlarmIcon size={24} />}
+              size="tall"
+              step={2}
+              buttonVariant="overlap"
+            />
+            <ToolCard
+              title="Search IMEI status"
+              desc="Check whether an IMEI has been flagged on-chain. Enter the 15-digit IMEI and see the device status instantly."
+              cta="Start searching"
+              href="/search"
+              icon={<SearchRefreshIcon size={24} />}
+              size="tall"
+              step={3}
+              buttonVariant="overlap"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const STEPS = [
+  {
+    title: "Step 1",
+    body: "Enter the IMEI number. That's the phone's serial number — dial *#06# on any phone to find it.",
+  },
+  {
+    title: "Step 2",
+    body: "Get a secret phrase. Three random words you can remember. This is your key to update the report later.",
+  },
+  {
+    title: "Step 3",
+    body: "The phone is flagged immediately. Anyone who checks that IMEI from this point on sees it's stolen.",
+  },
+  {
+    title: "Step 4",
+    body: "Found your phone? Clear the flag. Use your secret phrase to mark it safe again — no office visit, no waiting.",
+  },
+];
+
+function HowItWorksSection() {
+  return (
+    <section id="how-it-works" style={{ paddingTop: 96, scrollMarginTop: 100 }}>
+      <div style={{ width: "100%", maxWidth: PAGE_WIDTH, margin: "0 auto", padding: "0 24px" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Pill variant="glass">How It Works</Pill>
+        </div>
+
+        <h2
+          style={{
+            textAlign: "right",
+            fontFamily: "var(--font-poppins), sans-serif",
+            fontWeight: 500,
+            fontSize: "clamp(34px, 3.68vw, 53px)",
+            lineHeight: 1.1,
+            letterSpacing: "-0.02em",
+            margin: "18px 0 0",
+          }}
+        >
+          <span style={{ color: TOKENS.cream }}>Get To </span>
+          <span style={{ color: TOKENS.inkText }}>Understand</span>
+          <span style={{ color: TOKENS.cream }}>.</span>
+        </h2>
+
+        <h3
+          style={{
+            fontFamily: "var(--font-poppins), sans-serif",
+            fontWeight: 500,
+            fontSize: "clamp(28px, 2.5vw, 36px)",
+            lineHeight: 1.15,
+            letterSpacing: "-0.01em",
+            margin: "66px 0 0",
+          }}
+        >
+          <span style={{ color: TOKENS.cream }}>How the </span>
+          <span style={{ color: TOKENS.inkText }}>Registry</span>
+          <span style={{ color: TOKENS.cream }}> Works.</span>
+        </h3>
+
+        <p
+          style={{
+            width: 658,
+            maxWidth: "100%",
+            margin: "16px 0 0",
+            color: TOKENS.cream,
+            fontFamily: "var(--font-poppins), sans-serif",
+            fontSize: 12.04,
+            fontWeight: 500,
+            lineHeight: 1.65,
+            letterSpacing: 0,
+          }}
+        >
+          Lost your phone? Enter its IMEI (dial *#06# to find it) and Payless flags it
+          instantly. You&apos;ll get a secret 3-word phrase — keep it safe, it&apos;s your key
+          to clear the flag later if you get the phone back. From that moment, anyone who
+          checks that IMEI sees it&apos;s stolen.
+        </p>
+
+        <div
+          className="grid grid-cols-1 gap-y-4 md:grid-cols-[1fr_44px_1fr_44px_1fr_44px_1fr] md:items-stretch md:gap-x-6"
+          style={{ marginTop: 42, columnGap: 22 }}
+        >
+          {STEPS.map((step, index) => (
+            <Fragment key={step.title}>
+              <div
+                style={{
+                  background: TOKENS.blueLightActive,
+                  borderRadius: 20,
+                  border: `2px solid ${TOKENS.ink}`,
+                  padding: "18px 20px",
+                  minHeight: 127,
+                }}
+              >
                 <div
-                  key={benefit}
                   style={{
-                    minWidth: 260,
-                    padding: "11px 22px",
-                    borderRadius: 10,
-                    background: COLORS.tagBg,
-                    border: `1px solid ${COLORS.tagBorder}`,
-                    color: COLORS.white,
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 14,
-                    fontWeight: 500,
-                    textAlign: "right",
+                    fontFamily: "var(--font-poppins), sans-serif",
+                    fontWeight: 600,
+                    fontSize: 15,
+                    color: TOKENS.inkText,
+                    marginBottom: 10,
                   }}
                 >
-                  {benefit}
+                  {step.title}
                 </div>
-              )
-            )}
-          </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-poppins), sans-serif",
+                    fontSize: 11.5,
+                    lineHeight: 1.5,
+                    color: INK_SOFT,
+                  }}
+                >
+                  {step.body}
+                </div>
+              </div>
+              {index < STEPS.length - 1 ? (
+                <div className="hidden items-center justify-center md:flex" style={{ color: TOKENS.cream }}>
+                  <ArrowRight size={20} />
+                </div>
+              ) : null}
+            </Fragment>
+          ))}
         </div>
+
+        <p
+          style={{
+            maxWidth: 465,
+            margin: "42px 0 0",
+            color: "rgba(255,255,255,0.82)",
+            fontFamily: "var(--font-poppins), sans-serif",
+            fontSize: 12,
+            lineHeight: 1.65,
+          }}
+        >
+          Before you buy, enter the phone&apos;s IMEI (dial *#06# to find it) and Payless
+          checks it against the registry instantly. Clean means it&apos;s safe to buy.
+          Flagged means walk away — no forms, no waiting.
+        </p>
       </div>
     </section>
   );
 }
 
-function CTASection({ onOpenWaitlist }: any) {
+const GALLERY = [
+  { src: "/gallery/phone-1.png", height: 273 },
+  { src: "/gallery/phone-2.png", height: 212 },
+  { src: "/gallery/phone-3.png", height: 345 },
+  { src: "/gallery/phone-4.png", height: 303 },
+  { src: "/gallery/phone-5.png", height: 255 },
+];
+
+function GetStartedSection() {
   return (
-    <section style={{ background: "#0a0a0e" }} className="px-5 pb-16 md:pb-24 md:px-[60px]">
-      <div className="max-w-[1280px] mx-auto">
+    <section style={{ paddingTop: 104, paddingBottom: 40 }}>
+      <div style={{ width: "100%", maxWidth: PAGE_WIDTH, margin: "0 auto", padding: "0 24px" }}>
         <div
           style={{
-            position: "relative",
-            overflow: "hidden",
-            borderRadius: 24,
-            padding: "72px 40px",
-            textAlign: "center",
-            border: "1px solid rgba(180,60,40,0.1)",
-            backgroundColor: "#1c0a08",
-            backgroundImage: 'url("/red.png")',
-            backgroundSize: "cover",
-            backgroundPosition: "center",
+            background: TOKENS.cream,
+            borderRadius: 40,
+            padding: "50px 50px 30px",
           }}
-          className="md:px-[40px] px-5 md:py-[72px] py-10"
         >
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "linear-gradient(135deg, rgba(80,20,10,0.6), rgba(40,10,10,0.8))",
-              pointerEvents: "none",
-            }}
-          />
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "radial-gradient(circle at center, rgba(255,255,255,0.05), transparent 35%)",
-              opacity: 0.6,
-              pointerEvents: "none",
-            }}
-          />
+          <Pill>Use Payless Now!!!</Pill>
 
-          <div style={{ position: "relative", zIndex: 2 }}>
-            <SectionBadge>Check a device or flag one from the app.</SectionBadge>
-
+          <div className="mt-8 flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
             <h2
               style={{
-                fontFamily: "'Syne', sans-serif",
-                fontWeight: 800,
-                fontSize: "clamp(32px, 5vw, 64px)",
-                lineHeight: 1.06,
+                fontFamily: "var(--font-poppins), sans-serif",
+                fontWeight: 500,
+                fontSize: "clamp(34px, 4.6vw, 61px)",
+                lineHeight: 1.1,
                 letterSpacing: "-0.02em",
-                color: COLORS.white,
-                margin: "24px 0 24px",
+                color: TOKENS.inkText,
+                margin: 0,
               }}
-              className="md:text-[clamp(32px, 5vw, 64px)] text-[clamp(28px, 7vw, 64px)]"
             >
-              Protect Your <span style={{ color: COLORS.accent }}>Device</span>. Protect
-              <br />
-              Your Next <span style={{ color: COLORS.accent }}>Purchase</span>.
+              <span style={{ color: TOKENS.ink }}>Get started with </span>
+              <span style={{ color: TOKENS.blue }}>Payless</span>
+              <span style={{ color: TOKENS.ink }}>.</span>
             </h2>
 
-            <p
-              style={{
-                maxWidth: 460,
-                margin: "0 auto 36px",
-                color: COLORS.body,
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 14,
-                lineHeight: 1.65,
-              }}
-            >
-              Search an IMEI before you buy or flag a lost or stolen device from a connected wallet.
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: 14,
-                flexWrap: "wrap",
-                marginBottom: 24,
-              }}
-            >
-              <HoverButton
-                variant="primary"
-                size="lg"
-                leftIcon={<SearchIcon size={16} />}
-                hoverStyle={{ opacity: 0.88 }}
-                href="/search"
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 18 }}>
+              <p
+                style={{
+                  maxWidth: 480,
+                  textAlign: "right",
+                  color: TOKENS.inkText,
+                  fontFamily: "var(--font-poppins), sans-serif",
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  margin: 0,
+                }}
               >
-                Search IMEI
-              </HoverButton>
-              <HoverButton
-                variant="outline"
-                size="lg"
-                hoverStyle={{ borderColor: "rgba(255,255,255,0.7)" }}
-                onClick={onOpenWaitlist}
-              >
-                Join Our Waitlist
-              </HoverButton>
+                Check a phone, list one for sale, or just see what&apos;s nearby — no account
+                required to browse.
+              </p>
+              <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                <Button href="/search" variant="inkOutline" icon={<SearchIcon size={16} />}>
+                  Search IMEI
+                </Button>
+                <Button href="/flag" variant="dark" icon={<ArrowRight size={16} />}>
+                  Flag lost device
+                </Button>
+              </div>
             </div>
+          </div>
 
+          <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-5 md:items-end md:gap-[50px]">
+            {GALLERY.map((item, index) => (
+              <div
+                key={item.src}
+                style={{
+                  position: "relative",
+                  height: item.height,
+                  borderRadius: 20,
+                  overflow: "hidden",
+                  background: "#BDBAB4",
+                }}
+              >
+                <Image
+                  src={item.src}
+                  alt={`Payless phone ${index + 1}`}
+                  fill
+                  sizes="(max-width: 768px) 45vw, 208px"
+                  style={{ objectFit: "cover" }}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 50 }}>
+            <Footer />
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-// TODO: Remove this legacy footer after confirming the standalone layout/footer component is the only one needed.
-function LandingFooter() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <footer
-      style={{
-        background: "#0a0a0e",
-        borderTop: "1px solid rgba(255,255,255,0.06)",
-      }}
-      className="px-4 md:px-[60px] py-4 md:py-[18px]"
-    >
-      <div
-        className="max-w-[1280px] mx-auto flex items-center justify-between gap-6 flex-wrap"
-        style={{
-          display: "flex",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <LogoMark size={28} />
-          <span
-            style={{
-              fontFamily: "'Syne', sans-serif",
-              color: COLORS.white,
-              fontWeight: 600,
-              fontSize: 14,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Payless Protocol
-          </span>
-        </div>
-
-        <nav style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
-          <NavLink
-            label="Home"
-            active
-            href="/"
-            style={{
-              padding: "4px 12px",
-              borderRadius: 6,
-              background: "rgba(255,255,255,0.08)",
-              color: "rgba(255,255,255,0.9)",
-              fontSize: 13,
-            }}
-          />
-          {[
-            { label: "Search", href: "/search" },
-            { label: "Flag", href: "/flag" },
-            { label: "Recover", href: "/recover" },
-          ].map((link) => (
-            <NavLink 
-              key={link.href} 
-              label={link.label} 
-              href={link.href} 
-              style={{
-                background: "transparent",
-                color: "rgba(255,255,255,0.4)",
-                padding: "0"
-              }}
-            />
-          ))}
-        </nav>
-      </div>
-    </footer>
   );
 }
 
 export default function PaylessLanding() {
-  const [waitlistOpen, setWaitlistOpen] = useState(false);
-  const { address } = useAccount();
-  const router = useRouter();
-
   return (
-    <>
-      <div style={pageStyle}>
-        <Navbar />
-        <main>
-          {/* DESKTOP LAYOUT */}
-          <div className="hidden md:block">
-            <HeroSection />
-            <ToolsSection />
-            <BenefitsSection />
-            <CTASection onOpenWaitlist={() => setWaitlistOpen(true)} />
-          </div>
-
-          {/* MOBILE LAYOUT */}
-          <div className="block md:hidden">
-            {/* MOBILE SECTION 1 — TOP BAR */}
-            <div style={{ padding: "20px 20px 0px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
-                <div style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #4a7cf7, #6b9bff)",
-                  border: "2px solid rgba(74,124,247,0.4)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24"
-                       fill="none" stroke="white" strokeWidth="2"
-                       strokeLinecap="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                </div>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: "#fff" }}>
-                  {address ? `${address.slice(0, 2)}${address.slice(2, 6)}...` : "Connect Wallet"}
-                </div>
-              </div>
-            </div>
-
-            {/* MOBILE SECTION 2 — HERO HEADING */}
-            <div style={{ padding: "0 20px", marginBottom: "24px" }}>
-              <h1 style={{
-                fontFamily: "'Syne', sans-serif",
-                fontSize: "32px",
-                fontWeight: 800,
-                color: "#fff",
-                lineHeight: 1.15,
-                letterSpacing: "-0.02em",
-                margin: 0
-              }}>
-                Get to know your<br />
-                device <span style={{ color: "#4a7cf7" }}>status</span>
-              </h1>
-            </div>
-
-            {/* MOBILE SECTION 3 — SEARCH BAR */}
-            <div style={{ padding: "0 20px", marginBottom: "28px" }}>
-              <div 
-                onClick={() => router.push("/search")}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  borderRadius: "100px",
-                  padding: "12px 18px",
-                  cursor: "pointer"
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" strokeWidth="2"
-                     strokeLinecap="round" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  <rect x="3" y="3" width="7" height="7" rx="1"/>
-                  <rect x="14" y="3" width="7" height="7" rx="1"/>
-                  <rect x="3" y="14" width="7" height="7" rx="1"/>
-                  <rect x="14" y="14" width="7" height="7" rx="1"/>
-                </svg>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.35)", flex: 1 }}>
-                  Instant device status lookup
-                </div>
-              </div>
-            </div>
-
-            {/* MOBILE SECTION 4 — REPORT CARD */}
-            <div style={{ padding: "0 20px", marginBottom: "16px" }}>
-              <div style={{
-                background: "linear-gradient(145deg, #5b7fe8, #7399f5)",
-                borderRadius: "20px",
-                padding: "24px",
-                position: "relative",
-                overflow: "hidden"
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "48px" }}>
-                  <div>
-                    <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, color: "#fff", marginBottom: "4px", margin: 0 }}>
-                      Flag.
-                    </h2>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.75)", margin: 0 }}>
-                      Flag a lost or stolen device
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => router.push("/flag")}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      background: "#0a0a0e",
-                      border: "none",
-                      borderRadius: "100px",
-                      padding: "10px 18px",
-                      color: "#fff",
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      cursor: "pointer"
-                    }}
-                  >
-                    Flag Now!
-                    <svg width="14" height="14" viewBox="0 0 24 24"
-                         fill="none" stroke="white" strokeWidth="2.5"
-                         strokeLinecap="round">
-                      <line x1="5" y1="12" x2="19" y2="12"/>
-                      <polyline points="12 5 19 12 12 19"/>
-                    </svg>
-                  </button>
-                </div>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: 0 }}>
-                  Write the device hash and recovery phrase to the registry from a connected wallet.
-                </p>
-                {/* DECORATIVE CIRCLES */}
-                <div style={{
-                  position: "absolute",
-                  bottom: -20,
-                  right: -20,
-                  width: 100,
-                  height: 100,
-                  borderRadius: "50%",
-                  border: "2px solid rgba(255,255,255,0.2)",
-                  background: "transparent",
-                  pointerEvents: "none"
-                }} />
-                <div style={{
-                  position: "absolute",
-                  bottom: 5,
-                  right: 5,
-                  width: 65,
-                  height: 65,
-                  borderRadius: "50%",
-                  border: "2px solid rgba(255,255,255,0.15)",
-                  background: "transparent",
-                  pointerEvents: "none"
-                }} />
-              </div>
-            </div>
-
-            {/* MOBILE SECTION 5 — RETRIEVE CARD */}
-            <div style={{ padding: "0 20px", marginBottom: "32px" }}>
-              <div style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: "20px",
-                padding: "24px",
-                position: "relative",
-                overflow: "hidden"
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div>
-                    <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, color: "#fff", marginBottom: "4px", margin: 0 }}>
-                      Recover
-                    </h2>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.5)", margin: 0 }}>
-                      Need your IMEI?
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => router.push("/recover")}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      background: "#fff",
-                      border: "none",
-                      borderRadius: "100px",
-                      padding: "10px 18px",
-                      color: "#0a0a0e",
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      cursor: "pointer"
-                    }}
-                  >
-                    Let&apos;s go!
-                    <svg width="14" height="14" viewBox="0 0 24 24"
-                         fill="none" stroke="#0a0a0e" strokeWidth="2.5"
-                         strokeLinecap="round">
-                      <line x1="5" y1="12" x2="19" y2="12"/>
-                      <polyline points="12 5 19 12 12 19"/>
-                    </svg>
-                  </button>
-                </div>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.5)", lineHeight: 1.6, marginTop: "48px", margin: 0 }}>
-                  Recover the IMEI before you search or flag a device.
-                </p>
-                {/* DECORATIVE CIRCLES */}
-                <div style={{
-                  position: "absolute",
-                  bottom: -20,
-                  right: -20,
-                  width: 100,
-                  height: 100,
-                  borderRadius: "50%",
-                  border: "2px solid rgba(255,255,255,0.1)",
-                  background: "transparent",
-                  pointerEvents: "none"
-                }} />
-                <div style={{
-                  position: "absolute",
-                  bottom: 5,
-                  right: 5,
-                  width: 65,
-                  height: 65,
-                  borderRadius: "50%",
-                  border: "2px solid rgba(255,255,255,0.07)",
-                  background: "transparent",
-                  pointerEvents: "none"
-                }} />
-              </div>
-            </div>
-          </div>
-        </main>
-        <Footer />
-        <WaitlistModal isOpen={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
-      </div>
-    </>
+    <div style={{ minHeight: "100dvh", background: TOKENS.blue, overflowX: "hidden" }}>
+      <Navbar />
+      <main>
+        <HeroSection />
+        <RegistryToolsSection />
+        <HowItWorksSection />
+        <GetStartedSection />
+      </main>
+    </div>
   );
 }

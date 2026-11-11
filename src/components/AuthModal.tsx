@@ -1,8 +1,45 @@
-'use client';
+"use client";
 
-import { usePrivy } from '@privy-io/react-auth';
-import { useAccount } from 'wagmi';
-import { useEffect, useMemo, useState } from 'react';
+import { usePrivy } from "@privy-io/react-auth";
+import { useAccount } from "wagmi";
+import { useEffect, useMemo, useState } from "react";
+import { TOKENS } from "@/styles/tokens";
+
+function UserIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon({ size = 15 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  );
+}
 
 function SignOutIcon({ size = 14 }: { size?: number }) {
   return (
@@ -24,30 +61,19 @@ function SignOutIcon({ size = 14 }: { size?: number }) {
 }
 
 export default function AuthModal() {
-  const { ready, authenticated, login, logout, user } = usePrivy();
+  const { ready, authenticated, login, logout } = usePrivy();
   const { address } = useAccount();
   const [settled, setSettled] = useState(false);
 
   useEffect(() => {
     if (ready) {
-      // Small delay to let authenticated state stabilize after ready flips true
       const timer = setTimeout(() => setSettled(true), 300);
       return () => clearTimeout(timer);
     }
   }, [ready]);
 
-  useEffect(() => {
-    if (ready) {
-      console.log('[AuthModal] ✅ Auth state updated:', {
-        authenticated,
-        address: address ? address.substring(0, 6) + '...' : 'NOT CONNECTED',
-        userEmail: user?.email?.address || 'none',
-      });
-    }
-  }, [ready, authenticated, address, user]);
-
   const shortenedAddress = useMemo(() => {
-    if (!address) return '';
+    if (!address) return "";
     return `${address.slice(0, 6)}...${address.slice(-4)}`.toUpperCase();
   }, [address]);
 
@@ -55,10 +81,11 @@ export default function AuthModal() {
     return (
       <div
         style={{
-          padding: '8px 12px',
-          background: '#1A1A1A',
-          borderRadius: 8,
-          color: '#888',
+          padding: "10px 16px",
+          background: "rgba(255,255,255,0.12)",
+          border: "1px solid rgba(255,255,255,0.2)",
+          borderRadius: 999,
+          color: "rgba(255,255,255,0.7)",
           fontSize: 12,
         }}
       >
@@ -67,79 +94,101 @@ export default function AuthModal() {
     );
   }
 
-  return (
-    <div
-      style={{
-        display: 'flex',
-        gap: '10px',
-        alignItems: 'center',
-      }}
-    >
-      {authenticated && address ? (
-        <>
-          <span
-            style={{
-              padding: '8px 12px',
-              background: '#1A1A1A',
-              borderRadius: 8,
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 13,
-              color: '#00F0FF',
-              fontWeight: 600,
-            }}
-          >
-            {shortenedAddress}
-          </span>
-          <button
-            onClick={() => {
-              logout();
-              console.log('[AuthModal] ✅ User logged out');
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '10px 20px',
-              background: '#3B82F6',
-              border: 'none',
-              borderRadius: 10,
-              color: '#fff',
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'background 0.2s ease',
-            }}
-            onMouseOver={(e) => (e.currentTarget.style.background = '#2563EB')}
-            onMouseOut={(e) => (e.currentTarget.style.background = '#3B82F6')}
-          >
-            Sign Out <SignOutIcon size={14} />
-          </button>
-        </>
-      ) : (
-        <button
-          onClick={() => {
-            console.log('[AuthModal] Opening login modal');
-            login();
-          }}
+  if (authenticated && address) {
+    return (
+      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <span
           style={{
-            padding: '10px 20px',
-            background: '#00F0FF',
-            border: 'none',
-            borderRadius: 10,
-            color: '#0F0F0F',
-            fontFamily: "'DM Sans', sans-serif",
+            padding: "9px 14px",
+            background: TOKENS.ink,
+            borderRadius: 999,
+            fontFamily: "var(--font-poppins), sans-serif",
             fontSize: 13,
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'background 0.2s ease',
+            color: TOKENS.cream,
+            fontWeight: 600,
           }}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#00D9E8')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#00F0FF')}
         >
-          Connect
+          {shortenedAddress}
+        </span>
+        <button
+          onClick={() => logout()}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "9px 16px",
+            background: "transparent",
+            border: `1px solid ${TOKENS.cream}`,
+            borderRadius: 999,
+            color: TOKENS.cream,
+            fontFamily: "var(--font-poppins), sans-serif",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          Sign Out <SignOutIcon size={14} />
         </button>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+      <button
+        onClick={() => login()}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          width: 122,
+          height: 45,
+          justifyContent: "center",
+          background: "transparent",
+          border: `2px solid ${TOKENS.cream}`,
+          borderRadius: 16,
+          color: TOKENS.cream,
+          fontFamily: "var(--font-poppins), sans-serif",
+          fontSize: 14,
+          fontWeight: 500,
+          cursor: "pointer",
+          transition: "border-color 0.2s ease, background 0.2s ease",
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.borderColor = TOKENS.white;
+          e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.borderColor = TOKENS.cream;
+          e.currentTarget.style.background = "transparent";
+        }}
+      >
+        Sign Up <ArrowRightIcon size={15} />
+      </button>
+      <button
+        onClick={() => login()}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          width: 139,
+          height: 45,
+          justifyContent: "center",
+          background: TOKENS.ink,
+          border: "1px solid transparent",
+          borderRadius: 16,
+          color: TOKENS.cream,
+          fontFamily: "var(--font-poppins), sans-serif",
+          fontSize: 14,
+          fontWeight: 600,
+          cursor: "pointer",
+          transition: "background 0.2s ease",
+        }}
+        onMouseOver={(e) => (e.currentTarget.style.background = "#2b2d2b")}
+        onMouseOut={(e) => (e.currentTarget.style.background = TOKENS.ink)}
+      >
+        Login Now <UserIcon size={15} />
+      </button>
     </div>
   );
 }

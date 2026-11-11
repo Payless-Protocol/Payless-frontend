@@ -33,7 +33,7 @@ export function Input({
           borderRadius: TOKENS.buttonRadius,
           padding: "13px 16px",
           color: TOKENS.heading,
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "var(--font-poppins), sans-serif",
           fontSize: 14,
           outline: "none",
           transition: "border-color 0.2s ease, box-shadow 0.2s ease",

@@ -1,94 +1,94 @@
-"use client";
-
 import Link from "next/link";
 import { TOKENS } from "@/styles/tokens";
 
-const FOOTER_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Search", href: "/search" },
-  { label: "Flag", href: "/flag" },
-  { label: "Recover", href: "/recover" },
+const FOOTER_COLUMNS = [
+  {
+    title: "Company",
+    links: [
+      { label: "About us", href: "#" },
+      { label: "Become a partner hub", href: "#" },
+      { label: "Contact us", href: "#" },
+    ],
+  },
+  {
+    title: "Help",
+    links: [
+      { label: "FAQ's", href: "/faq" },
+      { label: "Report an issue", href: "/flag" },
+    ],
+  },
+  {
+    title: "Products",
+    links: [
+      { label: "Registry", href: "/search" },
+      { label: "Marketplace", href: "/" },
+      { label: "How it works", href: "/#how-it-works" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy policy", href: "#" },
+      { label: "Terms and conditions", href: "#" },
+    ],
+  },
 ] as const;
 
 export function Footer() {
   return (
-    <footer
-      style={{
-        background: "#0a0a0e",
-        borderTop: "1px solid rgba(255,255,255,0.06)",
-        padding: "18px 60px",
-      }}
-    >
+    <footer style={{ width: "100%", color: TOKENS.inkText }}>
       <div
         style={{
-          maxWidth: TOKENS.pageWidth,
-          margin: "0 auto",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 24,
+          justifyContent: "flex-end",
           flexWrap: "wrap",
+          gap: 52,
+          paddingTop: 8,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              background: "linear-gradient(135deg, #4a7cf7, #6b9bff)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 12px 24px rgba(74,124,247,0.18)",
-              flex: "0 0 auto",
-            }}
-          >
-            <span
+        {FOOTER_COLUMNS.map((column) => (
+          <div key={column.title} style={{ textAlign: "right" }}>
+            <h3
               style={{
-                fontFamily: "'Syne', sans-serif",
-                color: "#fff",
-                fontWeight: 800,
-                fontSize: 14,
-                lineHeight: 1,
+                fontFamily: "'Poppins', sans-serif",
+                fontSize: 15,
+                fontWeight: 600,
+                color: TOKENS.inkText,
+                margin: "0 0 12px 0",
               }}
             >
-              P
-            </span>
+              {column.title}
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {column.links.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="footer-link"
+                  style={{
+                    fontFamily: "var(--font-poppins), sans-serif",
+                    fontSize: 13,
+                    textDecoration: "none",
+                  }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
-          <span
-            style={{
-              fontFamily: "'Syne', sans-serif",
-              color: "#fff",
-              fontWeight: 600,
-              fontSize: 14,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Payless Protocol
-          </span>
-        </div>
+        ))}
+      </div>
 
-        <nav style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
-          {FOOTER_LINKS.map((link, index) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              style={{
-                color: index === 0 ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)",
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 13,
-                fontWeight: index === 0 ? 600 : 400,
-                textDecoration: "none",
-                padding: index === 0 ? "4px 12px" : "0",
-                borderRadius: 6,
-                background: index === 0 ? "rgba(255,255,255,0.08)" : "transparent",
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+      <div
+        style={{
+          marginTop: 50,
+          textAlign: "center",
+          color: TOKENS.inkMuted,
+          fontFamily: "var(--font-poppins), sans-serif",
+          fontSize: 12.5,
+        }}
+      >
+        © Payless {new Date().getFullYear()}. All rights reserved. · Made for Nigeria&apos;s second-hand phone market.
       </div>
     </footer>
   );

@@ -3,16 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { useAccount } from "wagmi";
+import { useEffect, useState } from "react";
 import AuthModal from "@/components/AuthModal";
 import { TOKENS } from "@/styles/tokens";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Search", href: "/search" },
-  { label: "Flag", href: "/flag" },
-  { label: "Recover", href: "/recover" },
+  { label: "Retrieve", href: "/retrieve" },
+  { label: "Flag device", href: "/flag" },
 ] as const;
 
 function NavLink({
@@ -32,12 +31,12 @@ function NavLink({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        color: active || hovered ? "#fff" : "rgba(255,255,255,0.5)",
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: 14,
-        fontWeight: active ? 700 : 400,
+        color: active || hovered ? TOKENS.cream : "rgba(203,200,197,0.55)",
+        fontFamily: "var(--font-poppins), sans-serif",
+        fontSize: 15,
+        fontWeight: active ? 600 : 500,
         textDecoration: "none",
-        transition: "all 0.2s ease",
+        transition: "color 0.2s ease",
       }}
     >
       {label}
@@ -45,20 +44,21 @@ function NavLink({
   );
 }
 
-function UserAvatarIcon({ size = 16 }: { size?: number }) {
+function MenuIcon({ open }: { open: boolean }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="white"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+      {open ? (
+        <>
+          <path d="M18 6 6 18" />
+          <path d="M6 6l12 12" />
+        </>
+      ) : (
+        <>
+          <path d="M4 7h16" />
+          <path d="M4 12h16" />
+          <path d="M4 17h16" />
+        </>
+      )}
     </svg>
   );
 }
@@ -67,26 +67,46 @@ export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { address, isConnected } = useAccount();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
+    const check = () => setIsMobile(window.innerWidth < 900);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const shortenedAddress = useMemo(() => {
-    if (!address) return "";
-    return `${address.slice(0, 6)}...`.toUpperCase();
-  }, [address]);
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  // Close menu on Escape, outside tap; lock body scroll while open
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+    const onClick = (e: MouseEvent) => {
+      const panel = document.getElementById("mobile-menu-panel");
+      const toggle = document.querySelector('button[aria-label="Toggle menu"]');
+      if (panel && toggle && !panel.contains(e.target as Node) && !toggle.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("click", onClick);
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("click", onClick);
+    };
+  }, [menuOpen]);
 
   return (
     <>
@@ -97,14 +117,15 @@ export function Navbar() {
           left: 0,
           right: 0,
           zIndex: 100,
-          height: 64,
+          height: 95,
           padding: isMobile ? "0 20px" : "0 40px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: scrolled ? "rgba(10,10,14,0.98)" : "#0a0a0e",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          transition: "background 0.3s ease",
+          background: TOKENS.blue,
+          backdropFilter: "none",
+          borderBottom: "1px solid rgba(255,255,255,0.12)",
+          transition: "none",
         }}
       >
         <div
@@ -117,24 +138,32 @@ export function Navbar() {
             position: "relative",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>
+          <Link
+            href="/"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              textDecoration: "none",
+              flex: "0 0 auto",
+            }}
+          >
             <Image
-              src="/logo.png"
+              src="/frame-61.png"
               alt="Payless Protocol"
-              width={24}
-              height={24}
+              width={35}
+              height={35}
+              priority
               style={{
-                width: 24,
-                height: 24,
-                borderRadius: 4,
+                width: 35,
+                height: 35,
                 display: "block",
-                objectFit: "cover",
               }}
             />
             <span
               style={{
-                color: "#fff",
-                fontFamily: "'Syne', sans-serif",
+                color: TOKENS.cream,
+                fontFamily: "var(--font-poppins), sans-serif",
                 fontWeight: 600,
                 fontSize: 15,
                 letterSpacing: "0.01em",
@@ -143,17 +172,14 @@ export function Navbar() {
             >
               Payless Protocol
             </span>
-          </div>
+          </Link>
 
           {!isMobile ? (
             <nav
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 36,
-                position: "absolute",
-                left: "50%",
-                transform: "translateX(-50%)",
+                gap: 38,
               }}
             >
               {NAV_LINKS.map((link) => (
@@ -167,52 +193,68 @@ export function Navbar() {
             </nav>
           ) : null}
 
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 auto" }}>
-            <AuthModal />
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>
+            {isMobile ? (
+              <button
+                type="button"
+                aria-label="Toggle menu"
+                aria-expanded={menuOpen}
+                aria-controls="mobile-menu-panel"
+                onClick={() => setMenuOpen((v) => !v)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 40,
+                  height: 40,
+                  minWidth: 44,
+                  minHeight: 44,
+                  borderRadius: 10,
+                  border: "1px solid rgba(255,255,255,0.24)",
+                  background: "transparent",
+                  cursor: "pointer",
+                  padding: 2,
+                }}
+              >
+                <MenuIcon open={menuOpen} />
+              </button>
+            ) : (
+              <AuthModal />
+            )}
           </div>
         </div>
       </header>
 
-      {isMobile && isConnected && address ? (
-        <div
+      {isMobile && menuOpen ? (
+        <nav
+          id="mobile-menu-panel"
+          aria-label="Mobile navigation"
           style={{
             position: "fixed",
-            top: 64,
+            top: 95,
             left: 0,
             right: 0,
-            zIndex: 90,
-            padding: "16px 20px",
-            background: "#0a0a0e",
+            zIndex: 95,
+            background: TOKENS.blue,
+            borderBottom: "1px solid rgba(255,255,255,0.12)",
+            padding: "20px",
             display: "flex",
-            alignItems: "center",
-            gap: 12,
+            flexDirection: "column",
+            gap: 18,
           }}
         >
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: "50%",
-              background: "#3B82F6",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 4px 12px rgba(59,130,246,0.2)",
-            }}
-          >
-            <UserAvatarIcon size={20} />
+          {NAV_LINKS.map((link) => (
+            <NavLink
+              key={link.href}
+              href={link.href}
+              label={link.label}
+              active={pathname === link.href}
+            />
+          ))}
+          <div style={{ display: "flex", gap: 10, paddingTop: 8 }}>
+            <AuthModal />
           </div>
-          <span
-            style={{
-              color: "#fff",
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 15,
-              fontWeight: 700,
-            }}
-          >
-            {shortenedAddress}
-          </span>
-        </div>
+        </nav>
       ) : null}
     </>
   );

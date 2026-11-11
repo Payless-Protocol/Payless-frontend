@@ -30,7 +30,7 @@ export function StatusBadge({ status }: { status: DeviceStatus }) {
         border: `1px solid ${tone.border}`,
         background: tone.background,
         color: tone.color,
-        fontFamily: "'DM Sans', sans-serif",
+        fontFamily: "var(--font-poppins), sans-serif",
         fontSize: 12,
         fontWeight: 700,
         padding: "6px 10px",

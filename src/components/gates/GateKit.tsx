@@ -4,7 +4,7 @@ import { useState, useEffect, type CSSProperties, type InputHTMLAttributes, type
 import { TOKENS } from "@/styles/tokens";
 
 const shellStyle: CSSProperties = {
-  minHeight: "100vh",
+  minHeight: "100dvh",
   background: TOKENS.background,
   paddingTop: 64,
   display: "flex",
@@ -12,7 +12,7 @@ const shellStyle: CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   padding: "64px 24px 80px",
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "var(--font-poppins), sans-serif",
 };
 
 const contentStyle: CSSProperties = {
@@ -76,7 +76,7 @@ export function FieldLabel({ children }: { children: ReactNode }) {
   return (
     <div
       style={{
-        fontFamily: "'DM Sans', sans-serif",
+        fontFamily: "var(--font-poppins), sans-serif",
         fontSize: 13,
         fontWeight: 500,
         color: "rgba(255,255,255,0.7)",
@@ -126,7 +126,7 @@ export function TextInput({
           borderRadius: TOKENS.buttonRadius,
           padding: "13px 16px",
           color: TOKENS.heading,
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "var(--font-poppins), sans-serif",
           fontSize: 14,
           outline: "none",
           transition: "border-color 0.2s ease, box-shadow 0.2s ease",
@@ -219,7 +219,7 @@ export function Button({
         gap: 8,
         borderRadius: TOKENS.buttonRadius,
         padding: "13px 22px",
-        fontFamily: "'Syne', sans-serif",
+        fontFamily: "var(--font-poppins), sans-serif",
         fontSize: 15,
         fontWeight: 700,
         cursor: disabled || loading ? "not-allowed" : "pointer",
@@ -302,7 +302,7 @@ export function ConnectWalletCard({
       </div>
       <div
         style={{
-          fontFamily: "'Syne', sans-serif",
+          fontFamily: "var(--font-poppins), sans-serif",
           color: TOKENS.heading,
           fontSize: 24,
           fontWeight: 800,
@@ -373,7 +373,7 @@ export function StatusCard({
         <div style={{ flex: "1 1 auto" }}>
           <div
             style={{
-              fontFamily: "'Syne', sans-serif",
+              fontFamily: "var(--font-poppins), sans-serif",
               color: tone === "danger" ? TOKENS.danger : tone === "success" ? TOKENS.success : TOKENS.heading,
               fontSize: 20,
               fontWeight: 800,
