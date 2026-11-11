@@ -11,8 +11,8 @@ const INK_SOFT = "#2E2F2D";
 /* ── Icons ─────────────────────────────────────────────────────── */
 function SearchIcon({ size = 16 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
-      <circle cx="11" cy="11" r="8" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" aria-hidden="true">
+      <circle cx={11} cy={11} r={8} />
       <path d="m21 21-4.35-4.35" />
     </svg>
   );
@@ -20,15 +20,15 @@ function SearchIcon({ size = 16 }: { size?: number }) {
 
 function ArrowRight({ size = 16 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="5" y1="12" x2="19" y2="12" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1={5} y1={12} x2={19} y2={12} />
       <polyline points="12 5 19 12 12 19" />
     </svg>
   );
 }
 
 /* ── Reusable bits ─────────────────────────────────────────────── */
-function Pill({ children, variant = "registry" }: { children: ReactNode; variant?: "registry" | "glass" }) {
+function Pill({ children, variant = "registry", style }: { children: ReactNode; variant?: "registry" | "glass"; style?: CSSProperties }) {
   const base: CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
@@ -43,7 +43,7 @@ function Pill({ children, variant = "registry" }: { children: ReactNode; variant
     whiteSpace: "nowrap",
   };
 
-  const style: CSSProperties =
+  const variantStyle: CSSProperties =
     variant === "glass"
       ? {
           ...base,
@@ -62,7 +62,7 @@ function Pill({ children, variant = "registry" }: { children: ReactNode; variant
           color: TOKENS.inkText,
         };
 
-  return <span style={style}>{children}</span>;
+  return <span style={{ ...variantStyle, ...style }}>{children}</span>;
 }
 
 type BtnVariant = "dark" | "outline" | "inkOutline";
@@ -119,13 +119,13 @@ function SendIcon({ size = 16 }: { size?: number }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2.4"
+      strokeWidth={2.4}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
     >
       <polygon points="5 3 19 12 5 21" />
-      <line x1="19" y1="12" x2="5" y2="12" />
+      <line x1={19} y1={12} x2={5} y2={12} />
     </svg>
   );
 }
@@ -147,20 +147,20 @@ function HeroSection() {
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 508,
+            width: 504,
             maxWidth: "100%",
-            height: 42,
-            padding: "0 18px",
-            borderRadius: 999,
+            height: 38,
+            padding: "10px 12px",
+            borderRadius: 15,
             background: TOKENS.blueLightActive,
             border: `2px solid ${TOKENS.ink}`,
             color: TOKENS.inkText,
             fontFamily: "var(--font-poppins), sans-serif",
             fontSize: 12,
             fontWeight: 600,
-            letterSpacing: "0.01em",
-            lineHeight: 1,
-            marginBottom: 40,
+            letterSpacing: "0",
+            lineHeight: "18px",
+            marginBottom: 25,
           }}
         >
           The decentralized IMEI registry that protects buyers, sellers, and marketplaces.
@@ -169,26 +169,28 @@ function HeroSection() {
         <h1
           style={{
             display: "block",
-            fontFamily: "var(--font-poppins), sans-serif",
-            fontWeight: 500,
-            fontSize: "clamp(42px, 6.1vw, 85px)",
-            lineHeight: 1.1,
-            letterSpacing: "-0.02em",
+            fontFamily: "var(--font-bricolage), sans-serif",
+            fontWeight: 600,
+            fontSize: 85,
+            lineHeight: 1.25,
+            letterSpacing: "0",
             color: TOKENS.cream,
-            margin: "0 0 6px",
+            margin: "25px 0 0",
             textAlign: "center",
+            width: 878,
+            maxWidth: "100%",
           }}
         >
-          Make stolen device
+          Make stole device
           <span
             style={{
               display: "block",
               fontFamily: "var(--font-playfair), serif",
               fontStyle: "italic",
-              fontWeight: 400,
-              fontSize: "clamp(44px, 6.4vw, 89px)",
-              lineHeight: 1.05,
-              letterSpacing: "-0.01em",
+              fontWeight: 600,
+              fontSize: 85,
+              lineHeight: 1.25,
+              letterSpacing: "0",
               color: TOKENS.ink,
               margin: 0,
               textAlign: "center",
@@ -200,12 +202,12 @@ function HeroSection() {
 
         <p
           style={{
-            maxWidth: 595,
-            margin: "34px auto 0",
-            color: "rgba(255,255,255,0.9)",
+            maxWidth: 608,
+            margin: "25px auto 0",
+            color: "rgba(255,255,255,0.75)",
             fontFamily: "var(--font-poppins), sans-serif",
-            fontSize: 15,
-            lineHeight: 1.55,
+            fontSize: 16,
+            lineHeight: 1.5,
             textAlign: "center",
           }}
         >
@@ -220,14 +222,27 @@ function HeroSection() {
             justifyContent: "center",
             gap: 14,
             flexWrap: "wrap",
-            marginTop: 36,
+            marginTop: 25,
           }}
         >
           <Button
             href="/search"
             variant="outline"
             icon={<SearchIcon size={16} />}
-            style={{ width: 150, height: 51, padding: 0 }}
+            style={{
+              width: 148,
+              height: 49,
+              padding: "14px 18px",
+              borderRadius: 16,
+              fontSize: 14,
+              fontWeight: 600,
+              color: TOKENS.cream,
+              background: "transparent",
+              border: `2px solid ${TOKENS.cream}`,
+              letterSpacing: "0",
+              justifyContent: "flex-start",
+              whiteSpace: "nowrap",
+            }}
           >
             Search IMEI
           </Button>
@@ -236,7 +251,20 @@ function HeroSection() {
             variant="dark"
             icon={<SendIcon size={16} />}
             iconRight
-            style={{ width: 177, height: 49, padding: 0 }}
+            style={{
+              width: 177,
+              height: 49,
+              padding: "14px 18px",
+              borderRadius: 16,
+              fontSize: 14,
+              fontWeight: 600,
+              color: TOKENS.cream,
+              background: TOKENS.ink,
+              border: "none",
+              letterSpacing: "0",
+              justifyContent: "flex-start",
+              whiteSpace: "nowrap",
+            }}
           >
             Flag lost device
           </Button>
@@ -244,13 +272,15 @@ function HeroSection() {
 
         <div
           style={{
-            marginTop: 30,
-            color: "rgba(255,255,255,0.8)",
+            marginTop: 25,
+            color: "rgba(255,255,255,0.75)",
             fontFamily: "var(--font-poppins), sans-serif",
-            fontSize: 13.5,
+            fontWeight: 500,
+            fontSize: 16,
+            lineHeight: 1.5,
           }}
         >
-          Built on <span style={{ fontWeight: 700, color: TOKENS.ink }}>Base.</span>
+          Built on <span style={{ fontWeight: 500, color: TOKENS.ink }}>Base</span>.
         </div>
       </div>
     </section>
@@ -258,13 +288,11 @@ function HeroSection() {
 }
 
 /* Custom icons per design spec — replace with Figma SVG exports in /public/icons when available. */
-
-/* Retrieve IMEI: two overlapping rounded squares with circular arrows (recover/swap) */
 function RecoverIcon({ size = 24 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="2.5" y="2.5" width="11" height="11" rx="3" />
-      <rect x="10.5" y="10.5" width="11" height="11" rx="3" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2.5" y="2.5" width={11} height={11} rx={3} />
+      <rect x="10.5" y="10.5" width={11} height={11} rx={3} />
       <path d="M6 8h4a1.5 1.5 0 0 1 1.5 1.5V11" />
       <path d="m9.6 10.6 1.9 1.9 1.9-1.9" />
       <path d="M18 16h-4a1.5 1.5 0 0 1-1.5-1.5V13" />
@@ -273,10 +301,9 @@ function RecoverIcon({ size = 24 }: { size?: number }) {
   );
 }
 
-/* Report lost phone: dome / alarm-siren with small rays on top */
 function AlarmIcon({ size = 24 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M4 17a8 8 0 0 1 16 0" />
       <path d="M3 20.5h18" />
       <path d="M12 9v3.5" />
@@ -289,10 +316,9 @@ function AlarmIcon({ size = 24 }: { size?: number }) {
   );
 }
 
-/* Search IMEI status: magnifier combined with circular refresh arrow */
 function SearchRefreshIcon({ size = 24 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M10.5 3a7.5 7.5 0 1 0 4.6 13.4" />
       <path d="M10.5 0.9v4.2l-2-2" />
       <path d="m8.5 3.1 2 2 2-2" />
@@ -330,16 +356,25 @@ function ToolCard({
       ]
         .filter(Boolean)
         .join(" ")}
+      style={{
+        background: TOKENS.blueLightActive,
+        borderRadius: 25,
+        border: `1.5px solid ${TOKENS.ink}`,
+        padding: "16.5px 21.5px",
+        minHeight: 98.8,
+      }}
     >
       <div className="rt-pill">
         {icon}
         <span
           style={{
-            fontFamily: "var(--font-poppins), sans-serif",
-            fontWeight: 500,
-            fontSize: 17,
-            lineHeight: 1,
+            fontFamily: "var(--font-bricolage), sans-serif",
+            fontWeight: 600,
+            fontSize: 16,
+            lineHeight: "24px",
+            letterSpacing: "0",
             color: TOKENS.inkText,
+            marginBottom: 0,
           }}
         >
           {title}
@@ -351,6 +386,23 @@ function ToolCard({
       <Link
         href={href}
         className={`rt-btn ${buttonVariant === "below" ? "rt-btn--below" : "rt-btn--overlap"}`}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          gap: 8,
+          width: buttonVariant === "below" ? 139 : buttonVariant === "overlap" ? (cta === "Start searching" ? 155 : 156) : 139,
+          height: 42,
+          padding: "12px 18px",
+          borderRadius: 16,
+          background: TOKENS.ink,
+          color: TOKENS.cream,
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: "0",
+          textDecoration: "none",
+          whiteSpace: "nowrap",
+        }}
       >
         {cta}
         <ArrowRight size={14} />
@@ -364,17 +416,19 @@ function RegistryToolsSection() {
     <section style={{ paddingTop: 74 }}>
       <div style={{ width: "100%", maxWidth: PAGE_WIDTH, margin: "0 auto", padding: "0 24px" }}>
         <div className="rt-panel">
-          <Pill>Registry tools</Pill>
+          <Pill variant="registry" style={{ background: "transparent", border: "none", borderRadius: 0, padding: 0, minWidth: "auto", height: "auto", fontSize: 12, letterSpacing: "0", lineHeight: "18px", color: TOKENS.inkText, justifyContent: "flex-start", textAlign: "left" }}>
+            Registry tools
+          </Pill>
 
           <h2
             style={{
-              fontFamily: "var(--font-poppins), sans-serif",
+              fontFamily: "var(--font-bricolage), sans-serif",
               fontWeight: 600,
-              fontSize: "clamp(26px, 2.19cqw, 40px)",
-              lineHeight: 1.35,
-              letterSpacing: "-0.01em",
+              fontSize: 54,
+              lineHeight: "81px",
+              letterSpacing: "0",
               margin: "28px 0 0",
-              color: TOKENS.inkText,
+              maxWidth: 667,
             }}
           >
             <span style={{ color: TOKENS.blue }}>Search, flag,</span>{" "}
@@ -387,7 +441,7 @@ function RegistryToolsSection() {
           <div className="rt-grid">
             <ToolCard
               title="Retrieve IMEI"
-              desc="Find your IMEI when it's unknown. We guide you through simple steps to retrieve it quickly and continue the process."
+              desc="Find your IMEI when it’s unknown, Let’s guide you through simple steps to retrieve it quickly and continue the process."
               cta="Recover now"
               href="/retrieve"
               icon={<RecoverIcon size={24} />}
@@ -397,7 +451,7 @@ function RegistryToolsSection() {
             />
             <ToolCard
               title="Report lost phone"
-              desc="Flags a device as lost or stolen, triggering an alert that helps prevent misuse and boosts recovery chances."
+              desc="Flags a device as lost or stolen, triggering an alert that helps prevent misuse and boost recovery chances."
               cta="Flag lost device"
               href="/flag"
               icon={<AlarmIcon size={24} />}
@@ -407,7 +461,7 @@ function RegistryToolsSection() {
             />
             <ToolCard
               title="Search IMEI status"
-              desc="Check whether an IMEI has been flagged on-chain. Enter the 15-digit IMEI and see the device status instantly."
+              desc="Find your IMEI when it’s unknown, Let’s guide you through simple steps to retrieve it quickly and continue the process."
               cta="Start searching"
               href="/search"
               icon={<SearchRefreshIcon size={24} />}
@@ -429,7 +483,7 @@ const STEPS = [
   },
   {
     title: "Step 2",
-    body: "Get a secret phrase. Three random words you can remember. This is your key to update the report later.",
+    body: "Get a secret phrase. Three random words, you can remember. This is your key to update the report later.",
   },
   {
     title: "Step 3",
@@ -446,18 +500,21 @@ function HowItWorksSection() {
     <section id="how-it-works" style={{ paddingTop: 96, scrollMarginTop: 100 }}>
       <div style={{ width: "100%", maxWidth: PAGE_WIDTH, margin: "0 auto", padding: "0 24px" }}>
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Pill variant="glass">How It Works</Pill>
+          <Pill variant="glass" style={{ fontSize: 12, letterSpacing: "0", lineHeight: "18px", color: TOKENS.cream, background: "rgba(185,195,243,0.25)", border: "none", borderRadius: 10, padding: 0, minWidth: "auto", height: "auto" }}>
+            How It Works
+          </Pill>
         </div>
 
         <h2
           style={{
             textAlign: "right",
-            fontFamily: "var(--font-poppins), sans-serif",
-            fontWeight: 500,
-            fontSize: "clamp(34px, 3.68vw, 53px)",
-            lineHeight: 1.1,
-            letterSpacing: "-0.02em",
-            margin: "18px 0 0",
+            fontFamily: "var(--font-bricolage), sans-serif",
+            fontWeight: 600,
+            fontSize: 54,
+            lineHeight: "81px",
+            letterSpacing: "0",
+            margin: "23px 0 0",
+            maxWidth: 669,
           }}
         >
           <span style={{ color: TOKENS.cream }}>Get To </span>
@@ -469,10 +526,12 @@ function HowItWorksSection() {
           style={{
             fontFamily: "var(--font-poppins), sans-serif",
             fontWeight: 500,
-            fontSize: "clamp(28px, 2.5vw, 36px)",
-            lineHeight: 1.15,
-            letterSpacing: "-0.01em",
-            margin: "66px 0 0",
+            fontSize: 36,
+            lineHeight: "54px",
+            letterSpacing: "0",
+            textAlign: "center",
+            margin: "50px 0 0",
+            width: 432,
           }}
         >
           <span style={{ color: TOKENS.cream }}>How the </span>
@@ -484,43 +543,50 @@ function HowItWorksSection() {
           style={{
             width: 658,
             maxWidth: "100%",
-            margin: "16px 0 0",
+            margin: "13px 0 0",
             color: TOKENS.cream,
             fontFamily: "var(--font-poppins), sans-serif",
-            fontSize: 12.04,
+            fontSize: 12.03582096,
             fontWeight: 500,
-            lineHeight: 1.65,
-            letterSpacing: 0,
+            lineHeight: "19.86px",
+            letterSpacing: "0",
           }}
         >
-          Lost your phone? Enter its IMEI (dial *#06# to find it) and Payless flags it
-          instantly. You&apos;ll get a secret 3-word phrase — keep it safe, it&apos;s your key
-          to clear the flag later if you get the phone back. From that moment, anyone who
-          checks that IMEI sees it&apos;s stolen.
+          Lost your phone? Enter its IMEI (dial *#06# to find it) and Payless flags it instantly. You&apos;ll get a secret 3-word<br />
+          phrase — keep it safe, it&apos;s your key to clear the flag later if you get the phone back. From that moment,<br />
+          anyone who checks that IMEI sees it&apos;s stolen.
         </p>
 
         <div
-          className="grid grid-cols-1 gap-y-4 md:grid-cols-[1fr_44px_1fr_44px_1fr_44px_1fr] md:items-stretch md:gap-x-6"
-          style={{ marginTop: 42, columnGap: 22 }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "210px 210px 210px 215px",
+            columnGap: "35px",
+            marginTop: 42,
+            marginLeft: 15,
+          }}
         >
           {STEPS.map((step, index) => (
             <Fragment key={step.title}>
               <div
                 style={{
                   background: TOKENS.blueLightActive,
-                  borderRadius: 20,
-                  border: `2px solid ${TOKENS.ink}`,
-                  padding: "18px 20px",
-                  minHeight: 127,
+                  borderRadius: 25,
+                  border: `1.5px solid ${TOKENS.ink}`,
+                  padding: "16.5px 21.5px",
+                  minHeight: 98.8,
+                  width: index === 3 ? 215 : 210,
                 }}
               >
                 <div
                   style={{
                     fontFamily: "var(--font-poppins), sans-serif",
                     fontWeight: 600,
-                    fontSize: 15,
+                    fontSize: 16,
+                    lineHeight: "24px",
+                    letterSpacing: "0",
                     color: TOKENS.inkText,
-                    marginBottom: 10,
+                    marginBottom: 15,
                   }}
                 >
                   {step.title}
@@ -528,9 +594,9 @@ function HowItWorksSection() {
                 <div
                   style={{
                     fontFamily: "var(--font-poppins), sans-serif",
-                    fontSize: 11.5,
-                    lineHeight: 1.5,
-                    color: INK_SOFT,
+                    fontSize: 12,
+                    lineHeight: "18px",
+                    color: TOKENS.inkText,
                   }}
                 >
                   {step.body}
@@ -547,12 +613,12 @@ function HowItWorksSection() {
 
         <p
           style={{
-            maxWidth: 465,
-            margin: "42px 0 0",
-            color: "rgba(255,255,255,0.82)",
+            maxWidth: 466,
+            margin: "40px 0 0",
+            color: TOKENS.cream,
             fontFamily: "var(--font-poppins), sans-serif",
-            fontSize: 12,
-            lineHeight: 1.65,
+            fontSize: 12.03582096,
+            lineHeight: "19.86px",
           }}
         >
           Before you buy, enter the phone&apos;s IMEI (dial *#06# to find it) and Payless
@@ -583,18 +649,34 @@ function GetStartedSection() {
             padding: "50px 50px 30px",
           }}
         >
-          <Pill>Use Payless Now!!!</Pill>
+          <Pill
+            style={{
+              fontSize: 12,
+              letterSpacing: "0",
+              lineHeight: "18px",
+              color: TOKENS.inkText,
+              background: TOKENS.blueLightActive,
+              border: `2px solid ${TOKENS.ink}`,
+              borderRadius: 15,
+              padding: "10px 12px",
+              minWidth: "auto",
+              height: "auto",
+            }}
+          >
+            Use Payless Now!!!
+          </Pill>
 
           <div className="mt-8 flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
             <h2
               style={{
-                fontFamily: "var(--font-poppins), sans-serif",
-                fontWeight: 500,
-                fontSize: "clamp(34px, 4.6vw, 61px)",
-                lineHeight: 1.1,
-                letterSpacing: "-0.02em",
-                color: TOKENS.inkText,
-                margin: 0,
+                fontFamily: "var(--font-bricolage), sans-serif",
+                fontWeight: 600,
+                fontSize: 54,
+                lineHeight: "81px",
+                letterSpacing: "0",
+                textAlign: "left",
+                margin: "15px 0 0",
+                maxWidth: 667,
               }}
             >
               <span style={{ color: TOKENS.ink }}>Get started with </span>
@@ -605,12 +687,12 @@ function GetStartedSection() {
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 18 }}>
               <p
                 style={{
-                  maxWidth: 480,
+                  maxWidth: 477,
                   textAlign: "right",
                   color: TOKENS.inkText,
                   fontFamily: "var(--font-poppins), sans-serif",
-                  fontSize: 14,
-                  lineHeight: 1.6,
+                  fontSize: 16,
+                  lineHeight: 1.5,
                   margin: 0,
                 }}
               >

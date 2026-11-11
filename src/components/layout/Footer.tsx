@@ -47,13 +47,16 @@ export function Footer() {
         }}
       >
         {FOOTER_COLUMNS.map((column) => (
-          <div key={column.title} style={{ textAlign: "right" }}>
+          <div key={column.title} style={{ textAlign: "center" }}>
             <h3
               style={{
-                fontFamily: "'Poppins', sans-serif",
-                fontSize: 15,
-                fontWeight: 600,
+                fontFamily: "var(--font-poppins), sans-serif",
+                fontSize: 16,
+                fontWeight: 500,
+                lineHeight: "24px",
+                letterSpacing: "0",
                 color: TOKENS.inkText,
+                textAlign: "left",
                 margin: "0 0 12px 0",
               }}
             >
@@ -61,18 +64,24 @@ export function Footer() {
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {column.links.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="footer-link"
-                  style={{
-                    fontFamily: "var(--font-poppins), sans-serif",
-                    fontSize: 13,
-                    textDecoration: "none",
-                  }}
-                >
-                  {link.label}
-                </Link>
+                <div key={link.label} style={{ textAlign: link.label === "Privacy policy" ? "right" : "center" }}>
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className="footer-link"
+                    style={{
+                      fontFamily: "var(--font-bricolage), sans-serif",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      lineHeight: "22px",
+                      letterSpacing: "0",
+                      color: "rgba(24,26,24,0.75)",
+                      textDecoration: "none",
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                </div>
               ))}
             </div>
           </div>
@@ -83,9 +92,12 @@ export function Footer() {
         style={{
           marginTop: 50,
           textAlign: "center",
-          color: TOKENS.inkMuted,
-          fontFamily: "var(--font-poppins), sans-serif",
-          fontSize: 12.5,
+          color: "rgba(24,26,24,0.75)",
+          fontFamily: "var(--font-bricolage), sans-serif",
+          fontSize: 12,
+          fontWeight: 600,
+          lineHeight: "22px",
+          letterSpacing: "0",
         }}
       >
         © Payless {new Date().getFullYear()}. All rights reserved. · Made for Nigeria&apos;s second-hand phone market.

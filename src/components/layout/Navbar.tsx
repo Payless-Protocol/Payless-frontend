@@ -30,14 +30,17 @@ function NavLink({
       href={href}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        color: active || hovered ? TOKENS.cream : "rgba(203,200,197,0.55)",
-        fontFamily: "var(--font-poppins), sans-serif",
-        fontSize: 15,
-        fontWeight: active ? 600 : 500,
-        textDecoration: "none",
-        transition: "color 0.2s ease",
-      }}
+        style={{
+          color: active || hovered ? TOKENS.cream : "rgba(203,200,197,0.5)",
+          fontFamily: "var(--font-bricolage), sans-serif",
+          fontSize: 16,
+          fontWeight: 600,
+          lineHeight: "22px",
+          letterSpacing: "0",
+          textDecoration: "none",
+          transition: "color 0.2s ease",
+          whiteSpace: "nowrap",
+        }}
     >
       {label}
     </Link>
@@ -118,20 +121,18 @@ export function Navbar() {
           right: 0,
           zIndex: 100,
           height: 95,
-          padding: isMobile ? "0 20px" : "0 40px",
+          padding: isMobile ? "0 20px" : "0 50px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           background: TOKENS.blue,
           backdropFilter: "none",
-          borderBottom: "1px solid rgba(255,255,255,0.12)",
           transition: "none",
         }}
       >
         <div
           style={{
             width: "100%",
-            maxWidth: TOKENS.pageWidth,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -163,10 +164,10 @@ export function Navbar() {
             <span
               style={{
                 color: TOKENS.cream,
-                fontFamily: "var(--font-poppins), sans-serif",
+                fontFamily: "var(--font-bricolage), sans-serif",
                 fontWeight: 600,
-                fontSize: 15,
-                letterSpacing: "0.01em",
+                fontSize: 16,
+                letterSpacing: "0",
                 whiteSpace: "nowrap",
               }}
             >
@@ -179,7 +180,7 @@ export function Navbar() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 38,
+                gap: 34,
               }}
             >
               {NAV_LINKS.map((link) => (
@@ -219,7 +220,54 @@ export function Navbar() {
                 <MenuIcon open={menuOpen} />
               </button>
             ) : (
-              <AuthModal />
+              <>
+                <Link
+                  href="/signup"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    width: 120,
+                    height: 45,
+                    padding: "12px 18px",
+                    borderRadius: 16,
+                    background: "transparent",
+                    border: `2px solid ${TOKENS.cream}`,
+                    color: TOKENS.cream,
+                    fontFamily: "var(--font-poppins), sans-serif",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    letterSpacing: "0",
+                    textDecoration: "none",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Sign Up
+                </Link>
+                <Link
+                  href="/login"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    width: 139,
+                    height: 45,
+                    padding: "12px 18px",
+                    borderRadius: 16,
+                    background: TOKENS.ink,
+                    color: TOKENS.cream,
+                    fontFamily: "var(--font-poppins), sans-serif",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    letterSpacing: "0",
+                    textDecoration: "none",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Login Now
+                </Link>
+                <AuthModal />
+              </>
             )}
           </div>
         </div>

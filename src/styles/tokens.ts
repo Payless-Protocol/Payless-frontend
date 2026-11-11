@@ -17,6 +17,7 @@ export const TOKENS = {
   clean: "#95C88B",
   flagged: "#C88B8B",
   danger: "#A92626",
+  confirmGray: "#B6B6B6",
 
   // ── Semantic helpers ───────────────────────────────────────────────
   background: "#1E3ED9",

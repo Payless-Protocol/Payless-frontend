@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, type CSSProperties, type FormEvent } from "react";
+import { useState, type CSSProperties, type FormEvent } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { getContractAddress, PAYLESS_ABI, formatContractError } from "@/lib/contract";
 import { hashIMEI, hashSecret, validateIMEI, validateWord } from "@/lib/hash";
@@ -8,39 +8,68 @@ import { ACTIVE_CHAIN_ID, getActiveChain } from "@/lib/constants";
 import { getTxUrl } from "@/lib/basescan";
 import { useGaslessTransaction } from "@/hooks/usePimlicTransaction";
 import { TOKENS } from "@/styles/tokens";
+import { ShieldIllustration } from "@/components/primitives/Illustrations";
+import SigningOverlay from "@/components/gates/SigningOverlay";
 
-const inputStyle: CSSProperties = {
+const fieldStyle: CSSProperties = {
   width: "100%",
-  height: 48,
-  padding: "0 14px",
-  borderRadius: 10,
-  border: "1px solid rgba(24,26,24,0.35)",
-  background: "#E4E1DB",
+  height: 56,
+  padding: 14,
+  borderRadius: 20,
+  border: "2px solid #000000",
+  background: "transparent",
   color: TOKENS.inkText,
   fontFamily: "var(--font-poppins), sans-serif",
-  fontSize: 14,
+  fontSize: 16,
+  fontWeight: 500,
+  lineHeight: "24px",
 };
 
 const labelStyle: CSSProperties = {
   display: "block",
-  marginBottom: 8,
+  margin: 0,
   color: TOKENS.inkText,
   fontFamily: "var(--font-poppins), sans-serif",
-  fontSize: 13,
-  fontWeight: 600,
+  fontSize: 16,
+  fontWeight: 500,
+  lineHeight: "24px",
+};
+
+const helperStyle: CSSProperties = {
+  margin: "10px 0 0",
+  color: "rgba(24,26,24,0.75)",
+  fontFamily: "var(--font-poppins), sans-serif",
+  fontSize: 12,
+  fontWeight: 500,
+  lineHeight: "18px",
+};
+
+const cardShellStyle: CSSProperties = {
+  width: "100%",
+  maxWidth: 547,
+  background: TOKENS.ink,
+  borderRadius: 25,
+  paddingLeft: 5,
+};
+
+const cardInnerStyle: CSSProperties = {
+  width: "100%",
+  background: TOKENS.cream,
+  borderRadius: 25,
+  padding: "clamp(20px, 2.1vw, 30px)",
 };
 
 function MacDots() {
   return (
-    <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+    <div style={{ display: "flex", gap: 10, alignItems: "center", flex: "0 0 auto" }}>
       {[0, 1, 2].map((i) => (
         <span
           key={i}
           style={{
-            width: 10,
-            height: 10,
+            width: 15,
+            height: 15,
             borderRadius: "50%",
-            background: "rgba(24,26,24,0.55)",
+            background: TOKENS.ink,
             display: "inline-block",
           }}
         />
@@ -58,56 +87,57 @@ export default function RecoverGate() {
   const [word3, setWord3] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [showConfirm, setShowConfirm] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
-  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Clear pending reset timer on unmount to avoid state updates after unmount
-  useEffect(() => {
-    return () => {
-      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
-    };
-  }, []);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showSigning, setShowSigning] = useState(false);
 
   const wordsValid = [word1, word2, word3].every((w) => w.trim().length >= 2);
 
   if (!authenticated) {
     return (
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 460,
-          background: TOKENS.cream,
-          borderRadius: 22,
-          padding: "26px 24px",
-          textAlign: "center",
-          boxShadow: "0 24px 50px rgba(11,22,76,0.18)",
-        }}
-      >
-        <h2 style={{ fontFamily: "var(--font-poppins), sans-serif", fontWeight: 700, fontSize: 18, color: TOKENS.inkText }}>
-          Connect to retrieve a device
-        </h2>
-        <p style={{ margin: "10px 0 20px", color: TOKENS.inkMuted, fontFamily: "var(--font-poppins), sans-serif", fontSize: 13.5, lineHeight: 1.6 }}>
-          Please log in first to recover a device.
-        </p>
-        <button
-          type="button"
-          onClick={() => login()}
-          style={{
-            width: "100%",
-            height: 52,
-            borderRadius: 12,
-            border: "none",
-            background: TOKENS.ink,
-            color: TOKENS.white,
-            fontFamily: "var(--font-poppins), sans-serif",
-            fontSize: 15,
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          Login Now
-        </button>
+      <div style={cardShellStyle}>
+        <div style={{ ...cardInnerStyle, textAlign: "center" }}>
+          <h2
+            style={{
+              fontFamily: "var(--font-poppins), sans-serif",
+              fontWeight: 600,
+              fontSize: 20,
+              color: TOKENS.inkText,
+            }}
+          >
+            Connect to retrieve a device
+          </h2>
+          <p
+            style={{
+              margin: "10px 0 20px",
+              color: "rgba(24,26,24,0.75)",
+              fontFamily: "var(--font-poppins), sans-serif",
+              fontSize: 14,
+              fontWeight: 500,
+              lineHeight: "21px",
+            }}
+          >
+            Please log in first to recover a device.
+          </p>
+          <button
+            type="button"
+            onClick={() => login()}
+            style={{
+              width: "100%",
+              height: 52,
+              borderRadius: 16,
+              border: "none",
+              background: TOKENS.ink,
+              color: TOKENS.cream,
+              fontFamily: "var(--font-poppins), sans-serif",
+              fontSize: 16,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Login Now
+          </button>
+        </div>
       </div>
     );
   }
@@ -118,22 +148,20 @@ export default function RecoverGate() {
 
     if (!validateIMEI(imei)) {
       setMessage("IMEI must be exactly 15 digits (no spaces or dashes).");
-      setLoading(false);
       return;
     }
 
     const words = [word1, word2, word3];
     if (!words.every(validateWord)) {
       setMessage("Each word must be 2+ letters (no numbers or special characters).");
-      setLoading(false);
       return;
     }
 
     setShowConfirm(true);
   };
 
-  const confirmAndSubmit = async () => {
-    setShowConfirm(false);
+  const submitUnflag = async () => {
+    setShowSigning(false);
     setLoading(true);
     setMessage("");
     setTxHash(null);
@@ -160,12 +188,12 @@ export default function RecoverGate() {
       setTxHash(hash);
       setMessage("Device successfully unflagged!");
 
-      resetTimerRef.current = setTimeout(() => {
-        setImei("");
-        setWord1("");
-        setWord2("");
-        setWord3("");
-      }, 2000);
+      // Success screen shows the form back at its empty placeholder state
+      setImei("");
+      setWord1("");
+      setWord2("");
+      setWord3("");
+      setShowConfirm(false);
     } catch (error: unknown) {
       setMessage(formatContractError(error, "Failed to clear device. Please verify credentials."));
     } finally {
@@ -173,31 +201,21 @@ export default function RecoverGate() {
     }
   };
 
+  const signingMessage = imei.trim() ? hashIMEI(imei.trim()) : "";
+
   return (
     <>
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 460,
-          background: TOKENS.cream,
-          borderRadius: 22,
-          padding: "20px 22px 22px",
-          boxShadow: "0 24px 50px rgba(11,22,76,0.18)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontFamily: "var(--font-poppins), sans-serif", fontWeight: 700, fontSize: 14, color: TOKENS.inkText }}>
-            Recover / Unflag Device
-          </span>
-          <MacDots />
-        </div>
-
-        <form onSubmit={handleUnflagDevice} style={{ marginTop: 16 }}>
-          <div>
-            <label style={labelStyle} htmlFor="recover-imei-input">15-Digit IMEI</label>
+      <div style={cardShellStyle}>
+        <div style={cardInnerStyle}>
+          <form onSubmit={handleUnflagDevice} style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 24 }}>
+              <span style={labelStyle}>Recover / Unflag Device</span>
+              <MacDots />
+            </div>
             <input
               id="recover-imei-input"
               name="imei"
+              className="payless-field"
               type="text"
               inputMode="numeric"
               maxLength={15}
@@ -208,15 +226,18 @@ export default function RecoverGate() {
               value={imei}
               onChange={(e) => setImei(e.target.value.replace(/\D/g, "").slice(0, 15))}
               placeholder="Enter a 15-digit IMEI to retrieve your device"
-              style={inputStyle}
+              aria-label="15-digit IMEI"
+              style={{ ...fieldStyle, marginTop: 30 }}
             />
-          </div>
 
-          <div style={{ marginTop: 18 }}>
-            <label style={labelStyle} htmlFor="recover-phrase-label">Secret Recovery Phrase (3 words)</label>
-            <p style={{ margin: "0 0 10px", color: TOKENS.inkMuted, fontFamily: "var(--font-poppins), sans-serif", fontSize: 11.5, lineHeight: 1.5 }}>
-              Enter the exact 3 words you used when flagging this device. Order matters.
-            </p>
+            <div style={{ marginTop: 30 }}>
+              <label style={labelStyle} htmlFor="recover-word1-input">
+                Secret Recovery Phrase (3 words)
+              </label>
+              <p style={helperStyle}>
+                Enter the exact 3 words you used when flagging this device. Order matters.
+              </p>
+            </div>
             <fieldset
               style={{
                 border: "none",
@@ -230,11 +251,17 @@ export default function RecoverGate() {
               </legend>
               <div
                 className="recover-word-row"
-                style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                  gap: 20,
+                  marginTop: 20,
+                }}
               >
                 <input
                   id="recover-word1-input"
                   name="word1"
+                  className="payless-field"
                   type="text"
                   autoComplete="off"
                   autoCapitalize="none"
@@ -243,11 +270,12 @@ export default function RecoverGate() {
                   value={word1}
                   onChange={(e) => setWord1(e.target.value)}
                   placeholder="Word 1"
-                  style={inputStyle}
+                  style={fieldStyle}
                 />
                 <input
                   id="recover-word2-input"
                   name="word2"
+                  className="payless-field"
                   type="text"
                   autoComplete="off"
                   autoCapitalize="none"
@@ -256,11 +284,12 @@ export default function RecoverGate() {
                   value={word2}
                   onChange={(e) => setWord2(e.target.value)}
                   placeholder="Word 2"
-                  style={inputStyle}
+                  style={fieldStyle}
                 />
                 <input
                   id="recover-word3-input"
                   name="word3"
+                  className="payless-field"
                   type="text"
                   autoComplete="off"
                   autoCapitalize="none"
@@ -269,162 +298,222 @@ export default function RecoverGate() {
                   value={word3}
                   onChange={(e) => setWord3(e.target.value)}
                   placeholder="Word 3"
-                  style={inputStyle}
+                  style={fieldStyle}
                 />
               </div>
             </fieldset>
-          </div>
 
-          <button
-            type="submit"
-            disabled={loading || !imei || !wordsValid}
-            style={{
-              width: "100%",
-              height: 52,
-              marginTop: 20,
-              borderRadius: 12,
-              border: "none",
-              background: TOKENS.ink,
-              color: TOKENS.white,
-              fontFamily: "var(--font-poppins), sans-serif",
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: loading || !imei || !wordsValid ? "not-allowed" : "pointer",
-              opacity: loading || !imei || !wordsValid ? 0.5 : 1,
-            }}
-          >
-            {loading ? "Processing..." : "Retrieve Device"}
-          </button>
-        </form>
-      </div>
-
-      {showConfirm ? (
-        <div
-          style={{
-            width: "100%",
-            maxWidth: 460,
-            marginTop: 16,
-            background: TOKENS.cream,
-            borderRadius: 22,
-            padding: "20px 22px",
-            boxShadow: "0 24px 50px rgba(11,22,76,0.18)",
-          }}
-        >
-          <h3 style={{ fontFamily: "var(--font-poppins), sans-serif", fontWeight: 700, fontSize: 16, color: TOKENS.inkText }}>
-            Confirm Recover Device
-          </h3>
-          <p style={{ margin: "10px 0 6px", color: TOKENS.inkMuted, fontFamily: "var(--font-poppins), sans-serif", fontSize: 13 }}>
-            You are about to recover/unflag device with IMEI:{" "}
-            <span style={{ fontFamily: "ui-monospace, monospace", color: TOKENS.inkText }}>{imei}</span>
-          </p>
-          <p style={{ margin: "0 0 16px", color: TOKENS.inkMuted, fontFamily: "var(--font-poppins), sans-serif", fontSize: 11.5, lineHeight: 1.5 }}>
-            This action writes to the blockchain. Make sure you have the correct recovery phrase.
-          </p>
-          <div style={{ display: "flex", gap: 10 }}>
             <button
-              type="button"
-              onClick={() => setShowConfirm(false)}
+              type="submit"
+              disabled={loading || !imei || !wordsValid}
               style={{
-                flex: 1,
-                height: 46,
-                borderRadius: 10,
-                border: "1px solid rgba(24,26,24,0.4)",
-                background: "transparent",
-                color: TOKENS.inkText,
-                fontFamily: "var(--font-poppins), sans-serif",
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={confirmAndSubmit}
-              disabled={loading}
-              style={{
-                flex: 1,
-                height: 46,
-                borderRadius: 10,
+                width: "100%",
+                height: 52,
+                marginTop: 30,
+                padding: "14px 18px",
+                borderRadius: 16,
                 border: "none",
                 background: TOKENS.ink,
-                color: TOKENS.white,
+                color: TOKENS.cream,
                 fontFamily: "var(--font-poppins), sans-serif",
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: 600,
-                cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading ? 0.6 : 1,
+                lineHeight: "24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: loading || !imei || !wordsValid ? "not-allowed" : "pointer",
               }}
             >
-              {loading ? "Processing..." : "Confirm & Recover"}
+              {loading ? "Processing..." : "Retrieve Device"}
             </button>
-          </div>
+          </form>
+
+          {/* Inline confirmation panel (section 8.4 equivalent: 482 × 191,
+              #B6B6B6, radius 16, padding 21/15) */}
+          {showConfirm && !loading ? (
+            <div
+              style={{
+                marginTop: 30,
+                background: TOKENS.confirmGray,
+                borderRadius: 16,
+                padding: "21px 15px",
+              }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-playfair), serif",
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  fontSize: 16,
+                  lineHeight: "24px",
+                  color: TOKENS.inkText,
+                }}
+              >
+                Confirm Recover Device
+              </h3>
+              <p
+                style={{
+                  margin: "10px 0 0",
+                  color: "rgba(24,26,24,0.75)",
+                  fontFamily: "var(--font-poppins), sans-serif",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  lineHeight: "18px",
+                }}
+              >
+                You are about to recover/unflag device with IMEI:{" "}
+                <span style={{ color: TOKENS.inkText }}>{imei}</span>
+              </p>
+              <p
+                style={{
+                  margin: "10px 0 0",
+                  color: "rgba(24,26,24,0.75)",
+                  fontFamily: "var(--font-poppins), sans-serif",
+                  fontSize: 10,
+                  fontWeight: 500,
+                  lineHeight: "15px",
+                }}
+              >
+                This action writes to the blockchain. Make sure you have the correct recovery
+                phrase.
+              </p>
+              <div style={{ display: "flex", gap: 20, marginTop: 20 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(false)}
+                  style={{
+                    flex: 1,
+                    height: 52,
+                    borderRadius: 16,
+                    border: "none",
+                    background: TOKENS.danger,
+                    color: TOKENS.cream,
+                    fontFamily: "var(--font-poppins), sans-serif",
+                    fontSize: 16,
+                    fontWeight: 600,
+                    lineHeight: "24px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowConfirm(false);
+                    setShowSigning(true);
+                  }}
+                  style={{
+                    flex: 1,
+                    height: 52,
+                    borderRadius: 16,
+                    border: "none",
+                    background: TOKENS.ink,
+                    color: TOKENS.cream,
+                    fontFamily: "var(--font-poppins), sans-serif",
+                    fontSize: 16,
+                    fontWeight: 600,
+                    lineHeight: "24px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Confirm &amp; Recover
+                </button>
+              </div>
+            </div>
+          ) : null}
         </div>
+      </div>
+
+      {/* Signing overlay (section 8.5) */}
+      {showSigning ? (
+        <SigningOverlay message={signingMessage} onSign={submitUnflag} signing={loading} />
       ) : null}
 
       {txHash ? (
-        <div role="status" aria-live="polite"
-          style={{
-            width: "100%",
-            maxWidth: 460,
-            marginTop: 16,
-            background: TOKENS.cream,
-            borderRadius: 22,
-            padding: "22px",
-            textAlign: "center",
-            boxShadow: "0 24px 50px rgba(11,22,76,0.18)",
-            animation: "toast-in 0.25s ease",
-          }}
+        /* Success card (green 5px left edge, cloud inner, radius 25, padding 20/30) */
+        <div
+          role="status"
+          aria-live="polite"
+          style={{ ...cardShellStyle, background: TOKENS.clean, marginTop: 25 }}
         >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              margin: "0 auto 12px",
-              borderRadius: "50%",
-              background: "rgba(30,62,217,0.12)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: TOKENS.blue,
-            }}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-          </div>
-          <div style={{ fontFamily: "var(--font-poppins), sans-serif", fontWeight: 700, fontSize: 16, color: TOKENS.inkText }}>
-            Device successfully unflagged!
-          </div>
-          <div style={{ marginTop: 8, color: TOKENS.inkMuted, fontFamily: "var(--font-poppins), sans-serif", fontSize: 12 }}>
-            Tx Hash:{" "}
-            <a
-              href={getTxUrl(txHash, ACTIVE_CHAIN_ID)}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: TOKENS.blue, wordBreak: "break-all" }}
+          <div style={{ ...cardInnerStyle, padding: "20px clamp(20px, 2.1vw, 30px)", textAlign: "center" }}>
+            <div
+              style={{
+                fontFamily: "var(--font-poppins), sans-serif",
+                fontWeight: 600,
+                fontSize: 16,
+                lineHeight: "24px",
+                color: "#000000",
+              }}
             >
-              {txHash.slice(0, 18)}…{txHash.slice(-6)}
-            </a>
+              Device successfully unflagged!
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 25 }}>
+              <ShieldIllustration />
+            </div>
+            <div
+              className="overflow-anywhere"
+              style={{
+                marginTop: 25,
+                color: TOKENS.inkText,
+                fontFamily: "var(--font-poppins), sans-serif",
+                fontWeight: 500,
+                fontSize: 14,
+                lineHeight: "21px",
+                textAlign: "center",
+              }}
+            >
+              Tx Hash:{" "}
+              <a
+                href={getTxUrl(txHash, ACTIVE_CHAIN_ID)}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: TOKENS.inkText, textDecoration: "none", wordBreak: "break-all" }}
+              >
+                {txHash}
+              </a>
+            </div>
           </div>
         </div>
       ) : message && !txHash ? (
-        <p role="alert" aria-live="assertive" className="overflow-anywhere" style={{ width: "100%", maxWidth: 460, marginTop: 14, color: TOKENS.white, fontFamily: "var(--font-poppins), sans-serif", fontSize: 13, lineHeight: 1.6 }}>
+        <p
+          role="alert"
+          aria-live="assertive"
+          className="overflow-anywhere"
+          style={{
+            width: "100%",
+            maxWidth: 547,
+            marginTop: 14,
+            color: TOKENS.white,
+            fontFamily: "var(--font-poppins), sans-serif",
+            fontSize: 13,
+            lineHeight: "19.5px",
+            textAlign: "center",
+          }}
+        >
           {message}
         </p>
       ) : null}
 
+      {/* Attribution (16/24, 608 box, white 75% + Dark "Base") */}
       <div
         style={{
-          marginTop: 26,
-          color: "rgba(255,255,255,0.72)",
+          width: "100%",
+          maxWidth: 608,
+          marginTop: 25,
+          textAlign: "center",
+          color: "rgba(255,255,255,0.75)",
           fontFamily: "var(--font-poppins), sans-serif",
-          fontSize: 12.5,
+          fontWeight: 500,
+          fontSize: 16,
+          lineHeight: "24px",
         }}
       >
-        Built on <span style={{ fontWeight: 700, color: TOKENS.ink }}>Base</span>
-        <span style={{ color: TOKENS.white }}>.</span>
+        Built on <span style={{ color: TOKENS.ink }}>Base</span>
+        <span>.</span>
       </div>
     </>
   );
