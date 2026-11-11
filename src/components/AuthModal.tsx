@@ -5,7 +5,7 @@ import { useAccount } from "wagmi";
 import { useEffect, useMemo, useState } from "react";
 import { TOKENS } from "@/styles/tokens";
 
-function UserIcon({ size = 20 }: { size?: number }) {
+function UserIcon({ size = 14 }: { size?: number }) {
   return (
     <svg
       width={size}
@@ -23,7 +23,7 @@ function UserIcon({ size = 20 }: { size?: number }) {
   );
 }
 
-function ArrowRightIcon({ size = 20 }: { size?: number }) {
+function ArrowRightIcon({ size = 15 }: { size?: number }) {
   return (
     <svg
       width={size}
@@ -134,14 +134,14 @@ export default function AuthModal() {
   }
 
   return (
-    <div style={{ display: "flex", gap: 25, alignItems: "center" }}>
+    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
       <button
         onClick={() => login()}
         style={{
           display: "flex",
           alignItems: "center",
           gap: 8,
-          width: 120,
+          width: 122,
           height: 45,
           justifyContent: "center",
           background: "transparent",
@@ -150,7 +150,7 @@ export default function AuthModal() {
           color: TOKENS.cream,
           fontFamily: "var(--font-poppins), sans-serif",
           fontSize: 14,
-          fontWeight: 600,
+          fontWeight: 500,
           cursor: "pointer",
           transition: "border-color 0.2s ease, background 0.2s ease",
         }}
@@ -163,7 +163,7 @@ export default function AuthModal() {
           e.currentTarget.style.background = "transparent";
         }}
       >
-        Sign Up <ArrowRightIcon />
+        Sign Up <ArrowRightIcon size={15} />
       </button>
       <button
         onClick={() => login()}
@@ -187,7 +187,7 @@ export default function AuthModal() {
         onMouseOver={(e) => (e.currentTarget.style.background = "#2b2d2b")}
         onMouseOut={(e) => (e.currentTarget.style.background = TOKENS.ink)}
       >
-        Login Now <UserIcon />
+        Login Now <UserIcon size={15} />
       </button>
     </div>
   );

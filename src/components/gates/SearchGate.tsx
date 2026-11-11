@@ -4,28 +4,8 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { useDeviceStatus } from "@/hooks/useDeviceStatus";
 import { TOKENS } from "@/styles/tokens";
-import {
-  GhostIllustration,
-  PersonIllustration,
-  ShieldIllustration,
-} from "@/components/primitives/Illustrations";
 
 const isValidIMEI = (value: string) => /^\d{15}$/.test(value.trim());
-
-const cardShellStyle = {
-  width: "100%",
-  maxWidth: 547,
-  background: TOKENS.ink,
-  borderRadius: 25,
-  paddingLeft: 5,
-} as const;
-
-const cardInnerStyle = {
-  width: "100%",
-  background: TOKENS.cream,
-  borderRadius: 25,
-  padding: "clamp(20px, 2.1vw, 30px)",
-} as const;
 
 function formatDate(updateAt?: bigint) {
   if (!updateAt || updateAt === 0n) return "Never registered";
@@ -36,18 +16,87 @@ function formatDate(updateAt?: bigint) {
   });
 }
 
-/* ── Three-dot motif (section 5.5: three 15px Dark circles, 10px gap) ── */
+/* ── Illustrations ─────────────────────────────────────────────── */
+function GhostIllustration() {
+  return (
+    <svg width="104" height="104" viewBox="0 0 104 104" fill="none" aria-hidden="true">
+      <defs>
+        <clipPath id="ghostClip">
+          <circle cx="52" cy="52" r="46" />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#ghostClip)">
+        <circle cx="52" cy="52" r="46" fill="#D9E0FB" />
+        <path d="M0 80a52 52 0 0 0 104 0Z" fill="#1E3ED9" />
+        <ellipse cx="30" cy="44" rx="7" ry="4.5" fill="#fff" opacity="0.95" />
+        <ellipse cx="74" cy="40" rx="6" ry="4" fill="#fff" opacity="0.95" />
+        <path
+          d="M38 58c0-9 6-16 14-16s14 7 14 16v14c0 2-2 3-4 2l-3-2-3 2-4-2-4 2-3-2c-2 1-4 0-4-2V58Z"
+          fill="#fff"
+        />
+        <circle cx="46" cy="54" r="2.2" fill="#181A18" />
+        <circle cx="58" cy="54" r="2.2" fill="#181A18" />
+        <path d="M50 60c1 1.5 3 1.5 4 0" stroke="#181A18" strokeWidth="1.6" strokeLinecap="round" />
+      </g>
+    </svg>
+  );
+}
+
+function ShieldIllustration() {
+  return (
+    <svg width="104" height="104" viewBox="0 0 104 104" fill="none" aria-hidden="true">
+      <defs>
+        <clipPath id="shieldClip">
+          <circle cx="52" cy="52" r="46" />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#shieldClip)">
+        <circle cx="52" cy="52" r="46" fill="#D9E0FB" />
+      </g>
+      <path
+        d="M52 28l19 7.5V49c0 13-8.4 21.5-19 25.5C41.4 70.5 33 62 33 49V35.5L52 28Z"
+        fill="#1E3ED9"
+      />
+      <path d="M44 51l6 6 12-13" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M77 37l1.6 4.4 4.4 1.6-4.4 1.6L77 49l-1.6-4.4L71 43l4.4-1.6L77 37Z" fill="#fff" />
+      <path d="M29 70l1.2 3.3 3.3 1.2-3.3 1.2L29 79l-1.2-3.3L24.5 74.5l3.3-1.2L29 70Z" fill="#fff" />
+      <path d="M62 60c4-2.5 6.5-2.5 9 0" stroke="#95C88B" strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M66 66c3-1.8 5-1.8 7 0" stroke="#95C88B" strokeWidth="2.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function WarningIllustration() {
+  return (
+    <svg width="120" height="104" viewBox="0 0 120 104" fill="none" aria-hidden="true">
+      <path d="M26 44l9 16H17l9-16Z" fill="#fff" />
+      <path d="M92 34l9 16H83l9-16Z" fill="#fff" />
+      <path d="M28 72l8 14H20l8-14Z" fill="#fff" />
+      <path d="M88 66l8 14H80l8-14Z" fill="#fff" />
+      <circle cx="60" cy="30" r="10" fill="#3A2A22" />
+      <path d="M50 42h20l5 28H45l5-28Z" fill="#1E3ED9" />
+      <path d="M52 70h7l-2 26h-7l2-26Z" fill="#181A18" />
+      <path d="M61 70h7l2 26h-7l-2-26Z" fill="#181A18" />
+      <path d="M64 46l8 6-8 6V46Z" fill="#B9C3F3" />
+      <path d="M42 18l10 18H32l10-18Z" fill="#E86A4D" />
+      <path d="M42 24v6" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" />
+      <circle cx="42" cy="33" r="1.4" fill="#fff" />
+    </svg>
+  );
+}
+
+/* ── UI bits ───────────────────────────────────────────────────── */
 function MacDots() {
   return (
-    <div style={{ display: "flex", gap: 10, alignItems: "center", flex: "0 0 auto" }}>
+    <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
       {[0, 1, 2].map((i) => (
         <span
           key={i}
           style={{
-            width: 15,
-            height: 15,
+            width: 10,
+            height: 10,
             borderRadius: "50%",
-            background: TOKENS.ink,
+            background: "rgba(24,26,24,0.55)",
             display: "inline-block",
           }}
         />
@@ -56,22 +105,19 @@ function MacDots() {
   );
 }
 
-/* ── Status badge (section 10: 28px tall, radius 10, padding 5/10,
-      Poppins Medium 12/18, black label) ──────────────────────────────── */
-function StatusBadge({ label, bg }: { label: string; bg: string }) {
+function StatusPill({ label, bg }: { label: string; bg: string }) {
   return (
     <span
       style={{
         display: "inline-flex",
         alignItems: "center",
-        padding: "5px 10px",
-        borderRadius: 10,
+        padding: "7px 14px",
+        borderRadius: 999,
         background: bg,
-        color: "#000000",
+        color: TOKENS.inkText,
         fontFamily: "var(--font-poppins), sans-serif",
-        fontSize: 12,
-        fontWeight: 500,
-        lineHeight: "18px",
+        fontSize: 12.5,
+        fontWeight: 600,
         whiteSpace: "nowrap",
       }}
     >
@@ -80,70 +126,77 @@ function StatusBadge({ label, bg }: { label: string; bg: string }) {
   );
 }
 
-/* ── Result card (section 7: 547 backing with 5px accent left edge,
-      542 cloud inner, radius 25, padding 20/30) ─────────────────────── */
 function ResultCard({
-  accent,
+  tone,
   title,
   badge,
   illustration,
   children,
   action,
 }: {
-  accent: string;
+  tone: "notfound" | "clean" | "flagged" | "verified";
   title: string;
   badge: ReactNode;
   illustration: ReactNode;
   children: ReactNode;
   action?: ReactNode;
 }) {
+  const accent =
+    tone === "notfound"
+      ? TOKENS.notFound
+      : tone === "clean"
+        ? TOKENS.clean
+        : tone === "flagged"
+          ? TOKENS.danger
+          : TOKENS.blueLightActive;
+
   return (
-    <div style={{ ...cardShellStyle, background: accent, marginTop: 25 }}>
-      <div style={cardInnerStyle}>
-        <div
+    <div
+      style={{
+        width: "100%",
+        maxWidth: 540,
+        marginTop: 24,
+        background: TOKENS.cream,
+        borderRadius: 24,
+        border: "1px solid rgba(24,26,24,0.10)",
+        borderLeft: `4px solid ${accent}`,
+        padding: "24px 26px 26px",
+        boxShadow: "0 24px 50px rgba(11,22,76,0.16)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <h2
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: "var(--font-poppins), sans-serif",
-              fontWeight: 600,
-              fontSize: 16,
-              lineHeight: "24px",
-              color: "#000000",
-              margin: 0,
-            }}
-          >
-            {title}
-          </h2>
-          {badge}
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 29 }}>
-          {illustration}
-        </div>
-
-        <div
-          className="overflow-anywhere"
-          style={{
-            marginTop: 25,
-            textAlign: "center",
+            fontFamily: "'Poppins', sans-serif",
+            fontWeight: 700,
+            fontSize: 18,
             color: TOKENS.inkText,
-            fontFamily: "var(--font-poppins), sans-serif",
-            fontSize: 14,
-            fontWeight: 500,
-            lineHeight: "21px",
+            margin: 0,
           }}
         >
-          {children}
-        </div>
-
-        {action ? <div style={{ marginTop: 25 }}>{action}</div> : null}
+          {title}
+        </h2>
+        {badge}
       </div>
+
+      <div style={{ display: "flex", justifyContent: "center", padding: "20px 0 14px" }}>
+        {illustration}
+      </div>
+
+      <div
+        className="overflow-anywhere"
+        style={{
+          textAlign: "center",
+          color: TOKENS.inkMuted,
+          fontFamily: "var(--font-poppins), sans-serif",
+          fontSize: 13.5,
+          lineHeight: 1.6,
+        }}
+      >
+        {children}
+      </div>
+
+      {action ? <div style={{ marginTop: 20 }}>{action}</div> : null}
     </div>
   );
 }
@@ -173,58 +226,60 @@ export function SearchGate() {
         style={{
           minHeight: "100dvh",
           background: TOKENS.blue,
-          padding: "145px 24px 90px",
+          padding: "128px 24px 90px",
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <h1
-          style={{
-            textAlign: "center",
-            margin: 0,
-            fontFamily: "var(--font-bricolage), sans-serif",
-            fontWeight: 600,
-            fontSize: 36,
-            lineHeight: "45px",
-            letterSpacing: "0",
-            color: TOKENS.cream,
-          }}
-        >
-          Check{" "}
-          <span
+        <div style={{ width: "100%", maxWidth: 760, display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <h1
             style={{
-              fontFamily: "var(--font-playfair), serif",
-              fontStyle: "italic",
-              fontWeight: 700,
-              fontSize: 36,
-              color: TOKENS.ink,
+              textAlign: "center",
+              margin: 0,
+              fontFamily: "var(--font-poppins), sans-serif",
+              fontWeight: 800,
+              fontSize: "clamp(30px, 4.4vw, 44px)",
+              letterSpacing: "-0.02em",
+              color: TOKENS.white,
             }}
           >
-            imei
-          </span>{" "}
-          Status
-        </h1>
-        <p
-          style={{
-            margin: "25px 0 0",
-            textAlign: "center",
-            color: "rgba(255,255,255,0.75)",
-            fontFamily: "var(--font-poppins), sans-serif",
-            fontWeight: 500,
-            fontSize: 16,
-            lineHeight: "24px",
-          }}
-        >
-          Look up a 15-digit IMEI to see whether it has been flagged on-chain
-        </p>
+            Check{" "}
+            <span
+              style={{
+                fontFamily: "var(--font-playfair), serif",
+                fontStyle: "italic",
+                fontWeight: 400,
+                fontSize: "1.08em", color: TOKENS.ink
+              }}
+            >
+              imei
+            </span>{" "}
+            Status
+          </h1>
+          <p
+            style={{
+              margin: "12px 0 26px",
+              textAlign: "center",
+              color: "rgba(255,255,255,0.85)",
+              fontFamily: "var(--font-poppins), sans-serif",
+              fontSize: 13.5,
+            }}
+          >
+            Look up a 15-digit IMEI to see whether it has been flagged on-chain
+          </p>
 
-        {/* Search card — 547 backing, 542 cloud inner, radius 25, padding 30 */}
-        <div style={{ ...cardShellStyle, marginTop: 25 }}>
-          <div style={cardInnerStyle}>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <MacDots />
-            </div>
+          {/* Search card */}
+          <div
+            style={{
+              width: "100%",
+              maxWidth: 540,
+              background: TOKENS.cream,
+              borderRadius: 24,
+              padding: "22px 22px 22px",
+              boxShadow: "0 24px 50px rgba(11,22,76,0.18)",
+            }}
+          >
+            <MacDots />
 
             <form
               onSubmit={(e) => {
@@ -235,13 +290,13 @@ export function SearchGate() {
                 }
                 setSubmittedImei(imei.trim());
               }}
-              style={{ marginTop: 30 }}
+              style={{ marginTop: 18 }}
             >
               <div style={{ position: "relative" }}>
                 <span
                   style={{
                     position: "absolute",
-                    left: 16,
+                    left: 18,
                     top: "50%",
                     transform: "translateY(-50%)",
                     color: TOKENS.inkText,
@@ -249,7 +304,7 @@ export function SearchGate() {
                     pointerEvents: "none",
                   }}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
                     <circle cx="11" cy="11" r="8" />
                     <path d="m21 21-4.35-4.35" />
                   </svg>
@@ -271,16 +326,14 @@ export function SearchGate() {
                   }}
                   style={{
                     width: "100%",
-                    height: 56,
-                    padding: "0 14px 0 46px",
-                    borderRadius: 20,
-                    border: `2px solid ${imeiError ? TOKENS.danger : "#000000"}`,
-                    background: "transparent",
+                    height: 54,
+                    padding: "0 20px 0 46px",
+                    borderRadius: 999,
+                    border: `1.5px solid ${imeiError ? TOKENS.danger : "rgba(24,26,24,0.6)"}`,
+                    background: "#E4E1DB",
                     color: TOKENS.inkText,
                     fontFamily: "var(--font-poppins), sans-serif",
-                    fontWeight: 500,
-                    fontSize: 16,
-                    lineHeight: "24px",
+                    fontSize: 15,
                   }}
                 />
               </div>
@@ -289,112 +342,99 @@ export function SearchGate() {
                 disabled={isLoading}
                 style={{
                   width: "100%",
-                  height: 52,
-                  marginTop: 30,
-                  borderRadius: 16,
+                  height: 54,
+                  marginTop: 16,
+                  borderRadius: 12,
                   border: "none",
                   background: TOKENS.ink,
-                  color: TOKENS.cream,
+                  color: TOKENS.white,
                   fontFamily: "var(--font-poppins), sans-serif",
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: 600,
-                  lineHeight: "24px",
                   cursor: isLoading ? "not-allowed" : "pointer",
+                  opacity: isLoading ? 0.7 : 1,
                 }}
               >
                 Check device status
               </button>
             </form>
             {imeiError ? (
-              <div style={{ marginTop: 8, color: TOKENS.danger, fontFamily: "var(--font-poppins), sans-serif", fontSize: 12, fontWeight: 500, lineHeight: "18px" }}>
-                {imeiError}
-              </div>
+              <div style={{ marginTop: 8, marginLeft: 8, color: TOKENS.danger, fontSize: 12 }}>{imeiError}</div>
             ) : null}
           </div>
-        </div>
 
-        {/* Loading strip — 542 × 64, radius 25, padding 20/30 (section 6.2) */}
-        {isLoading ? (
-          <div
-            role="status"
-            aria-live="polite"
-            style={{
-              width: "100%",
-              maxWidth: 542,
-              minHeight: 64,
-              marginTop: 25,
-              background: TOKENS.cream,
-              borderRadius: 25,
-              padding: "20px 30px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <span
+          {isLoading ? (
+            <div
+              role="status"
+              aria-live="polite"
               style={{
-                fontFamily: "var(--font-poppins), sans-serif",
-                fontWeight: 600,
-                fontSize: 16,
-                lineHeight: "24px",
-                color: "#000000",
+                width: "100%",
+                maxWidth: 540,
+                marginTop: 24,
+                background: TOKENS.cream,
+                borderRadius: 24,
+                padding: "22px 26px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
             >
-              Searching registry
-            </span>
-            <span style={{ display: "inline-flex", gap: 10 }}>
-              {[1, 0.7, 0.4].map((opacity, i) => (
-                <span
-                  key={i}
-                  style={{
-                    width: 15,
-                    height: 15,
-                    borderRadius: "50%",
-                    background: TOKENS.ink,
-                    opacity,
-                    display: "inline-block",
-                  }}
-                />
-              ))}
-            </span>
-          </div>
-        ) : null}
+              <span style={{ fontFamily: "var(--font-poppins), sans-serif", fontWeight: 700, fontSize: 16, color: TOKENS.inkText }}>
+                Searching registry
+              </span>
+              <span style={{ display: "inline-flex", gap: 7 }}>
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    style={{
+                      width: 9,
+                      height: 9,
+                      borderRadius: "50%",
+                      background: TOKENS.inkText,
+                      display: "inline-block",
+                      animation: "pulse 1.1s ease-in-out infinite",
+                      animationDelay: `${i * 0.16}s`,
+                    }}
+                  />
+                ))}
+              </span>
+            </div>
+          ) : null}
 
-        {error ? (
-          <div role="alert" aria-live="assertive" style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-            <ResultCard
-              accent={TOKENS.danger}
-              title="Search Failed"
-              badge={<StatusBadge label="Error" bg={TOKENS.flagged} />}
-              illustration={<PersonIllustration />}
-            >
-              {error}
-            </ResultCard>
-          </div>
-        ) : null}
-
-        {showResult && status !== undefined ? (
-          status === 1 ? (
-            <div role="status" aria-live="polite" style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+          {error ? (
+            <div role="alert" aria-live="assertive">
               <ResultCard
-                accent={TOKENS.danger}
-                title="Device has been flagged"
-                badge={<StatusBadge label="Flagged" bg={TOKENS.flagged} />}
-                illustration={<PersonIllustration />}
+                tone="flagged"
+                title="Search Failed"
+                badge={<StatusPill label="Error" bg={TOKENS.flagged} />}
+                illustration={<WarningIllustration />}
+              >
+                {error}
+              </ResultCard>
+            </div>
+          ) : null}
+
+          {showResult && status !== undefined ? (
+            status === 1 ? (
+              <div role="status" aria-live="polite">
+                <ResultCard
+                  tone="flagged"
+                  title="Device has been flagged"
+                badge={<StatusPill label="Flagged" bg={TOKENS.flagged} />}
+                illustration={<WarningIllustration />}
                 action={
                   <button
                     type="button"
                     style={{
                       width: "100%",
                       height: 52,
-                      borderRadius: 16,
+                      borderRadius: 12,
                       border: "none",
                       background: TOKENS.danger,
-                      color: TOKENS.cream,
+                      color: TOKENS.white,
                       fontFamily: "var(--font-poppins), sans-serif",
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: 600,
-                      lineHeight: "24px",
                       cursor: "pointer",
                     }}
                   >
@@ -402,57 +442,42 @@ export function SearchGate() {
                   </button>
                 }
               >
-                <span
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 10,
-                    textAlign: "left",
-                  }}
-                >
-                  <span style={{ color: TOKENS.danger, flex: "0 0 auto" }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <span style={{ display: "inline-flex", alignItems: "flex-start", gap: 8, textAlign: "left" }}>
+                  <span style={{ color: TOKENS.danger, marginTop: 2 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
                       <path d="M12 9v4" />
                       <path d="M12 17h.01" />
                     </svg>
                   </span>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-poppins), sans-serif",
-                      fontWeight: 500,
-                      fontSize: 12,
-                      lineHeight: "18px",
-                      color: TOKENS.danger,
-                    }}
-                  >
+                  <span>
                     Warning: This device has been flagged as missing/stolen by a user on{" "}
                     {formatDate(updateAt)}. Proceed with caution
                   </span>
                 </span>
               </ResultCard>
-            </div>
-          ) : status === 2 ? (
-            <div role="status" aria-live="polite" style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-              <ResultCard
-                accent={TOKENS.blueLightActive}
-                title="Verified Device"
-                badge={<StatusBadge label="Verified" bg={TOKENS.blueLightActive} />}
+              </div>
+            ) : status === 2 ? (
+              <div role="status" aria-live="polite">
+                <ResultCard
+                  tone="verified"
+                  title="Verified Device"
+                badge={<StatusPill label="Verified" bg={TOKENS.blueLightActive} />}
                 illustration={<ShieldIllustration />}
               >
                 This IMEI was verified on {formatDate(updateAt)}.
               </ResultCard>
-            </div>
-          ) : (
-            <div role="status" aria-live="polite" style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-              <ResultCard
-                accent={isZeroHash ? TOKENS.notFound : TOKENS.clean}
-                title={isZeroHash ? "No Registry Entry" : "Device Not Flagged"}
+              </div>
+            ) : (
+              <div role="status" aria-live="polite">
+                <ResultCard
+                  tone={isZeroHash ? "notfound" : "clean"}
+                  title={isZeroHash ? "No Registry Entry" : "Device Not Flagged"}
                 badge={
                   isZeroHash ? (
-                    <StatusBadge label="Not found" bg={TOKENS.notFound} />
+                    <StatusPill label="Not found" bg={TOKENS.notFound} />
                   ) : (
-                    <StatusBadge label="Clean" bg={TOKENS.clean} />
+                    <StatusPill label="Clean" bg={TOKENS.clean} />
                   )
                 }
                 illustration={isZeroHash ? <GhostIllustration /> : <ShieldIllustration />}
@@ -461,26 +486,21 @@ export function SearchGate() {
                   ? "No registry entry was found for this IMEI."
                   : `No flagged devices were found for IMEI ending in ...${submittedImei.slice(-4)}.`}
               </ResultCard>
-            </div>
-          )
-        ) : null}
+              </div>
+            )
+          ) : null}
 
-        {/* Attribution (section 6.3: Poppins Medium 16/24, 608 box, white 75% + Dark "Base") */}
-        <div
-          style={{
-            width: "100%",
-            maxWidth: 608,
-            marginTop: 25,
-            textAlign: "center",
-            color: "rgba(255,255,255,0.75)",
-            fontFamily: "var(--font-poppins), sans-serif",
-            fontWeight: 500,
-            fontSize: 16,
-            lineHeight: "24px",
-          }}
-        >
-          Built on <span style={{ color: TOKENS.ink }}>Base</span>
-          <span>.</span>
+          <div
+            style={{
+              marginTop: 26,
+              color: "rgba(255,255,255,0.72)",
+              fontFamily: "var(--font-poppins), sans-serif",
+              fontSize: 12.5,
+            }}
+          >
+            Built on <span style={{ fontWeight: 700, color: TOKENS.ink }}>Base</span>
+            <span style={{ color: TOKENS.white }}>.</span>
+          </div>
         </div>
       </main>
     </>

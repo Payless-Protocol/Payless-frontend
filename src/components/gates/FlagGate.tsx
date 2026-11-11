@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useState, useRef, useEffect, type CSSProperties, type FormEvent } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { getContractAddress, PAYLESS_ABI, formatContractError } from "@/lib/contract";
 import { hashIMEI, hashSecret, validateIMEI, validateWord } from "@/lib/hash";
@@ -8,8 +8,6 @@ import { ACTIVE_CHAIN_ID, getActiveChain } from "@/lib/constants";
 import { getTxUrl } from "@/lib/basescan";
 import { useGaslessTransaction } from "@/hooks/usePimlicTransaction";
 import { TOKENS } from "@/styles/tokens";
-import { ShieldIllustration } from "@/components/primitives/Illustrations";
-import SigningOverlay from "@/components/gates/SigningOverlay";
 
 const fieldStyle: CSSProperties = {
   width: "100%",
@@ -88,8 +86,14 @@ export default function FlagGate() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [showSigning, setShowSigning] = useState(false);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear pending reset timer on unmount to avoid state updates after unmount
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
+  }, []);
 
   const wordsValid = [word1, word2, word3].every((w) => w.trim().length >= 2);
 
@@ -148,20 +152,21 @@ export default function FlagGate() {
 
     if (!validateIMEI(imei)) {
       setMessage("IMEI must be exactly 15 digits (no spaces or dashes).");
+      setLoading(false);
       return;
     }
 
     const words = [word1, word2, word3];
     if (!words.every(validateWord)) {
       setMessage("Each word must be 2+ letters (no numbers or special characters).");
+      setLoading(false);
       return;
     }
 
-    setShowConfirm(true);
+    void submitFlag();
   };
 
   const submitFlag = async () => {
-    setShowSigning(false);
     setLoading(true);
     setMessage("");
     setTxHash(null);
@@ -188,20 +193,18 @@ export default function FlagGate() {
       setTxHash(hash);
       setMessage("Device successfully flagged!");
 
-      // Success screen shows the form back at its empty placeholder state
-      setImei("");
-      setWord1("");
-      setWord2("");
-      setWord3("");
-      setShowConfirm(false);
+      resetTimerRef.current = setTimeout(() => {
+        setImei("");
+        setWord1("");
+        setWord2("");
+        setWord3("");
+      }, 2000);
     } catch (error: unknown) {
       setMessage(formatContractError(error, "Failed to flag device. Please try again."));
     } finally {
       setLoading(false);
     }
   };
-
-  const signingMessage = imei.trim() ? hashIMEI(imei.trim()) : "";
 
   return (
     <>
@@ -329,153 +332,41 @@ export default function FlagGate() {
               {loading ? "Processing..." : "Flag Device"}
             </button>
           </form>
-
-          {/* Inline confirmation panel (section 8.4: 482 × 206, #B6B6B6,
-              radius 16, padding 21/15) */}
-          {showConfirm && !loading ? (
-            <div
-              style={{
-                marginTop: 30,
-                background: TOKENS.confirmGray,
-                borderRadius: 16,
-                padding: "21px 15px",
-              }}
-            >
-              <h3
-                style={{
-                  margin: 0,
-                  fontFamily: "var(--font-playfair), serif",
-                  fontStyle: "italic",
-                  fontWeight: 600,
-                  fontSize: 16,
-                  lineHeight: "24px",
-                  color: TOKENS.inkText,
-                }}
-              >
-                Confirm Flag Device
-              </h3>
-              <p
-                style={{
-                  margin: "10px 0 0",
-                  color: "rgba(24,26,24,0.75)",
-                  fontFamily: "var(--font-poppins), sans-serif",
-                  fontSize: 12,
-                  fontWeight: 500,
-                  lineHeight: "18px",
-                }}
-              >
-                You are about to flag device with IMEI:{" "}
-                <span style={{ color: TOKENS.inkText }}>{imei}</span>
-              </p>
-              <p
-                style={{
-                  margin: "10px 0 0",
-                  color: "rgba(24,26,24,0.75)",
-                  fontFamily: "var(--font-poppins), sans-serif",
-                  fontSize: 10,
-                  fontWeight: 500,
-                  lineHeight: "15px",
-                }}
-              >
-                This action writes to the blockchain and cannot be undone without the exact
-                recovery phrase.
-              </p>
-              <div style={{ display: "flex", gap: 20, marginTop: 20 }}>
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(false)}
-                  style={{
-                    flex: 1,
-                    height: 52,
-                    borderRadius: 16,
-                    border: "none",
-                    background: TOKENS.danger,
-                    color: TOKENS.cream,
-                    fontFamily: "var(--font-poppins), sans-serif",
-                    fontSize: 16,
-                    fontWeight: 600,
-                    lineHeight: "24px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowConfirm(false);
-                    setShowSigning(true);
-                  }}
-                  style={{
-                    flex: 1,
-                    height: 52,
-                    borderRadius: 16,
-                    border: "none",
-                    background: TOKENS.ink,
-                    color: TOKENS.cream,
-                    fontFamily: "var(--font-poppins), sans-serif",
-                    fontSize: 16,
-                    fontWeight: 600,
-                    lineHeight: "24px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Confirm &amp; Flag
-                </button>
-              </div>
-            </div>
-          ) : null}
         </div>
       </div>
 
-      {/* Signing overlay (section 8.5) */}
-      {showSigning ? (
-        <SigningOverlay message={signingMessage} onSign={submitFlag} signing={loading} />
-      ) : null}
-
       {txHash ? (
-        /* Success card (section 8.6: green 5px left edge, cloud inner,
-           radius 25, padding 20/30) */
-        <div
-          role="status"
-          aria-live="polite"
-          style={{ ...cardShellStyle, background: TOKENS.clean, marginTop: 25 }}
-        >
-          <div style={{ ...cardInnerStyle, padding: "20px clamp(20px, 2.1vw, 30px)", textAlign: "center" }}>
+        <div role="status" aria-live="polite" style={{ ...cardShellStyle, marginTop: 25 }}>
+          <div style={{ ...cardInnerStyle, textAlign: "center", animation: "toast-in 0.25s ease" }}>
             <div
               style={{
-                fontFamily: "var(--font-poppins), sans-serif",
-                fontWeight: 600,
-                fontSize: 16,
-                lineHeight: "24px",
-                color: "#000000",
+                width: 44,
+                height: 44,
+                margin: "0 auto 12px",
+                borderRadius: "50%",
+                background: "rgba(30,62,217,0.12)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: TOKENS.blue,
               }}
             >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </div>
+            <div style={{ fontFamily: "var(--font-poppins), sans-serif", fontWeight: 600, fontSize: 16, color: TOKENS.inkText }}>
               Device successfully flagged!
             </div>
-            <div style={{ display: "flex", justifyContent: "center", marginTop: 25 }}>
-              <ShieldIllustration />
-            </div>
-            <div
-              className="overflow-anywhere"
-              style={{
-                marginTop: 25,
-                color: TOKENS.inkText,
-                fontFamily: "var(--font-poppins), sans-serif",
-                fontWeight: 500,
-                fontSize: 14,
-                lineHeight: "21px",
-                textAlign: "center",
-              }}
-            >
+            <div style={{ marginTop: 8, color: "rgba(24,26,24,0.75)", fontFamily: "var(--font-poppins), sans-serif", fontSize: 12, lineHeight: "18px" }}>
               Tx Hash:{" "}
               <a
                 href={getTxUrl(txHash, ACTIVE_CHAIN_ID)}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: TOKENS.inkText, textDecoration: "none", wordBreak: "break-all" }}
+                style={{ color: TOKENS.blue, wordBreak: "break-all" }}
               >
-                {txHash}
+                {txHash.slice(0, 18)}…{txHash.slice(-6)}
               </a>
             </div>
           </div>
@@ -499,24 +390,6 @@ export default function FlagGate() {
           {message}
         </p>
       ) : null}
-
-      {/* Attribution (section 6.3 / 8: 16/24, 608 box, white 75% + Dark "Base") */}
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 608,
-          marginTop: 25,
-          textAlign: "center",
-          color: "rgba(255,255,255,0.75)",
-          fontFamily: "var(--font-poppins), sans-serif",
-          fontWeight: 500,
-          fontSize: 16,
-          lineHeight: "24px",
-        }}
-      >
-        Built on <span style={{ color: TOKENS.ink }}>Base</span>
-        <span>.</span>
-      </div>
     </>
   );
 }
