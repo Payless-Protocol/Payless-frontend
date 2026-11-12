@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import AuthModal from "@/components/AuthModal";
+import { AuthEntry } from "@/components/auth/AuthEntry";
 import { TOKENS } from "@/styles/tokens";
 
 const NAV_LINKS = [
@@ -219,7 +219,7 @@ export function Navbar() {
                 <MenuIcon open={menuOpen} />
               </button>
             ) : (
-              <AuthModal />
+              <AuthEntry />
             )}
           </div>
         </div>
@@ -252,7 +252,7 @@ export function Navbar() {
             />
           ))}
           <div style={{ display: "flex", gap: 10, paddingTop: 8 }}>
-            <AuthModal />
+            <AuthEntry />
           </div>
         </nav>
       ) : null}
