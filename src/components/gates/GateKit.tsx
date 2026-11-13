@@ -266,67 +266,6 @@ export function Spinner({ size = 16 }: { size?: number }) {
   );
 }
 
-export function ConnectWalletCard({
-  onConnect,
-  isConnecting,
-  address,
-}: {
-  onConnect: () => void;
-  isConnecting: boolean;
-  address?: string | null;
-}) {
-  return (
-    <Panel style={{ maxWidth: 520, textAlign: "center", padding: 36 }}>
-      <div
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: 18,
-          background: "rgba(255,255,255,0.06)",
-          border: `1px solid ${TOKENS.borderSubtle}`,
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: 18,
-        }}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M7 11V8a5 5 0 0 1 10 0v3"
-            stroke={TOKENS.accent}
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-          <rect x="5" y="11" width="14" height="9" rx="2" stroke={TOKENS.heading} strokeWidth="2" />
-        </svg>
-      </div>
-      <div
-        style={{
-          fontFamily: "var(--font-poppins), sans-serif",
-          color: TOKENS.heading,
-          fontSize: 24,
-          fontWeight: 800,
-          marginBottom: 10,
-          letterSpacing: "-0.02em",
-        }}
-      >
-        Connect Your Wallet
-      </div>
-      <div style={{ color: TOKENS.body, fontSize: 15, lineHeight: 1.7, marginBottom: 24 }}>
-        You need to connect a wallet to use this feature.
-        {address ? (
-          <div style={{ marginTop: 8, color: "rgba(255,255,255,0.35)", fontSize: 12 }}>
-            Connected: {address}
-          </div>
-        ) : null}
-      </div>
-      <Button fullWidth onClick={onConnect} loading={isConnecting} variant="primary">
-        {isConnecting ? "Connecting..." : "Connect Wallet"}
-      </Button>
-    </Panel>
-  );
-}
-
 export function StatusCard({
   tone,
   icon,
