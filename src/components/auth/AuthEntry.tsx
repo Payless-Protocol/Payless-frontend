@@ -140,6 +140,12 @@ export function AuthEntry() {
       return;
     }
 
+    const params = new URLSearchParams(window.location.search);
+    if (Array.from(params.keys()).some((key) => key.startsWith("privy_oauth_"))) {
+      setMounted(true);
+      return;
+    }
+
     let cancelled = false;
     let idleId: number | undefined;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
