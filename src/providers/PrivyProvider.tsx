@@ -42,7 +42,7 @@ export function PrivyProvider({ children }: PrivyProviderProps) {
     <PrivyProviderWrapper
       appId={privyAppId}
       config={{
-        loginMethods: ['google', 'email', 'wallet'],
+        loginMethods: ['google', 'email'],
         appearance: {
           theme: 'dark',
           accentColor: '#00F0FF',

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ReactNode } from "react";
-import { Providers } from "./providers";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Poppins, Playfair_Display, Bricolage_Grotesque } from "next/font/google";
 
 const poppins = Poppins({
@@ -79,7 +79,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         style={{ minHeight: "100dvh" }}
         className={`min-h-screen bg-blue text-white ${poppins.variable} ${playfairDisplay.variable} ${bricolageGrotesque.variable}`}
       >
-        <Providers>{children}</Providers>
+        <ErrorBoundary>{children}</ErrorBoundary>
       </body>
     </html>
   );
