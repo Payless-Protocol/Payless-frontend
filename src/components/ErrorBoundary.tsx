@@ -1,7 +1,7 @@
 "use client";
 import { Component, ReactNode } from "react";
 
-interface Props { children: ReactNode; }
+interface Props { children: ReactNode; silent?: boolean; }
 interface State { hasError: boolean; error: Error | null; }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -13,6 +13,12 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      if (this.props.silent) {
+        // Render nothing instead of re-rendering children: re-rendering would
+        // remount the PrivyProvider subtree below this boundary and destroy an
+        // open login modal.
+        return null;
+      }
       const errorMessage = this.state.error?.message || 'An unexpected error occurred';
       // Hide sensitive details
       const sanitized = errorMessage

@@ -1,21 +1,27 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { Providers } from "@/app/providers";
 import AuthModal from "@/components/AuthModal";
 import { useWalletProviderPresent } from "@/providers/WalletProviderPresence";
+import { ensureHcaptchaReady } from "@/lib/hcaptchaLoader";
+
+let autoOpenedThisPage = false;
 
 function AutoLogin({ enabled }: { enabled: boolean }) {
-  const { ready, authenticated, login } = usePrivy();
-  const openedRef = useRef(false);
+  const { ready, authenticated, login } = usePrivy() as {
+    ready: boolean;
+    authenticated: boolean;
+    login: () => void;
+  };
 
   useEffect(() => {
-    if (!enabled || openedRef.current || !ready || authenticated) {
+    if (!enabled || autoOpenedThisPage || !ready || authenticated) {
       return;
     }
 
-    openedRef.current = true;
+    autoOpenedThisPage = true;
     login();
   }, [authenticated, enabled, login, ready]);
 
@@ -24,6 +30,20 @@ function AutoLogin({ enabled }: { enabled: boolean }) {
 
 export default function AuthIsland({ autoOpen = false }: { autoOpen?: boolean }) {
   const providerPresent = useWalletProviderPresent();
+  const [hcaptchaReady, setHcaptchaReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    ensureHcaptchaReady().then(() => {
+      if (!cancelled) {
+        setHcaptchaReady(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const content = (
     <>
       <AutoLogin enabled={autoOpen} />
@@ -31,5 +51,13 @@ export default function AuthIsland({ autoOpen = false }: { autoOpen?: boolean })
     </>
   );
 
-  return providerPresent ? content : <Providers>{content}</Providers>;
+  if (providerPresent) {
+    return content;
+  }
+
+  if (!hcaptchaReady) {
+    return null;
+  }
+
+  return <Providers silent>{content}</Providers>;
 }

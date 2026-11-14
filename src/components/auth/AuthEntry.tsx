@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { hasPrivySessionHint } from "@/lib/privySessionHint";
 import { useWalletProviderPresent } from "@/providers/WalletProviderPresence";
+import { ensureHcaptchaReady } from "@/lib/hcaptchaLoader";
 import { TOKENS } from "@/styles/tokens";
 
 function UserIcon({ size = 14 }: { size?: number }) {
@@ -42,11 +43,20 @@ function ArrowRightIcon({ size = 15 }: { size?: number }) {
   );
 }
 
-function SignedOutButtons({ onSignIn }: { onSignIn: () => void }) {
+function SignedOutButtons({
+  onSignIn,
+  onIntent,
+}: {
+  onSignIn: () => void;
+  onIntent: () => void;
+}) {
   return (
     <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
       <button
         onClick={onSignIn}
+        onPointerEnter={onIntent}
+        onFocus={onIntent}
+        onTouchStart={onIntent}
         style={{
           display: "flex",
           alignItems: "center",
@@ -77,6 +87,9 @@ function SignedOutButtons({ onSignIn }: { onSignIn: () => void }) {
       </button>
       <button
         onClick={onSignIn}
+        onPointerEnter={onIntent}
+        onFocus={onIntent}
+        onTouchStart={onIntent}
         style={{
           display: "flex",
           alignItems: "center",
@@ -116,18 +129,23 @@ export function AuthEntry() {
   const [mounted, setMounted] = useState(false);
   const [autoOpen, setAutoOpen] = useState(false);
 
+  const prefetchHcaptcha = useCallback(() => {
+    void ensureHcaptchaReady();
+  }, []);
+
   const requestSignIn = useCallback(() => {
+    prefetchHcaptcha();
     setAutoOpen(true);
     setMounted(true);
-  }, []);
+  }, [prefetchHcaptcha]);
 
   const AuthIsland = useMemo(
     () =>
       dynamic(() => import("./AuthIsland"), {
         ssr: false,
-        loading: () => <SignedOutButtons onSignIn={requestSignIn} />,
+        loading: () => <SignedOutButtons onSignIn={requestSignIn} onIntent={prefetchHcaptcha} />,
       }),
-    [requestSignIn]
+    [requestSignIn, prefetchHcaptcha]
   );
 
   useEffect(() => {
@@ -193,7 +211,7 @@ export function AuthEntry() {
       {mounted ? (
         <AuthIsland autoOpen={autoOpen} />
       ) : (
-        <SignedOutButtons onSignIn={requestSignIn} />
+        <SignedOutButtons onSignIn={requestSignIn} onIntent={prefetchHcaptcha} />
       )}
     </div>
   );
