@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AuthEntry } from "@/components/auth/AuthEntry";
+import { IntentLink } from "@/components/primitives/IntentLink";
 import { TOKENS } from "@/styles/tokens";
 
 const NAV_LINKS = [
@@ -26,7 +27,7 @@ function NavLink({
   const [hovered, setHovered] = useState(false);
 
   return (
-    <Link
+    <IntentLink
       href={href}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -40,7 +41,7 @@ function NavLink({
       }}
     >
       {label}
-    </Link>
+    </IntentLink>
   );
 }
 
