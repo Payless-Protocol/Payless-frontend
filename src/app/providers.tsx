@@ -4,9 +4,9 @@ import { ReactNode } from 'react';
 import { PrivyProvider } from "@/providers/PrivyProvider";
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
-export function Providers({ children, silent = false }: { children: ReactNode; silent?: boolean }) {
+export function Providers({ children }: { children: ReactNode }) {
   return (
-    <ErrorBoundary silent={silent}>
+    <ErrorBoundary>
       <PrivyProvider>{children}</PrivyProvider>
     </ErrorBoundary>
   );

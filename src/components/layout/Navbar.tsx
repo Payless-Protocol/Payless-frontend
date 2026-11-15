@@ -4,8 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AuthEntry } from "@/components/auth/AuthEntry";
-import { IntentLink } from "@/components/primitives/IntentLink";
+import AuthModal from "@/components/AuthModal";
 import { TOKENS } from "@/styles/tokens";
 
 const NAV_LINKS = [
@@ -27,7 +26,7 @@ function NavLink({
   const [hovered, setHovered] = useState(false);
 
   return (
-    <IntentLink
+    <Link
       href={href}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -41,7 +40,7 @@ function NavLink({
       }}
     >
       {label}
-    </IntentLink>
+    </Link>
   );
 }
 
@@ -96,13 +95,7 @@ export function Navbar() {
     const onClick = (e: MouseEvent) => {
       const panel = document.getElementById("mobile-menu-panel");
       const toggle = document.querySelector('button[aria-label="Toggle menu"]');
-      const path = e.composedPath();
-      const insidePanel = panel ? path.includes(panel) : false;
-      const insideToggle = toggle ? path.includes(toggle) : false;
-      const insidePrivyModal = path.some(
-        (node) => node instanceof HTMLElement && node.closest?.("#privy-modal-content")
-      );
-      if (panel && toggle && !insidePanel && !insideToggle && !insidePrivyModal) {
+      if (panel && toggle && !panel.contains(e.target as Node) && !toggle.contains(e.target as Node)) {
         setMenuOpen(false);
       }
     };
@@ -226,7 +219,7 @@ export function Navbar() {
                 <MenuIcon open={menuOpen} />
               </button>
             ) : (
-              <AuthEntry />
+              <AuthModal />
             )}
           </div>
         </div>
@@ -259,7 +252,7 @@ export function Navbar() {
             />
           ))}
           <div style={{ display: "flex", gap: 10, paddingTop: 8 }}>
-            <AuthEntry />
+            <AuthModal />
           </div>
         </nav>
       ) : null}
