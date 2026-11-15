@@ -12,7 +12,6 @@ Updated: July 30, 2026 (Fixes Implemented)
 Route (app)                              Size     First Load JS
 ┌ ○ /                                    7.87 kB         279 kB
 ├ ○ /_not-found                          880 B          90.7 kB
-├ ƒ /api/waitlist                        0 B                0 B
 ├ ○ /flag                                1.9 kB          467 kB
 ├ ○ /recover                             1.9 kB          467 kB
 └ ○ /search                              3.17 kB         391 kB
@@ -27,7 +26,6 @@ Route (app)                              Size     First Load JS
 Route (app)                              Size     First Load JS
 ┌ ○ /                                    7.87 kB         279 kB
 ├ ○ /_not-found                          880 B          90.8 kB
-├ ƒ /api/waitlist                        0 B                0 B
 ├ ○ /flag                                2.3 kB          466 kB
 ├ ○ /recover                             2.29 kB         466 kB
 └ ○ /search                              3.17 kB         389 kB
@@ -450,7 +448,6 @@ The following tests require manual execution in Chrome DevTools:
 
 ### Build Status:
 - ✅ Build successful after all fixes
-- ⚠️ 1 ESLint warning (WaitlistModal.tsx - missing dependency)
 - ⚠️ 2 webpack warnings (ox/_esm/tempo - critical dependency expression)
 
 ### Manual Testing Required:
