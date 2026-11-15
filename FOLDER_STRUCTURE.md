@@ -13,7 +13,6 @@
 - `search/page.tsx` — Search Gate (read-only IMEI lookup)
 - `report/page.tsx` — Flag Gate (write: flagDevice)
 - `retrieve/page.tsx` — Retrieve Gate (write: unflagDevice)
-- `api/waitlist/` — Waitlist API route
 
 ## src/components/
 - `Navbar.tsx` — Top navigation with auth buttons

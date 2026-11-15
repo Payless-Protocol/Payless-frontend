@@ -54,10 +54,6 @@ NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS=0xYourSepoliaAddress
 NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
 NEXT_PUBLIC_PAYMASTER_URL=https://api.developer.coinbase.com/rpc/v1/base-sepolia/YOUR_COINBASE_PAYMASTER_KEY
-
-# The waitlist modal is live, so both Notion variables are required unless you disable the feature.
-NOTION_WAITLIST_TOKEN=your_notion_token
-NOTION_WAITLIST_DATABASE_ID=your_notion_database_id
 ```
 
 ### Run
@@ -75,8 +71,7 @@ src/
 ├── app/                        # Next.js App Router routes (thin, metadata-only pages)
 │   ├── search/                 # IMEI status lookup
 │   ├── flag/                   # Tier 1 report flow
-│   ├── recover/                # Unflag / recovery flow
-│   └── api/waitlist/           # Waitlist submission endpoint
+│   └── recover/                # Unflag / recovery flow
 ├── components/
 │   ├── layout/                 # Navbar, Footer
 │   ├── gates/                  # Multi-step flow UIs: SearchGate, FlagGate, RecoverGate
